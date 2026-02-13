@@ -1,0 +1,620 @@
+{
+    "sidebar": {
+        "agenda": "Agenda",
+        "dashboard": "Tableau de Bord",
+        "dailyCash": "Caisse Journalière",
+        "clients": "Clients",
+        "collaborators": "Collaborateurs",
+        "payroll": "Paie",
+        "monthlyClosing": "Clôtures Mensuelles",
+        "prices": "Liste de Prix",
+        "inventory": "Inventaire",
+        "giftcards": "Cartes Cadeaux",
+        "settings": "Paramètres",
+        "theme": "Changer de Thème"
+    },
+    "dashboard": {
+        "title": "Tableau de Bord",
+        "tabs": {
+            "daily": "Analyse Journalière",
+            "period": "Analyse de Période",
+            "closings": "Analyse de Clôtures",
+            "clients": "Analyse de Clients"
+        },
+        "cards": {
+            "services": "Services Rendus",
+            "sales": "Ventes de Produits",
+            "expenses": "Dépenses Totales",
+            "techCost": "Coût Technique (Utilisé)",
+            "cash": "Revenu en Espèces",
+            "cards": "Revenu par Carte",
+            "transfers": "Revenu par Virement",
+            "advances": "Avances Totales",
+            "produced": "Total Produit",
+            "income": "Revenu Total",
+            "distributed": "Total Distribué",
+            "savings": "Total Épargné"
+        },
+        "ranking": "Classement des Services (Aujourd'hui)",
+        "noData": "Aucune donnée enregistrée."
+    },
+    "dailyCash": {
+        "title": "Caisse Journalière",
+        "registerBtn": "Enregistrer Opération",
+        "cashInBox": "Espèces en Caisse",
+        "dateLocale": "fr-FR",
+        "cards": {
+            "services": "Total Services",
+            "sales": "Total Ventes",
+            "tips": "Total Pourboires",
+            "giftcards": "Total Ventes CC",
+            "cards": "Total Cartes",
+            "transfers": "Total Virements",
+            "gcPayments": "Total Paiements CC",
+            "expenses": "Total Dépenses",
+            "advances": "Total Avances"
+        },
+        "columns": {
+            "transfers": "Virements",
+            "cards": "Cartes",
+            "sales": "Vente Produits",
+            "giftcards": "Vente Cartes Cadeaux",
+            "gcPayments": "Paiements Carte Cadeau",
+            "tips": "Pourboires",
+            "expenses": "Dépenses",
+            "advances": "Avances",
+            "services": "Services"
+        }
+    },
+    "inventory": {
+        "title": "Gestion des Stocks",
+        "management": "Gestion des Stocks",
+        "auditBtn": "Voir Audit",
+        "viewAudit": "Voir Audit",
+        "tabs": {
+            "tech": "Stock Technique",
+            "technical": "Stock Technique",
+            "retail": "Stock Vente"
+        },
+        "searchPlaceholder": "Rechercher par produit ou marque...",
+        "addTechBtn": "Ajouter Produit Technique",
+        "addProductButton": "Ajouter Produit Technique",
+        "addRetailBtn": "Ajouter Produit Vente",
+        "table": {
+            "product": "Produit",
+            "stock": "Stock",
+            "minStock": "Minimum",
+            "size": "Taille",
+            "invoiceCost": "Coût Facture",
+            "collabCost": "Coût Collab.",
+            "costPerGram": "Coût/g",
+            "created": "Création",
+            "actions": "Actions",
+            "salePrice": "Prix Vente",
+            "profit": "Profit",
+            "totalValue": "Valeur Totale"
+        },
+        "noCategory": "Sans Catégorie",
+        "allCategories": "Toutes les catégories",
+        "audit": {
+            "title": "Audit de Stock",
+            "subtitle": "Historique des mouvements.",
+            "searchPlaceholder": "Rechercher...",
+            "table": {
+                "date": "Date",
+                "product": "Produit",
+                "type": "Type",
+                "amount": "Qté",
+                "reason": "Motif",
+                "newStock": "Nouveau Stock"
+            },
+            "typeEntry": "Entrée",
+            "typeExit": "Sortie"
+        }
+    },
+    "prices": {
+        "title": "Liste de Prix",
+        "subtitle": "Consulter et gérer les prix.",
+        "addBtn": "Ajouter Service",
+        "searchPlaceholder": "Rechercher service...",
+        "allCategories": "Toutes les catégories",
+        "noServices": "Aucun service trouvé.",
+        "sort": {
+            "nameAsc": "Nom (A-Z)",
+            "nameDesc": "Nom (Z-A)",
+            "priceAsc": "Prix (Croissant)",
+            "priceDesc": "Prix (Décroissant)"
+        }
+    },
+    "closings": {
+        "title": "Clôtures Mensuelles",
+        "subtitle": "Gestion comptable du mois",
+        "addBtn": "Ajouter Enregistrement",
+        "loading": "Chargement des enregistrements...",
+        "totalToDistribute": "TOTAL À DISTRIBUER",
+        "calculationDetail": "Détail du Calcul",
+        "totalIncome": "(+) Revenu Total",
+        "totalOutgoings": "(-) Sorties et Bons Totaux",
+        "totalSavings": "(-) Épargne Totale",
+        "partnerDistribution": "Distribution des Associés",
+        "table": {
+            "partner": "Associé",
+            "percent": "Pourcentage",
+            "amount": "Montant Calculé"
+        },
+        "noPartners": "Aucun associé configuré.",
+        "categories": {
+            "cashUnsealed": "Espèces Débloquées",
+            "cashWeekly": "Espèces Hebdomadaires",
+            "transfers": "Virements",
+            "cards": "Cartes / Dépôts",
+            "partnersAdvances": "Bons/Avances Associés",
+            "monthlyOutgoings": "Sorties Mensuelles",
+            "weeklySalesSavings": "Épargne Ventes",
+            "taxSavings": "Épargne Impôts",
+            "techSavings": "Épargne Produits Tech."
+        }
+    },
+    "clients": {
+        "title": "Clients",
+        "subtitle": "Gérez votre base de clients.",
+        "addBtn": "Ajouter Client",
+        "searchPlaceholder": "Rechercher par nom ou téléphone...",
+        "lastVisit": "Dernière Visite :",
+        "viewHistory": "Voir Historique",
+        "confirmDelete": "Supprimer {{clientName}} ?",
+        "deleteSuccess": "Client supprimé.",
+        "deleteError": "Erreur lors de la suppression du client.",
+        "editBtn": "Modifier Client",
+        "deleteBtn": "Supprimer Client",
+        "noClientsFound": "Aucun client trouvé."
+    },
+    "collaborators": {
+        "title": "Collaborateurs",
+        "subtitle": "Gérez le personnel et les commissions.",
+        "addBtn": "Ajouter Collaborateur",
+        "searchPlaceholder": "Rechercher par nom...",
+        "table": {
+            "name": "Nom",
+            "role": "Rôle",
+            "commission": "Commission",
+            "status": "Statut",
+            "actions": "Actions"
+        },
+        "modal": {
+            "editTitle": "Modifier Collaborateur",
+            "newTitle": "Nouveau Collaborateur",
+            "tabs": {
+                "personal": "Infos Personnelles",
+                "labor": "Données Professionnelles",
+                "schedule": "Horaire Hebdomadaire",
+                "docs": "Documents"
+            },
+            "form": {
+                "name": "Prénom",
+                "lastName": "Nom",
+                "docType": "Type Doc.",
+                "docNumber": "N° Document",
+                "phone": "Téléphone/WhatsApp",
+                "email": "E-mail",
+                "emergencyHeader": "Contact d'Urgence",
+                "emergencyName": "Nom du Contact",
+                "emergencyPhone": "Téléphone du Contact",
+                "hireDate": "Date d'Embauche",
+                "status": "Statut",
+                "commService": "Commission (Services) (%)",
+                "commSales": "Commission sur Vente (%)",
+                "terminationDate": "Date de Départ"
+            },
+            "schedule": {
+                "workingDay": "Travaillé",
+                "dayOff": "Repos",
+                "entry": "Entrée",
+                "exit": "Sortie",
+                "lunch": "Déjeuner",
+                "days": {
+                    "monday": "Lundi",
+                    "tuesday": "Mardi",
+                    "wednesday": "Mercredi",
+                    "thursday": "Jeudi",
+                    "friday": "Vendredi",
+                    "saturday": "Samedi",
+                    "sunday": "Dimanche"
+                }
+            },
+            "statusOptions": {
+                "active": "Actif",
+                "inactive": "Inactif",
+                "terminated": "Ancien employé"
+            },
+            "docs": {
+                "info": "Le téléchargement de fichiers (Contrats, Soldes de tout compte) sera bientôt disponible.",
+                "contract": "Télécharger Contrat (PDF)",
+                "settlement": "Télécharger Solde (PDF)"
+            }
+        },
+        "alerts": {
+            "created": "Créé avec succès",
+            "updated": "Mis à jour avec succès",
+            "deleted": "Supprimé avec succès",
+            "confirmDelete": "Supprimer ?",
+            "errorSave": "Erreur lors de l'enregistrement",
+            "errorDelete": "Erreur lors de la suppression"
+        }
+    },
+    "giftcards": {
+        "title": "Gestion des Cartes Cadeaux",
+        "subtitle": "Grand livre des cartes.",
+        "searchPlaceholder": "Rechercher...",
+        "table": {
+            "code": "Code",
+            "buyer": "Acheteur",
+            "contact": "Contact",
+            "initialValue": "Valeur Initiale",
+            "balance": "Solde Actuel",
+            "status": "Statut",
+            "date": "Date Vente"
+        },
+        "status": {
+            "active": "Active",
+            "exhausted": "Épuisée"
+        },
+        "noData": "Aucune Carte Cadeau trouvée."
+    },
+    "payroll": {
+        "subtitle": "Sélectionnez les jours pour calculer la paie.",
+        "thisWeek": "Cette Semaine",
+        "thisMonth": "Ce Mois",
+        "clear": "Effacer",
+        "historyBtn": "Historique",
+        "closePeriodBtn": "Clôturer Période",
+        "historyTitle": "Historique des Clôtures",
+        "historySubtitle": "Voir les périodes enregistrées.",
+        "backToPayroll": "Retour à la Paie",
+        "backToHistory": "Retour à l'Historique",
+        "customPeriod": "Période Personnalisée",
+        "successClose": "Période clôturée avec succès !",
+        "table": {
+            "name": "Nom de la Clôture",
+            "range": "Plage de Dates",
+            "date": "Date de Clôture"
+        },
+        "cards": {
+            "gross": "Production Brute",
+            "techCost": "(-) Coût Technique",
+            "tax": "(-) Impôts",
+            "netBase": "Base Nette",
+            "participation": "(+) Participation",
+            "commission": "(+) Commissions Ventes",
+            "tips": "(+) Pourboires",
+            "advances": "(+/-) Avances",
+            "finalPay": "PAIE FINALE"
+        },
+        "modal": {
+            "closingName": "Nom de la Clôture",
+            "totalToPay": "Total à Payer",
+            "warning": "Cette action enregistrera un instantané de cette paie.",
+            "confirmBtn": "Confirmer et Enregistrer"
+        },
+        "errors": {
+            "nameRequired": "Le nom de la clôture est obligatoire."
+        }
+    },
+    "modals": {
+        "registerTitle": "Enregistrer Opération",
+        "editTitle": "Modifier Opération",
+        "summaryTitle": "Résumé de l'Opération",
+        "titles": {
+            "techCalc": "Coût Technique (Détail)",
+            "techComm": "Commission de Vente"
+        },
+        "accordions": {
+            "services": "Services",
+            "products": "Produits / Ventes",
+            "gcSell": "Vendre Carte Cadeau",
+            "gcRedeem": "Utiliser Carte Cadeau (Payer)",
+            "expenses": "Dépenses / Sorties",
+            "advances": "Avances",
+            "tips": "Pourboires / Commission Manuelle"
+        },
+        "forms": {
+            "clientSearch": "Rechercher client...",
+            "collabSearch": "Rechercher collaborateur...",
+            "serviceSearch": "Rechercher service...",
+            "productSearch": "Rechercher produit...",
+            "selectCollab": "Sélectionner collaborateur...",
+            "itemDesc": "Description",
+            "itemAmount": "Montant",
+            "itemQuantity": "Qté",
+            "priceTotal": "Prix Total",
+            "techCost": "Coût Tech :",
+            "commission": "Commission :",
+            "paymentMethod": "Moyen de Paiement",
+            "multiplePayments": "Moyens Multiples",
+            "total": "TOTAL :",
+            "date": "Date",
+            "category": "Catégorie",
+            "addServiceSearch": "Ajouter Service (Recherche)",
+            "addServiceManual": "Ajouter Service (Manuel)",
+            "registerManual": "Enregistrement Manuel",
+            "notFoundService": "Service introuvable ? Enregistrer manuellement",
+            "addSalesSearch": "Ajouter Produit (Recherche)",
+            "addSalesManual": "Ajouter Vente (Manuel)",
+            "manualSaleTitle": "Vente Manuelle",
+            "notFoundProduct": "Vente manuelle (sans stock) ?",
+            "gcCode": "Code Unique",
+            "gcBuyer": "Nom Acheteur",
+            "gcContact": "Contact (Email/Téléphone)",
+            "gcAmount": "Montant",
+            "addGCSale": "Ajouter Vente de Carte Cadeau",
+            "addGCPay": "Ajouter Paiement (CC)",
+            "addExpense": "Ajouter Dépense",
+            "advanceFor": "Avance pour",
+            "addAdvance": "Ajouter Avance",
+            "tipsDesc": "Description (Ex : Pourboire)",
+            "tipDestination": "Destination :",
+            "tipNomina": "Ajouter à la Paie",
+            "tipInstant": "Payer Maintenant (Dépense Caisse)",
+            "addTip": "Ajouter Pourboire/Commission",
+            "cashPayment": "Espèces",
+            "cardPayment": "Carte",
+            "transferPayment": "Virement",
+            "giftCardPayment": "Carte Cadeau",
+            "cashPaymentTotal": "Tout en Espèces",
+            "cardPaymentTotal": "Tout par Carte",
+            "transferPaymentTotal": "Tout par Virement",
+            "commissionAssignmentTitle": "Attribuer Commission de Vente",
+            "soldBy": "Vendu par",
+            "commissionType": "Type de Commission",
+            "percentageAuto": "Automatique (Pourcentage)",
+            "amountManual": "Manuel (Montant Fixe)",
+            "commissionAmount": "Montant de la Commission",
+            "inCart": "dans le panier",
+            "create": "Enregistrer",
+            "salon": "Salon",
+            "searchService": "Rechercher Service",
+            "itemQuantityShort": "Qté",
+            "manualRegistry": "Enregistrement Manuel",
+            "desc": "Description",
+            "amount": "Montant",
+            "gcSaleDesc": "Vente de Carte Cadeau",
+            "gcPaymentDesc": "Paiement par Carte Cadeau"
+        },
+        "buttons": {
+            "deleteTransaction": "Supprimer Transaction",
+            "updateChanges": "Mettre à jour",
+            "registerOperation": "Enregistrer Opération",
+            "saving": "Enregistrement...",
+            "updating": "Mise à jour...",
+            "deleting": "Suppression...",
+            "techCalculatorTitle": "Calculatrice Technique",
+            "saveCost": "Enregistrer Coût",
+            "addManual": "+ Ajouter Dépense Manuellement",
+            "cancel": "Annuler",
+            "confirm": "Confirmer"
+        },
+        "errors": {
+            "noItems": "Aucun élément dans l'opération.",
+            "stockCheck": "Stock insuffisant. Disponible :",
+            "gcNotFound": "Carte Cadeau introuvable.",
+            "gcInactive": "La Carte Cadeau n'est pas Active.",
+            "gcBalanceLow": "a seulement",
+            "gcBalanceLowEnd": "de solde.",
+            "completeFields": "Remplissez tous les champs.",
+            "selectCollabService": "Sélectionnez collaborateur et service.",
+            "selectProduct": "Sélectionnez produit et quantité.",
+            "selectCollabAndAmount": "Sélectionnez collaborateur et montant.",
+            "completeFieldsTips": "Remplissez le pourboire.",
+            "completeFieldsGC": "Remplissez les données de la Carte Cadeau.",
+            "completeFieldsGCPay": "Remplissez les données de paiement."
+        },
+        "client": {
+            "editTitle": "Modifier Client",
+            "newTitle": "Nouveau Client",
+            "personal": "Infos Personnelles",
+            "history": "Historique",
+            "name": "Prénom",
+            "lastName": "Nom",
+            "docNumber": "N° Document",
+            "phone": "Téléphone",
+            "email": "Email",
+            "birthday": "Anniversaire",
+            "emergencyContact": "Contact Urgence",
+            "historyDesc": "Voir l'historique détaillé du client.",
+            "clientSince": "Client depuis :",
+            "lastVisitReg": "Dernière Visite :"
+        },
+        "techProduct": {
+            "editTitle": "Modifier Produit Technique",
+            "newTitle": "Nouveau Produit Technique",
+            "name": "Nom",
+            "brand": "Marque",
+            "category": "Catégorie",
+            "size": "Taille",
+            "measure": "Mesure",
+            "costInvoice": "Coût Facture",
+            "costCollab": "Coût Collab.",
+            "stock": "Stock Initial",
+            "minStock": "Stock Min"
+        },
+        "retailProduct": {
+            "editTitle": "Modifier Produit Vente",
+            "newTitle": "Nouveau Produit Vente",
+            "name": "Nom",
+            "brand": "Marque",
+            "category": "Catégorie",
+            "cost": "Coût",
+            "price": "Prix Vente",
+            "stock": "Stock Initial",
+            "minStock": "Stock Min"
+        },
+        "service": {
+            "editTitle": "Modifier Service",
+            "newTitle": "Nouveau Service",
+            "name": "Nom",
+            "category": "Catégorie",
+            "price": "Prix",
+            "duration": "Durée",
+            "placeholders": {
+                "name": "Nom du Service",
+                "category": "Catégorie (Ex : Coupe, Couleur)",
+                "price": "Prix de Vente",
+                "duration": "Durée (minutes)"
+            }
+        },
+        "monthlyRecord": {
+            "newTitle": "Nouvel Enregistrement",
+            "editTitle": "Modifier Enregistrement",
+            "date": "Date",
+            "description": "Description",
+            "category": "Catégorie",
+            "amount": "Montant",
+            "save": "Enregistrer",
+            "saving": "Enregistrement..."
+        }
+    },
+    "common": {
+        "loading": "Chargement...",
+        "search": "Rechercher...",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "confirmDelete": "Êtes-vous sûr ?",
+        "success": "Succès !",
+        "error": "Erreur",
+        "notAvailable": "N/D",
+        "actions": "Actions",
+        "separator": "Séparateur"
+    },
+    "settings": {
+        "title": "Paramètres",
+        "subtitle": "Réglages d'AgendiApp",
+        "brandIdentity": "Identité de Marque",
+        "brandName": "Nom de l'App",
+        "logoUrl": "URL du Logo",
+        "saveAppearance": "Enregistrer Apparence",
+        "errorTotalPercent": "Le total % des associés est de {{totalPercent}}%. Doit être 100%.",
+        "tabs": {
+            "appearance": "Apparence",
+            "accounting": "Comptabilité",
+            "maintenance": "Maintenance"
+        },
+        "accounting": {
+            "titleCommissions": "Commissions et Coûts",
+            "salesCommission": "Commission Ventes (%)",
+            "generalTax": "Impôt Général (%)",
+            "taxOverrides": "Dérogations Fiscales (Par Collaborateur)",
+            "titlePartners": "Associés et Distribution des Profits",
+            "addPartnerBtn": "Ajouter Associé"
+        },
+        "appearance": {
+            "title": "Réglages d'Apparence",
+            "darkMode": "Mode Sombre",
+            "language": "Langue de l'Application"
+        },
+        "maintenance": {
+            "title": "Tâches de Maintenance",
+            "clearCache": "Vider Cache Local",
+            "backupData": "Générer Sauvegarde"
+        }
+    },
+    "hr": {
+        "title": "Suivi du Temps",
+        "selectStaff": "Sélectionner Collaborateur",
+        "todayStatus": "Statut d'Aujourd'hui",
+        "history": "Historique Récent",
+        "actions": {
+            "checkIn": "Entrée",
+            "lunchStart": "Début Déjeuner",
+            "lunchEnd": "Fin Déjeuner",
+            "checkOut": "Sortie"
+        },
+        "status": {
+            "notStarted": "Non Commencé",
+            "working": "Au Travail",
+            "lunch": "En Déjeuner",
+            "finished": "Journée Terminée"
+        },
+        "success": "Pointage enregistré avec succès."
+    },
+    "calendar": {
+        "title": "Agenda",
+        "subtitle": "Gérez vos rendez-vous et disponibilités.",
+        "newBtn": "Nouveau Rendez-vous",
+        "today": "Aujourd'hui",
+        "lunch": "Déjeuner",
+        "status": {
+            "confirmed": "Confirmé",
+            "pending": "En Attente",
+            "cancelled": "Annulé",
+            "completed": "Terminé",
+            "no_show": "Absent"
+        },
+        "modal": {
+            "newTitle": "Nouveau Rendez-vous",
+            "editTitle": "Modifier Rendez-vous",
+            "client": "Client",
+            "clientPlaceholder": "Rechercher client...",
+            "stylist": "Styliste",
+            "stylistPlaceholder": "Sélectionner styliste...",
+            "service": "Service",
+            "servicePlaceholder": "Rechercher service...",
+            "date": "Date et Heure",
+            "duration": "Durée (min)",
+            "notes": "Notes / Commentaires",
+            "save": "Enregistrer Rendez-vous",
+            "delete": "Supprimer Rendez-vous"
+        },
+        "alerts": {
+            "created": "Rendez-vous planifié avec succès",
+            "updated": "Rendez-vous mis à jour",
+            "deleted": "Rendez-vous supprimé",
+            "overlap": "Le styliste a déjà un rendez-vous à cette heure."
+        }
+    },
+    "orders": {
+        "title": "Commandes et Fournisseurs",
+        "subtitle": "Gérez les achats, factures et comptes fournisseurs.",
+        "tabs": {
+            "suppliers": "Fournisseurs",
+            "invoices": "Factures",
+            "debts": "Dettes / Paiements"
+        },
+        "suppliers": {
+            "addBtn": "Ajouter Fournisseur",
+            "name": "Nom / Entreprise",
+            "contact": "Contact",
+            "phone": "Téléphone",
+            "bank": "Banque",
+            "account": "N° Compte",
+            "email": "Email"
+        },
+        "invoices": {
+            "uploadBtn": "Télécharger Facture (PDF)",
+            "date": "Date Émission",
+            "method": "Moyen de Paiement",
+            "file": "Fichier",
+            "preview": "Voir PDF",
+            "methods": {
+                "cash": "Espèces",
+                "transfer": "Virement",
+                "check": "Chèque",
+                "card": "Carte Crédit/Débit"
+            }
+        },
+        "debts": {
+            "addBtn": "Enregistrer Dette",
+            "supplier": "Fournisseur",
+            "totalAmount": "Montant Total",
+            "installments": "N° Échéances",
+            "initialPay": "Paiement Initial",
+            "installmentValue": "Valeur Échéance",
+            "paid": "Payé",
+            "pending": "En Attente",
+            "status": "Statut",
+            "registerPayment": "Enregistrer Paiement",
+            "history": "Historique Paiements"
+        }
+    }
+}

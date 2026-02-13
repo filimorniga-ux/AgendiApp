@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+    --color-gold: #f6e05e;
+}
+
+body {
+    @apply antialiased;
+}
+
+.glass-panel {
+    @apply bg-white/80 backdrop-blur-md border-b border-slate-200 dark:bg-slate-900/80 dark:border-slate-800;
+}

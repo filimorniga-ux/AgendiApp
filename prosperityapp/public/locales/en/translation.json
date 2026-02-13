@@ -1,0 +1,657 @@
+{
+  "sidebar": {
+    "agenda": "Calendar",
+    "dashboard": "Dashboard",
+    "roles": "Role Simulator",
+    "dailyCash": "Daily Cash",
+    "clients": "Clients",
+    "collaborators": "Collaborators",
+    "payroll": "Payroll",
+    "monthlyClosing": "Monthly Closings",
+    "prices": "Price List",
+    "inventory": "Inventory",
+    "giftcards": "Gift Cards",
+    "settings": "Settings",
+    "theme": "Toggle Theme",
+    "logout": "Log Out"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "tabs": {
+      "daily": "Daily Analysis",
+      "period": "Period Analysis",
+      "closings": "Closings Analysis",
+      "clients": "Client Analysis"
+    },
+    "cards": {
+      "services": "Services Rendered",
+      "sales": "Product Sales",
+      "expenses": "Total Expenses",
+      "techCost": "Technical Cost (Used)",
+      "cash": "Cash Income",
+      "cards": "Card Income",
+      "transfers": "Transfer Income",
+      "advances": "Total Advances",
+      "produced": "Total Produced",
+      "income": "Total Income",
+      "distributed": "Total Distributed",
+      "savings": "Total Savings"
+    },
+    "ranking": "Service Ranking (Today)",
+    "noData": "No data recorded."
+  },
+  "dailyCash": {
+    "title": "Daily Cash",
+    "registerBtn": "Register Operation",
+    "printBtn": "Print Closing",
+    "printClosure": "Print Cash Register Closing",
+    "cashInBox": "Cash in Box",
+    "dateLocale": "en-US",
+    "cards": {
+      "services": "Total Services",
+      "sales": "Total Sales",
+      "tips": "Total Tips",
+      "giftcards": "Total GC Sales",
+      "cards": "Total Cards",
+      "transfers": "Total Transfers",
+      "gcPayments": "Total GC Payments",
+      "expenses": "Total Expenses",
+      "advances": "Total Advances"
+    },
+    "columns": {
+      "transfers": "Transfers",
+      "cards": "Cards",
+      "sales": "Product Sales",
+      "giftcards": "Gift Card Sales",
+      "gcPayments": "Gift Card Payments",
+      "tips": "Tips",
+      "expenses": "Expenses",
+      "advances": "Advances",
+      "services": "Services"
+    }
+  },
+  "inventory": {
+    "title": "Inventory Management",
+    "management": "Inventory Management",
+    "auditBtn": "View Audit",
+    "viewAudit": "View Audit",
+    "tabs": {
+      "tech": "Technical Inventory",
+      "technical": "Technical Inventory",
+      "retail": "Retail Inventory"
+    },
+    "searchPlaceholder": "Search by product or brand...",
+    "addTechBtn": "Add Technical Product",
+    "addProductButton": "Add Technical Product",
+    "addRetailBtn": "Add Retail Product",
+    "table": {
+      "product": "Product",
+      "stock": "Stock",
+      "minStock": "Minimum",
+      "size": "Size",
+      "invoiceCost": "Invoice Cost",
+      "collabCost": "Collab Cost",
+      "costPerGram": "Cost/g",
+      "created": "Created",
+      "actions": "Actions",
+      "salePrice": "Sale Price",
+      "profit": "Profit",
+      "totalValue": "Total Value"
+    },
+    "noCategory": "No Category",
+    "allCategories": "All Categories",
+    "audit": {
+      "title": "Stock Audit",
+      "subtitle": "Movement history.",
+      "searchPlaceholder": "Search...",
+      "table": {
+        "date": "Date",
+        "product": "Product",
+        "type": "Type",
+        "amount": "Qty",
+        "reason": "Reason",
+        "newStock": "New Stock"
+      },
+      "typeEntry": "Entry",
+      "typeExit": "Exit"
+    }
+  },
+  "prices": {
+    "title": "Price List",
+    "subtitle": "View and manage prices.",
+    "addBtn": "Add Service",
+    "searchPlaceholder": "Search service...",
+    "allCategories": "All Categories",
+    "noServices": "No services found.",
+    "sort": {
+      "nameAsc": "Name (A-Z)",
+      "nameDesc": "Name (Z-A)",
+      "priceAsc": "Price (Low to High)",
+      "priceDesc": "Price (High to Low)"
+    }
+  },
+  "closings": {
+    "title": "Monthly Closings",
+    "subtitle": "Monthly accounting management",
+    "addBtn": "Add Record",
+    "loading": "Loading records...",
+    "totalToDistribute": "TOTAL TO DISTRIBUTE",
+    "calculationDetail": "Calculation Detail",
+    "totalIncome": "(+) Total Income",
+    "totalOutgoings": "(-) Total Outgoings & Vouchers",
+    "totalSavings": "(-) Total Savings",
+    "partnerDistribution": "Partner Distribution",
+    "table": {
+      "partner": "Partner",
+      "percent": "Percentage",
+      "amount": "Calculated Amount"
+    },
+    "noPartners": "No partners configured.",
+    "categories": {
+      "cashUnsealed": "Unsealed Cash",
+      "cashWeekly": "Weekly Cash",
+      "transfers": "Transfers",
+      "cards": "Cards / Deposits",
+      "partnersAdvances": "Partner Vouchers/Advances",
+      "monthlyOutgoings": "Monthly Outgoings",
+      "weeklySalesSavings": "Sales Savings",
+      "taxSavings": "Tax Savings",
+      "techSavings": "Tech Product Savings"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "subtitle": "Manage your client database.",
+    "addBtn": "Add Client",
+    "searchPlaceholder": "Search by name or phone...",
+    "lastVisit": "Last Visit:",
+    "viewHistory": "View History",
+    "confirmDelete": "Delete {{clientName}}?",
+    "deleteSuccess": "Client deleted.",
+    "deleteError": "Error deleting client.",
+    "editBtn": "Edit Client",
+    "deleteBtn": "Delete Client",
+    "noClientsFound": "No clients found."
+  },
+  "collaborators": {
+    "title": "Staff",
+    "subtitle": "Manage staff and commissions.",
+    "addBtn": "Add Staff Member",
+    "searchPlaceholder": "Search by name...",
+    "table": {
+      "name": "Name",
+      "role": "Role",
+      "commission": "Commission",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "modal": {
+      "editTitle": "Edit Staff Member",
+      "newTitle": "New Staff Member",
+      "tabs": {
+        "personal": "Personal Info",
+        "labor": "Labor Data",
+        "schedule": "Weekly Schedule",
+        "docs": "Documents"
+      },
+      "form": {
+        "name": "First Name",
+        "lastName": "Last Name",
+        "docType": "Doc Type",
+        "docNumber": "Doc Number",
+        "phone": "Phone/WhatsApp",
+        "email": "Email",
+        "emergencyHeader": "Emergency Contact",
+        "emergencyName": "Contact Name",
+        "emergencyPhone": "Contact Phone",
+        "hireDate": "Hire Date",
+        "status": "Status",
+        "commService": "Service Commission (%)",
+        "commSales": "Sales Commission (%)",
+        "terminationDate": "Termination Date"
+      },
+      "schedule": {
+        "workingDay": "Working Day",
+        "dayOff": "Day Off",
+        "entry": "Entry",
+        "exit": "Exit",
+        "lunch": "Lunch",
+        "days": {
+          "monday": "Monday",
+          "tuesday": "Tuesday",
+          "wednesday": "Wednesday",
+          "thursday": "Thursday",
+          "friday": "Friday",
+          "saturday": "Saturday",
+          "sunday": "Sunday"
+        }
+      },
+      "statusOptions": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "terminated": "Terminated"
+      },
+      "docs": {
+        "info": "File upload (Contracts, Settlements) coming soon.",
+        "contract": "Upload Contract (PDF)",
+        "settlement": "Upload Settlement (PDF)"
+      }
+    },
+    "alerts": {
+      "created": "Created successfully",
+      "updated": "Updated successfully",
+      "deleted": "Deleted successfully",
+      "confirmDelete": "Delete?",
+      "errorSave": "Error saving",
+      "errorDelete": "Error deleting"
+    }
+  },
+  "giftcards": {
+    "title": "Gift Card Management",
+    "subtitle": "Register and track sold and redeemed gift cards.",
+    "searchPlaceholder": "Search by code or buyer",
+    "table": {
+      "code": "Code",
+      "initialValue": "Initial Value",
+      "balance": "Balance",
+      "buyer": "Buyer",
+      "contact": "Contact",
+      "status": "Status",
+      "createdAt": "Purchase Date",
+      "evidence": "Evidence"
+    },
+    "buttons": {
+      "purchaseReceipt": "Purchase GC",
+      "redemptionReceipt": "Redeem GC",
+      "viewDocuments": "View Documents"
+    },
+    "status": {
+      "active": "Active",
+      "exhausted": "Exhausted"
+    },
+    "tooltips": {
+      "purchaseReceipt": "Upload purchase receipt",
+      "redemptionReceipt": "Upload redemption evidence",
+      "viewDocuments": "View uploaded documents"
+    },
+    "noRecords": "No Gift Cards found."
+  },
+  "payroll": {
+    "subtitle": "Select days to calculate payroll.",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "clear": "Clear",
+    "historyBtn": "History",
+    "closePeriodBtn": "Close Period",
+    "historyTitle": "Closing History",
+    "historySubtitle": "View saved periods.",
+    "backToPayroll": "Back to Payroll",
+    "backToHistory": "Back to History",
+    "customPeriod": "Custom Period",
+    "successClose": "Period closed successfully!",
+    "table": {
+      "name": "Closing Name",
+      "range": "Date Range",
+      "date": "Closing Date"
+    },
+    "cards": {
+      "gross": "Gross Production",
+      "techCost": "(-) Tech Cost",
+      "tax": "(-) Taxes",
+      "netBase": "Net Base",
+      "participation": "(+) Participation",
+      "commission": "(+) Sales Commissions",
+      "tips": "(+) Tips",
+      "advances": "(+/-) Advances",
+      "finalPay": "FINAL PAY"
+    },
+    "modal": {
+      "closingName": "Closing Name",
+      "totalToPay": "Total to Pay",
+      "warning": "This action will save a snapshot of this payroll.",
+      "confirmBtn": "Confirm and Save"
+    },
+    "errors": {
+      "nameRequired": "Closing name is required."
+    }
+  },
+  "modals": {
+    "registerTitle": "Register Operation",
+    "editTitle": "Edit Operation",
+    "summaryTitle": "Operation Summary",
+    "titles": {
+      "techCalc": "Technical Cost (Detail)",
+      "techComm": "Sales Commission"
+    },
+    "accordions": {
+      "services": "Services",
+      "products": "Products / Sales",
+      "gcSell": "Sell Gift Card",
+      "gcRedeem": "Redeem Gift Card (Pay)",
+      "expenses": "Expenses / Outgoings",
+      "advances": "Advances",
+      "tips": "Tips / Manual Commission"
+    },
+    "forms": {
+      "clientSearch": "Search client...",
+      "collabSearch": "Search staff...",
+      "serviceSearch": "Search service...",
+      "productSearch": "Search product...",
+      "selectCollab": "Select staff...",
+      "itemDesc": "Description",
+      "itemAmount": "Amount",
+      "itemQuantity": "Qty",
+      "priceTotal": "Total Price",
+      "techCost": "Tech Cost:",
+      "commission": "Commission:",
+      "paymentMethod": "Payment Method",
+      "multiplePayments": "Multiple Methods",
+      "total": "TOTAL:",
+      "date": "Date",
+      "category": "Category",
+      "addServiceSearch": "Add Service (Search)",
+      "addServiceManual": "Add Service (Manual)",
+      "registerManual": "Manual Register",
+      "notFoundService": "Can't find service? Register manually",
+      "addSalesSearch": "Add Product (Search)",
+      "addSalesManual": "Add Sale (Manual)",
+      "manualSaleTitle": "Manual Sale",
+      "notFoundProduct": "Manual sale (no inventory)?",
+      "gcCode": "Unique Code",
+      "gcBuyer": "Buyer Name",
+      "gcContact": "Contact (Email/Phone)",
+      "gcAmount": "Amount",
+      "addGCSale": "Add Gift Card Sale",
+      "addGCPay": "Add Payment (GC)",
+      "addExpense": "Add Expense",
+      "advanceFor": "Advance for",
+      "addAdvance": "Add Advance",
+      "tipsDesc": "Description (Ex: Tip)",
+      "tipDestination": "Destination:",
+      "tipNomina": "Add to Payroll",
+      "tipInstant": "Pay Now (Cash Expense)",
+      "addTip": "Add Tip/Commission",
+      "cashPayment": "Cash",
+      "cardPayment": "Card",
+      "transferPayment": "Transfer",
+      "giftCardPayment": "Gift Card",
+      "cashPaymentTotal": "All in Cash",
+      "cardPaymentTotal": "All with Card",
+      "transferPaymentTotal": "All by Transfer",
+      "commissionAssignmentTitle": "Assign Sales Commission",
+      "soldBy": "Sold by",
+      "commissionType": "Commission Type",
+      "percentageAuto": "Automatic (Percentage)",
+      "amountManual": "Manual (Fixed Amount)",
+      "commissionAmount": "Commission Amount",
+      "inCart": "in cart",
+      "create": "Save",
+      "salon": "Salon",
+      "searchService": "Search Service",
+      "itemQuantityShort": "Qty",
+      "manualRegistry": "Manual Registry",
+      "desc": "Description",
+      "amount": "Amount",
+      "gcSaleDesc": "Gift Card Sale",
+      "gcPaymentDesc": "Gift Card Payment"
+    },
+    "buttons": {
+      "deleteTransaction": "Delete Transaction",
+      "updateChanges": "Update Changes",
+      "registerOperation": "Register Operation",
+      "saving": "Saving...",
+      "updating": "Updating...",
+      "deleting": "Deleting...",
+      "techCalculatorTitle": "Technical Calculator",
+      "saveCost": "Save Cost",
+      "addManual": "+ Add Expense Manually",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
+    "errors": {
+      "noItems": "No items in operation.",
+      "stockCheck": "Insufficient stock. Available:",
+      "gcNotFound": "Gift Card not found.",
+      "gcInactive": "Gift Card is not Active.",
+      "gcBalanceLow": "only has",
+      "gcBalanceLowEnd": "balance.",
+      "completeFields": "Complete all fields.",
+      "selectCollabService": "Select staff and service.",
+      "selectProduct": "Select product and quantity.",
+      "selectCollabAndAmount": "Select staff and amount.",
+      "completeFieldsTips": "Complete tip details.",
+      "completeFieldsGC": "Complete Gift Card details.",
+      "completeFieldsGCPay": "Complete payment details."
+    },
+    "client": {
+      "editTitle": "Edit Client",
+      "newTitle": "New Client",
+      "personal": "Personal Info",
+      "history": "History",
+      "name": "First Name",
+      "lastName": "Last Name",
+      "docNumber": "Doc Number",
+      "phone": "Phone",
+      "email": "Email",
+      "birthday": "Birthday",
+      "emergencyContact": "Emergency Contact",
+      "historyDesc": "View detailed client history.",
+      "clientSince": "Client since:",
+      "lastVisitReg": "Last Visit:"
+    },
+    "techProduct": {
+      "editTitle": "Edit Technical Product",
+      "newTitle": "New Technical Product",
+      "name": "Name",
+      "brand": "Brand",
+      "category": "Category",
+      "size": "Size",
+      "measure": "Measure",
+      "costInvoice": "Invoice Cost",
+      "costCollab": "Collab Cost",
+      "stock": "Initial Stock",
+      "minStock": "Min Stock"
+    },
+    "retailProduct": {
+      "editTitle": "Edit Retail Product",
+      "newTitle": "New Retail Product",
+      "name": "Name",
+      "brand": "Brand",
+      "category": "Category",
+      "cost": "Cost",
+      "price": "Sale Price",
+      "stock": "Initial Stock",
+      "minStock": "Min Stock"
+    },
+    "service": {
+      "editTitle": "Edit Service",
+      "newTitle": "New Service",
+      "name": "Name",
+      "category": "Category",
+      "price": "Price",
+      "duration": "Duration",
+      "placeholders": {
+        "name": "Service Name",
+        "category": "Category (Ex: Cut, Color)",
+        "price": "Sale Price",
+        "duration": "Duration (minutes)"
+      }
+    },
+    "monthlyRecord": {
+      "newTitle": "New Record",
+      "editTitle": "Edit Record",
+      "date": "Date",
+      "description": "Description",
+      "category": "Category",
+      "amount": "Amount",
+      "save": "Save Record",
+      "saving": "Saving..."
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "search": "Search...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "sortAlphabetical": "Alphabetical Order",
+    "sortCustom": "Custom Order",
+    "dragToReorder": "Drag to reorder",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirmDelete": "Are you sure you want to delete?",
+    "success": "Success!",
+    "error": "Error",
+    "logoutSuccess": "Session closed successfully",
+    "notAvailable": "N/A",
+    "actions": "Actions",
+    "separator": "Separator"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "AgendiApp Settings",
+    "brandIdentity": "Brand Identity",
+    "brandName": "App Name",
+    "logoUrl": "Logo URL",
+    "saveAppearance": "Save Appearance",
+    "errorTotalPercent": "Total partner % is {{totalPercent}}%. Must be 100%.",
+    "tabs": {
+      "appearance": "Appearance",
+      "accounting": "Accounting",
+      "security": "Security",
+      "maintenance": "Maintenance"
+    },
+    "accounting": {
+      "titleCommissions": "Commissions & Costs",
+      "salesCommission": "Sales Commission (%)",
+      "generalTax": "General Tax (%)",
+      "taxOverrides": "Tax Overrides (Per Staff)",
+      "titlePartners": "Partners & Profit Distribution",
+      "addPartnerBtn": "Add Partner"
+    },
+    "appearance": {
+      "title": "Appearance Settings",
+      "darkMode": "Dark Mode",
+      "language": "App Language"
+    },
+    "security": {
+      "title": "Security Settings",
+      "pinLabel": "Security PIN",
+      "pinDescription": "This PIN will be required to access administrative functions such as editing cash movements.",
+      "pinHint": "Recommended: 4-6 numeric digits",
+      "pinError": "PIN must be at least 4 digits",
+      "currentPin": "Current PIN",
+      "newPin": "New PIN",
+      "confirmPin": "Confirm New PIN",
+      "changePin": "Change PIN",
+      "pinMismatch": "PINs do not match",
+      "incorrectCurrentPin": "Current PIN is incorrect",
+      "pinChanged": "PIN updated successfully"
+    },
+    "maintenance": {
+      "title": "Maintenance Tasks",
+      "dangerZone": "Danger Zone",
+      "resetWarning": "Warning! This action will delete all current data and reset the database with sample data. This action is irreversible.",
+      "resetBtn": "Reset Database",
+      "clearCache": "Clear Local Cache",
+      "backupData": "Generate Backup"
+    }
+  },
+  "hr": {
+    "title": "Time Tracking",
+    "selectStaff": "Select Staff",
+    "todayStatus": "Today's Status",
+    "history": "Recent History",
+    "actions": {
+      "checkIn": "Check In",
+      "lunchStart": "Start Lunch",
+      "lunchEnd": "End Lunch",
+      "checkOut": "Check Out"
+    },
+    "status": {
+      "notStarted": "Not Started",
+      "working": "Working",
+      "lunch": "On Lunch",
+      "finished": "Shift Ended"
+    },
+    "success": "Clocking registered successfully."
+  },
+  "calendar": {
+    "title": "Agenda",
+    "subtitle": "Manage your appointments and availability.",
+    "newBtn": "New Appointment",
+    "today": "Today",
+    "lunch": "Lunch",
+    "status": {
+      "confirmed": "Confirmed",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "no_show": "No Show"
+    },
+    "modal": {
+      "newTitle": "New Appointment",
+      "editTitle": "Edit Appointment",
+      "client": "Client",
+      "clientPlaceholder": "Search client...",
+      "stylist": "Stylist",
+      "stylistPlaceholder": "Select stylist...",
+      "service": "Service",
+      "servicePlaceholder": "Search service...",
+      "date": "Date & Time",
+      "duration": "Duration (min)",
+      "notes": "Notes / Comments",
+      "save": "Save Appointment",
+      "delete": "Delete Appointment"
+    },
+    "alerts": {
+      "created": "Appointment scheduled successfully",
+      "updated": "Appointment updated",
+      "deleted": "Appointment deleted",
+      "overlap": "Stylist already has an appointment at this time."
+    }
+  },
+  "orders": {
+    "title": "Orders & Suppliers",
+    "subtitle": "Manage purchases, invoices, and accounts payable.",
+    "tabs": {
+      "suppliers": "Suppliers",
+      "invoices": "Invoices",
+      "debts": "Debts / Payments"
+    },
+    "suppliers": {
+      "addBtn": "Add Supplier",
+      "name": "Name / Company",
+      "contact": "Contact",
+      "phone": "Phone",
+      "bank": "Bank",
+      "account": "Account No.",
+      "email": "Email"
+    },
+    "invoices": {
+      "uploadBtn": "Upload Invoice (PDF)",
+      "date": "Issue Date",
+      "method": "Payment Method",
+      "file": "File",
+      "preview": "View PDF",
+      "methods": {
+        "cash": "Cash",
+        "transfer": "Transfer",
+        "check": "Check",
+        "card": "Credit/Debit Card"
+      }
+    },
+    "debts": {
+      "addBtn": "Register Debt",
+      "supplier": "Supplier",
+      "totalAmount": "Total Amount",
+      "installments": "Installments",
+      "initialPay": "Initial Payment",
+      "installmentValue": "Installment Value",
+      "paid": "Paid",
+      "pending": "Pending",
+      "status": "Status",
+      "registerPayment": "Register Payment",
+      "history": "Payment History"
+    }
+  }
+}

@@ -1,0 +1,168 @@
+/* ===== INICIO: src/index.css (Sprint 104 - Agenda Kanban) ===== */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+
+    :root {
+      /* Modo Claro */
+      --color-accent: #D69E2E; 
+      --color-accent-text: #FFFFFF;
+      --color-bg-main: #F3F4F6;
+      --color-bg-secondary: #FFFFFF;
+      --color-bg-tertiary: #E5E7EB;
+      --color-text-main: #111827; 
+      --color-text-secondary: #374151;
+      --color-text-muted: #6B7280;
+      --color-border-main: #D1D5DB;
+      --cal-grid-color: transparent; /* Ocultar líneas en modo claro */
+      --cal-col-bg: #FFFFFF;
+    }
+
+    .dark {
+      /* Modo Oscuro */
+      --color-accent: #f6e05e; 
+      --color-accent-text: #1A202C; 
+      --color-bg-main: #1A202C; 
+      --color-bg-secondary: #2D3748; 
+      --color-bg-tertiary: #4A5568; 
+      --color-text-main: #EDF2F7; 
+      --color-text-secondary: #CBD5E0;
+      --color-text-muted: #A0AEC0;
+      --color-border-main: #4A5568;
+      --cal-grid-color: rgba(255,255,255,0.05); /* Líneas ultra sutiles */
+      --cal-col-bg: #2D3748;
+    }
+
+    body {
+      @apply bg-bg-main text-text-main;
+      font-family: 'Inter', sans-serif;
+    }
+
+    @layer components {
+      .btn-golden {
+        @apply bg-accent text-accent-text font-bold py-2 px-4 rounded-md transition-all duration-200;
+      }
+      .btn-golden:hover {
+        @apply brightness-90; 
+      }
+    }
+
+    /* --- Estilos Generales --- */
+    .sidebar-link.active {
+      @apply bg-accent text-accent-text shadow-md;
+    }
+    .sidebar-link.active i {
+      @apply text-accent-text;
+    }
+    
+    .react-calendar-gema {
+      @apply w-full border-none bg-transparent font-sans;
+    }
+    .react-calendar-gema .react-calendar__navigation button {
+      @apply text-accent font-bold text-lg;
+    }
+    .react-calendar-gema .react-calendar__tile {
+      @apply text-text-main rounded-md hover:bg-bg-tertiary;
+    }
+    .react-calendar-gema .react-calendar__tile--now {
+      @apply bg-bg-tertiary text-accent font-bold;
+    }
+    .react-calendar-gema .react-calendar-tile-selected {
+      @apply bg-accent text-accent-text font-bold !important;
+    }
+
+    /* ==========================================================================
+       AGENDA KANBAN - COLUMNAS INDEPENDIENTES
+       ========================================================================== */
+
+    .rbc-calendar {
+      @apply font-sans text-text-main bg-transparent;
+    }
+
+    .rbc-time-header {
+        @apply border-none mb-4; /* Espacio entre header y columnas */
+    }
+    
+    /* CABECERAS (Nombres) como Tarjetas */
+    .rbc-header {
+      @apply bg-bg-secondary py-3 font-bold text-lg text-text-main uppercase tracking-wide rounded-lg shadow-md border-b-4 border-accent mx-2; /* mx-2 crea el espacio horizontal */
+      border-left: none !important;
+      border-right: none !important;
+      border-top: none !important;
+    }
+    
+    .rbc-time-header-gutter {
+        @apply bg-transparent border-none;
+    }
+
+    .rbc-time-content {
+        @apply border-none pt-2;
+    }
+
+    /* COLUMNAS DE TIEMPO (El cuerpo) */
+    .rbc-day-slot {
+        @apply bg-transparent;
+    }
+    
+    /* LAS "ISLAS" DE CADA ESTILISTA */
+    .rbc-day-slot .rbc-time-column {
+      @apply bg-bg-secondary rounded-lg shadow-sm mx-2 transition-colors; /* mx-2 crea el gap vertical */
+      border: 1px solid var(--color-border-main);
+      min-width: 260px; /* Ancho mínimo para forzar scroll */
+    }
+
+    /* Líneas de hora (Sutiles o invisibles) */
+    .rbc-timeslot-group {
+      border-bottom: 1px solid var(--cal-grid-color) !important;
+      background-color: transparent !important;
+    }
+    .rbc-day-slot .rbc-time-slot {
+      border-top: none !important; 
+    }
+    
+    /* Gutter Izquierdo (Horas) */
+    .rbc-time-gutter .rbc-timeslot-group {
+        @apply text-text-muted text-xs font-mono flex items-center justify-end pr-2 border-b border-transparent;
+        background-color: transparent !important;
+    }
+
+    /* TARJETAS DE CITA */
+    .rbc-event {
+      @apply p-0 bg-transparent border-none shadow-md rounded-md overflow-hidden z-10;
+      width: 94% !important; /* Margen interno */
+      left: 3% !important;
+    }
+
+    .rbc-current-time-indicator {
+      @apply bg-red-500 h-0.5 z-50;
+    }
+
+    .rbc-background-event {
+      @apply opacity-100 pointer-events-none;
+    }
+    
+    /* Fondos especiales */
+    .non-working-hours {
+      background-color: rgba(0,0,0,0.2);
+      background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px);
+    }
+    .lunch-break {
+      background-color: rgba(246, 224, 94, 0.15);
+      border-top: 1px dashed var(--color-accent);
+      border-bottom: 1px dashed var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-size: 0.75rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    
+    :root:not(.dark) .non-working-hours {
+       background-color: rgba(0,0,0,0.05);
+    }
+    /* ===== FIN: src/index.css ===== */

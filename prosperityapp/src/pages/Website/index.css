@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* @theme block removed for Tailwind 3 compatibility. 
+   Gold color #f6e05e is used directly in components. */
+
+body {
+    @apply antialiased;
+}
+
+.glass-panel {
+    @apply bg-white/80 backdrop-blur-md border-b border-slate-200 dark:bg-slate-900/80 dark:border-slate-800;
+}

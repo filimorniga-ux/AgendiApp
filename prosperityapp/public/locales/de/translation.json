@@ -1,0 +1,620 @@
+{
+    "sidebar": {
+        "agenda": "Agenda",
+        "dashboard": "Dashboard",
+        "dailyCash": "Tageskasse",
+        "clients": "Kunden",
+        "collaborators": "Mitarbeiter",
+        "payroll": "Gehaltsabrechnung",
+        "monthlyClosing": "Monatsabschlüsse",
+        "prices": "Preisliste",
+        "inventory": "Inventar",
+        "giftcards": "Gutscheine",
+        "settings": "Einstellungen",
+        "theme": "Design ändern"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "tabs": {
+            "daily": "Tagesanalyse",
+            "period": "Periodenanalyse",
+            "closings": "Abschlussanalyse",
+            "clients": "Kundenanalyse"
+        },
+        "cards": {
+            "services": "Erbuchte Dienstleistungen",
+            "sales": "Produktverkäufe",
+            "expenses": "Gesamtausgaben",
+            "techCost": "Technische Kosten (Verbraucht)",
+            "cash": "Bareinnahmen",
+            "cards": "Karteneinnahmen",
+            "transfers": "Überweisungseinnahmen",
+            "advances": "Gesamtvorschüsse",
+            "produced": "Gesamt Produziert",
+            "income": "Gesamteinnahmen",
+            "distributed": "Gesamt Verteilt",
+            "savings": "Gesamt Ersparnisse"
+        },
+        "ranking": "Dienstleistungs-Ranking (Heute)",
+        "noData": "Keine Daten aufgezeichnet."
+    },
+    "dailyCash": {
+        "title": "Tageskasse",
+        "registerBtn": "Vorgang registrieren",
+        "cashInBox": "Bargeld in Kasse",
+        "dateLocale": "de-DE",
+        "cards": {
+            "services": "Summe Dienstleistungen",
+            "sales": "Summe Verkäufe",
+            "tips": "Summe Trinkgelder",
+            "giftcards": "Summe Gutscheinverkäufe",
+            "cards": "Summe Karten",
+            "transfers": "Summe Überweisungen",
+            "gcPayments": "Summe Gutscheinzahlungen",
+            "expenses": "Summe Ausgaben",
+            "advances": "Summe Vorschüsse"
+        },
+        "columns": {
+            "transfers": "Überweisungen",
+            "cards": "Karten",
+            "sales": "Produktverkauf",
+            "giftcards": "Gutscheinverkauf",
+            "gcPayments": "Gutscheinzahlungen",
+            "tips": "Trinkgelder",
+            "expenses": "Ausgaben",
+            "advances": "Vorschüsse",
+            "services": "Dienstleistungen"
+        }
+    },
+    "inventory": {
+        "title": "Inventarverwaltung",
+        "management": "Inventarverwaltung",
+        "auditBtn": "Audit anzeigen",
+        "viewAudit": "Audit anzeigen",
+        "tabs": {
+            "tech": "Technisches Inventar",
+            "technical": "Technisches Inventar",
+            "retail": "Verkaufsinventar"
+        },
+        "searchPlaceholder": "Suche nach Produkt oder Marke...",
+        "addTechBtn": "Technisches Produkt hinzufügen",
+        "addProductButton": "Technisches Produkt hinzufügen",
+        "addRetailBtn": "Verkaufsprodukt hinzufügen",
+        "table": {
+            "product": "Produkt",
+            "stock": "Bestand",
+            "minStock": "Minimum",
+            "size": "Größe",
+            "invoiceCost": "Rechnungskosten",
+            "collabCost": "Mitarbeiterkosten",
+            "costPerGram": "Kosten/g",
+            "created": "Erstellt",
+            "actions": "Aktionen",
+            "salePrice": "Verkaufspreis",
+            "profit": "Gewinn",
+            "totalValue": "Gesamtwert"
+        },
+        "noCategory": "Keine Kategorie",
+        "allCategories": "Alle Kategorien",
+        "audit": {
+            "title": "Bestandsaudit",
+            "subtitle": "Bewegungshistorie.",
+            "searchPlaceholder": "Suchen...",
+            "table": {
+                "date": "Datum",
+                "product": "Produkt",
+                "type": "Typ",
+                "amount": "Menge",
+                "reason": "Grund",
+                "newStock": "Neuer Bestand"
+            },
+            "typeEntry": "Eingang",
+            "typeExit": "Ausgang"
+        }
+    },
+    "prices": {
+        "title": "Preisliste",
+        "subtitle": "Preise einsehen und verwalten.",
+        "addBtn": "Dienstleistung hinzufügen",
+        "searchPlaceholder": "Dienstleistung suchen...",
+        "allCategories": "Alle Kategorien",
+        "noServices": "Keine Dienstleistungen gefunden.",
+        "sort": {
+            "nameAsc": "Name (A-Z)",
+            "nameDesc": "Name (Z-A)",
+            "priceAsc": "Preis (Aufsteigend)",
+            "priceDesc": "Preis (Absteigend)"
+        }
+    },
+    "closings": {
+        "title": "Monatsabschlüsse",
+        "subtitle": "Monatliche Buchhaltung",
+        "addBtn": "Eintrag hinzufügen",
+        "loading": "Einträge werden geladen...",
+        "totalToDistribute": "GESAMT ZU VERTEILEN",
+        "calculationDetail": "Berechnungsdetails",
+        "totalIncome": "(+) Gesamteinnahmen",
+        "totalOutgoings": "(-) Gesamtausgaben & Gutscheine",
+        "totalSavings": "(-) Gesamtersparnisse",
+        "partnerDistribution": "Partnerverteilung",
+        "table": {
+            "partner": "Partner",
+            "percent": "Prozentsatz",
+            "amount": "Berechneter Betrag"
+        },
+        "noPartners": "Keine Partner konfiguriert.",
+        "categories": {
+            "cashUnsealed": "Offenes Bargeld",
+            "cashWeekly": "Wöchentliches Bargeld",
+            "transfers": "Überweisungen",
+            "cards": "Karten / Einzahlungen",
+            "partnersAdvances": "Gutscheine/Vorschüsse Partner",
+            "monthlyOutgoings": "Monatliche Ausgaben",
+            "weeklySalesSavings": "Verkaufsersparnisse",
+            "taxSavings": "Steuerersparnisse",
+            "techSavings": "Ersparnisse Tech-Produkte"
+        }
+    },
+    "clients": {
+        "title": "Kunden",
+        "subtitle": "Verwalten Sie Ihre Kundendatenbank.",
+        "addBtn": "Kunde hinzufügen",
+        "searchPlaceholder": "Suche nach Name oder Telefon...",
+        "lastVisit": "Letzter Besuch:",
+        "viewHistory": "Verlauf anzeigen",
+        "confirmDelete": "{{clientName}} löschen?",
+        "deleteSuccess": "Kunde gelöscht.",
+        "deleteError": "Fehler beim Löschen des Kunden.",
+        "editBtn": "Kunde bearbeiten",
+        "deleteBtn": "Kunde löschen",
+        "noClientsFound": "Keine Kunden gefunden."
+    },
+    "collaborators": {
+        "title": "Mitarbeiter",
+        "subtitle": "Verwalten Sie Personal und Provisionen.",
+        "addBtn": "Mitarbeiter hinzufügen",
+        "searchPlaceholder": "Suche nach Name...",
+        "table": {
+            "name": "Name",
+            "role": "Rolle",
+            "commission": "Provision",
+            "status": "Status",
+            "actions": "Aktionen"
+        },
+        "modal": {
+            "editTitle": "Mitarbeiter bearbeiten",
+            "newTitle": "Neuer Mitarbeiter",
+            "tabs": {
+                "personal": "Persönliche Infos",
+                "labor": "Arbeitsdaten",
+                "schedule": "Wochenplan",
+                "docs": "Dokumente"
+            },
+            "form": {
+                "name": "Vorname",
+                "lastName": "Nachname",
+                "docType": "Dokumententyp",
+                "docNumber": "Dokumentennummer",
+                "phone": "Telefon/WhatsApp",
+                "email": "E-Mail",
+                "emergencyHeader": "Notfallkontakt",
+                "emergencyName": "Kontaktname",
+                "emergencyPhone": "Kontakttelefon",
+                "hireDate": "Eintrittsdatum",
+                "status": "Status",
+                "commService": "Provision (Dienstleistungen) (%)",
+                "commSales": "Verkaufsprovision (%)",
+                "terminationDate": "Austrittsdatum"
+            },
+            "schedule": {
+                "workingDay": "Arbeitstag",
+                "dayOff": "Frei",
+                "entry": "Eingang",
+                "exit": "Ausgang",
+                "lunch": "Mittagspause",
+                "days": {
+                    "monday": "Montag",
+                    "tuesday": "Dienstag",
+                    "wednesday": "Mittwoch",
+                    "thursday": "Donnerstag",
+                    "friday": "Freitag",
+                    "saturday": "Samstag",
+                    "sunday": "Sonntag"
+                }
+            },
+            "statusOptions": {
+                "active": "Aktiv",
+                "inactive": "Inaktiv",
+                "terminated": "Ehemalig"
+            },
+            "docs": {
+                "info": "Datei-Upload (Verträge, Abrechnungen) kommt bald.",
+                "contract": "Vertrag hochladen (PDF)",
+                "settlement": "Abrechnung hochladen (PDF)"
+            }
+        },
+        "alerts": {
+            "created": "Erfolgreich erstellt",
+            "updated": "Erfolgreich aktualisiert",
+            "deleted": "Erfolgreich gelöscht",
+            "confirmDelete": "Löschen?",
+            "errorSave": "Fehler beim Speichern",
+            "errorDelete": "Fehler beim Löschen"
+        }
+    },
+    "giftcards": {
+        "title": "Gutscheinverwaltung",
+        "subtitle": "Kartenbuch.",
+        "searchPlaceholder": "Suchen...",
+        "table": {
+            "code": "Code",
+            "buyer": "Käufer",
+            "contact": "Kontakt",
+            "initialValue": "Anfangswert",
+            "balance": "Aktuelles Guthaben",
+            "status": "Status",
+            "date": "Verkaufsdatum"
+        },
+        "status": {
+            "active": "Aktiv",
+            "exhausted": "Aufgebraucht"
+        },
+        "noData": "Keine Gutscheine gefunden."
+    },
+    "payroll": {
+        "subtitle": "Wählen Sie Tage für die Gehaltsabrechnung.",
+        "thisWeek": "Diese Woche",
+        "thisMonth": "Diesen Monat",
+        "clear": "Leeren",
+        "historyBtn": "Verlauf",
+        "closePeriodBtn": "Periode schließen",
+        "historyTitle": "Abschlussverlauf",
+        "historySubtitle": "Gespeicherte Perioden anzeigen.",
+        "backToPayroll": "Zurück zur Abrechnung",
+        "backToHistory": "Zurück zum Verlauf",
+        "customPeriod": "Benutzerdefinierte Periode",
+        "successClose": "Periode erfolgreich geschlossen!",
+        "table": {
+            "name": "Abschlussname",
+            "range": "Datumsbereich",
+            "date": "Abschlussdatum"
+        },
+        "cards": {
+            "gross": "Bruttoproduktion",
+            "techCost": "(-) Technische Kosten",
+            "tax": "(-) Steuern",
+            "netBase": "Nettobasis",
+            "participation": "(+) Beteiligung",
+            "commission": "(+) Verkaufsprovisionen",
+            "tips": "(+) Trinkgelder",
+            "advances": "(+/-) Vorschüsse",
+            "finalPay": "ENDZAHLUNG"
+        },
+        "modal": {
+            "closingName": "Abschlussname",
+            "totalToPay": "Zu zahlender Gesamtbetrag",
+            "warning": "Diese Aktion speichert eine Momentaufnahme dieser Abrechnung.",
+            "confirmBtn": "Bestätigen und Speichern"
+        },
+        "errors": {
+            "nameRequired": "Abschlussname ist erforderlich."
+        }
+    },
+    "modals": {
+        "registerTitle": "Vorgang registrieren",
+        "editTitle": "Vorgang bearbeiten",
+        "summaryTitle": "Vorgangszusammenfassung",
+        "titles": {
+            "techCalc": "Technische Kosten (Detail)",
+            "techComm": "Verkaufsprovision"
+        },
+        "accordions": {
+            "services": "Dienstleistungen",
+            "products": "Produkte / Verkäufe",
+            "gcSell": "Gutschein verkaufen",
+            "gcRedeem": "Gutschein einlösen (Bezahlen)",
+            "expenses": "Ausgaben / Abgänge",
+            "advances": "Vorschüsse",
+            "tips": "Trinkgelder / Manuelle Provision"
+        },
+        "forms": {
+            "clientSearch": "Kunde suchen...",
+            "collabSearch": "Mitarbeiter suchen...",
+            "serviceSearch": "Dienstleistung suchen...",
+            "productSearch": "Produkt suchen...",
+            "selectCollab": "Mitarbeiter wählen...",
+            "itemDesc": "Beschreibung",
+            "itemAmount": "Betrag",
+            "itemQuantity": "Menge",
+            "priceTotal": "Gesamtpreis",
+            "techCost": "Tech-Kosten:",
+            "commission": "Provision:",
+            "paymentMethod": "Zahlungsmethode",
+            "multiplePayments": "Mehrere Methoden",
+            "total": "GESAMT:",
+            "date": "Datum",
+            "category": "Kategorie",
+            "addServiceSearch": "Dienstleistung hinzufügen (Suche)",
+            "addServiceManual": "Dienstleistung hinzufügen (Manuell)",
+            "registerManual": "Manuelle Registrierung",
+            "notFoundService": "Dienstleistung nicht gefunden? Manuell registrieren",
+            "addSalesSearch": "Produkt hinzufügen (Suche)",
+            "addSalesManual": "Verkauf hinzufügen (Manuell)",
+            "manualSaleTitle": "Manueller Verkauf",
+            "notFoundProduct": "Manueller Verkauf (kein Inventar)?",
+            "gcCode": "Eindeutiger Code",
+            "gcBuyer": "Käufername",
+            "gcContact": "Kontakt (E-Mail/Telefon)",
+            "gcAmount": "Betrag",
+            "addGCSale": "Gutscheinverkauf hinzufügen",
+            "addGCPay": "Zahlung hinzufügen (GC)",
+            "addExpense": "Ausgabe hinzufügen",
+            "advanceFor": "Vorschuss für",
+            "addAdvance": "Vorschuss hinzufügen",
+            "tipsDesc": "Beschreibung (Bsp: Trinkgeld)",
+            "tipDestination": "Ziel:",
+            "tipNomina": "Zur Abrechnung hinzufügen",
+            "tipInstant": "Jetzt bezahlen (Kassenausgabe)",
+            "addTip": "Trinkgeld/Provision hinzufügen",
+            "cashPayment": "Bargeld",
+            "cardPayment": "Karte",
+            "transferPayment": "Überweisung",
+            "giftCardPayment": "Gutschein",
+            "cashPaymentTotal": "Alles in Bar",
+            "cardPaymentTotal": "Alles mit Karte",
+            "transferPaymentTotal": "Alles per Überweisung",
+            "commissionAssignmentTitle": "Verkaufsprovision zuweisen",
+            "soldBy": "Verkauft von",
+            "commissionType": "Provisionstyp",
+            "percentageAuto": "Automatisch (Prozentsatz)",
+            "amountManual": "Manuell (Fester Betrag)",
+            "commissionAmount": "Provisionsbetrag",
+            "inCart": "im Warenkorb",
+            "create": "Speichern",
+            "salon": "Salon",
+            "searchService": "Dienstleistung suchen",
+            "itemQuantityShort": "Menge",
+            "manualRegistry": "Manuelle Registrierung",
+            "desc": "Beschreibung",
+            "amount": "Betrag",
+            "gcSaleDesc": "Gutscheinverkauf",
+            "gcPaymentDesc": "Gutscheinzahlung"
+        },
+        "buttons": {
+            "deleteTransaction": "Transaktion löschen",
+            "updateChanges": "Änderungen aktualisieren",
+            "registerOperation": "Vorgang registrieren",
+            "saving": "Speichern...",
+            "updating": "Aktualisieren...",
+            "deleting": "Löschen...",
+            "techCalculatorTitle": "Technischer Rechner",
+            "saveCost": "Kosten speichern",
+            "addManual": "+ Ausgabe manuell hinzufügen",
+            "cancel": "Abbrechen",
+            "confirm": "Bestätigen"
+        },
+        "errors": {
+            "noItems": "Keine Elemente im Vorgang.",
+            "stockCheck": "Unzureichender Bestand. Verfügbar:",
+            "gcNotFound": "Gutschein nicht gefunden.",
+            "gcInactive": "Gutschein ist nicht aktiv.",
+            "gcBalanceLow": "hat nur",
+            "gcBalanceLowEnd": "Guthaben.",
+            "completeFields": "Füllen Sie alle Felder aus.",
+            "selectCollabService": "Wählen Sie Mitarbeiter und Dienstleistung.",
+            "selectProduct": "Wählen Sie Produkt und Menge.",
+            "selectCollabAndAmount": "Wählen Sie Mitarbeiter und Betrag.",
+            "completeFieldsTips": "Füllen Sie das Trinkgeld aus.",
+            "completeFieldsGC": "Füllen Sie die Gutscheindaten aus.",
+            "completeFieldsGCPay": "Füllen Sie die Zahlungsdaten aus."
+        },
+        "client": {
+            "editTitle": "Kunde bearbeiten",
+            "newTitle": "Neuer Kunde",
+            "personal": "Persönliche Infos",
+            "history": "Verlauf",
+            "name": "Vorname",
+            "lastName": "Nachname",
+            "docNumber": "Dokumentennummer",
+            "phone": "Telefon",
+            "email": "E-Mail",
+            "birthday": "Geburtstag",
+            "emergencyContact": "Notfallkontakt",
+            "historyDesc": "Detaillierten Kundenverlauf anzeigen.",
+            "clientSince": "Kunde seit:",
+            "lastVisitReg": "Letzter Besuch:"
+        },
+        "techProduct": {
+            "editTitle": "Technisches Produkt bearbeiten",
+            "newTitle": "Neues technisches Produkt",
+            "name": "Name",
+            "brand": "Marke",
+            "category": "Kategorie",
+            "size": "Größe",
+            "measure": "Maß",
+            "costInvoice": "Rechnungskosten",
+            "costCollab": "Mitarbeiterkosten",
+            "stock": "Anfangsbestand",
+            "minStock": "Mindestbestand"
+        },
+        "retailProduct": {
+            "editTitle": "Verkaufsprodukt bearbeiten",
+            "newTitle": "Neues Verkaufsprodukt",
+            "name": "Name",
+            "brand": "Marke",
+            "category": "Kategorie",
+            "cost": "Kosten",
+            "price": "Verkaufspreis",
+            "stock": "Anfangsbestand",
+            "minStock": "Mindestbestand"
+        },
+        "service": {
+            "editTitle": "Dienstleistung bearbeiten",
+            "newTitle": "Neue Dienstleistung",
+            "name": "Name",
+            "category": "Kategorie",
+            "price": "Preis",
+            "duration": "Dauer",
+            "placeholders": {
+                "name": "Dienstleistungsname",
+                "category": "Kategorie (Bsp: Schnitt, Farbe)",
+                "price": "Verkaufspreis",
+                "duration": "Dauer (Minuten)"
+            }
+        },
+        "monthlyRecord": {
+            "newTitle": "Neuer Eintrag",
+            "editTitle": "Eintrag bearbeiten",
+            "date": "Datum",
+            "description": "Beschreibung",
+            "category": "Kategorie",
+            "amount": "Betrag",
+            "save": "Eintrag speichern",
+            "saving": "Speichern..."
+        }
+    },
+    "common": {
+        "loading": "Laden...",
+        "search": "Suchen...",
+        "cancel": "Abbrechen",
+        "save": "Speichern",
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "confirmDelete": "Sind Sie sicher?",
+        "success": "Erfolg!",
+        "error": "Fehler",
+        "notAvailable": "N/V",
+        "actions": "Aktionen",
+        "separator": "Trennzeichen"
+    },
+    "settings": {
+        "title": "Einstellungen",
+        "subtitle": "AgendiApp Einstellungen",
+        "brandIdentity": "Markenidentität",
+        "brandName": "App-Name",
+        "logoUrl": "Logo-URL",
+        "saveAppearance": "Aussehen speichern",
+        "errorTotalPercent": "Gesamt % der Partner ist {{totalPercent}}%. Muss 100% sein.",
+        "tabs": {
+            "appearance": "Aussehen",
+            "accounting": "Buchhaltung",
+            "maintenance": "Wartung"
+        },
+        "accounting": {
+            "titleCommissions": "Provisionen & Kosten",
+            "salesCommission": "Verkaufsprovision (%)",
+            "generalTax": "Allgemeine Steuer (%)",
+            "taxOverrides": "Steuerabweichungen (Pro Mitarbeiter)",
+            "titlePartners": "Partner & Gewinnverteilung",
+            "addPartnerBtn": "Partner hinzufügen"
+        },
+        "appearance": {
+            "title": "Aussehen-Einstellungen",
+            "darkMode": "Dunkelmodus",
+            "language": "App-Sprache"
+        },
+        "maintenance": {
+            "title": "Wartungsaufgaben",
+            "clearCache": "Lokalen Cache leeren",
+            "backupData": "Backup erstellen"
+        }
+    },
+    "hr": {
+        "title": "Zeiterfassung",
+        "selectStaff": "Mitarbeiter wählen",
+        "todayStatus": "Heutiger Status",
+        "history": "Aktueller Verlauf",
+        "actions": {
+            "checkIn": "Einstempeln",
+            "lunchStart": "Mittagspause Start",
+            "lunchEnd": "Mittagspause Ende",
+            "checkOut": "Ausstempeln"
+        },
+        "status": {
+            "notStarted": "Nicht begonnen",
+            "working": "Arbeitend",
+            "lunch": "In Mittagspause",
+            "finished": "Schicht beendet"
+        },
+        "success": "Zeit erfolgreich erfasst."
+    },
+    "calendar": {
+        "title": "Agenda",
+        "subtitle": "Verwalten Sie Ihre Termine und Verfügbarkeit.",
+        "newBtn": "Neuer Termin",
+        "today": "Heute",
+        "lunch": "Mittagspause",
+        "status": {
+            "confirmed": "Bestätigt",
+            "pending": "Ausstehend",
+            "cancelled": "Storniert",
+            "completed": "Abgeschlossen",
+            "no_show": "Nicht erschienen"
+        },
+        "modal": {
+            "newTitle": "Neuer Termin",
+            "editTitle": "Termin bearbeiten",
+            "client": "Kunde",
+            "clientPlaceholder": "Kunde suchen...",
+            "stylist": "Stylist",
+            "stylistPlaceholder": "Stylist wählen...",
+            "service": "Dienstleistung",
+            "servicePlaceholder": "Dienstleistung suchen...",
+            "date": "Datum & Zeit",
+            "duration": "Dauer (Min)",
+            "notes": "Notizen / Kommentare",
+            "save": "Termin speichern",
+            "delete": "Termin löschen"
+        },
+        "alerts": {
+            "created": "Termin erfolgreich geplant",
+            "updated": "Termin aktualisiert",
+            "deleted": "Termin gelöscht",
+            "overlap": "Der Stylist hat zu dieser Zeit bereits einen Termin."
+        }
+    },
+    "orders": {
+        "title": "Bestellungen & Lieferanten",
+        "subtitle": "Verwalten Sie Einkäufe, Rechnungen und Verbindlichkeiten.",
+        "tabs": {
+            "suppliers": "Lieferanten",
+            "invoices": "Rechnungen",
+            "debts": "Schulden / Zahlungen"
+        },
+        "suppliers": {
+            "addBtn": "Lieferant hinzufügen",
+            "name": "Name / Firma",
+            "contact": "Kontakt",
+            "phone": "Telefon",
+            "bank": "Bank",
+            "account": "Kontonr.",
+            "email": "E-Mail"
+        },
+        "invoices": {
+            "uploadBtn": "Rechnung hochladen (PDF)",
+            "date": "Ausstellungsdatum",
+            "method": "Zahlungsmethode",
+            "file": "Datei",
+            "preview": "PDF anzeigen",
+            "methods": {
+                "cash": "Bargeld",
+                "transfer": "Überweisung",
+                "check": "Scheck",
+                "card": "Kredit-/Debitkarte"
+            }
+        },
+        "debts": {
+            "addBtn": "Schuld registrieren",
+            "supplier": "Lieferant",
+            "totalAmount": "Gesamtbetrag",
+            "installments": "Anzahl Raten",
+            "initialPay": "Anzahlung",
+            "installmentValue": "Ratenwert",
+            "paid": "Bezahlt",
+            "pending": "Ausstehend",
+            "status": "Status",
+            "registerPayment": "Zahlung registrieren",
+            "history": "Zahlungsverlauf"
+        }
+    }
+}

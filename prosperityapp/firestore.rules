@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+  
+    // Función auxiliar para verificar autenticación
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Reglas para la colección 'users'
+    match /users/{userId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Reglas para 'appointments'
+    match /appointments/{appointmentId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Reglas para 'movements' (Caja Diaria)
+    // CRÍTICO: Permitir lectura para que el Dashboard muestre el flujo de caja
+    match /movements/{movementId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Reglas para 'services' y 'collaborators' (públicos para la Landing Page)
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    
+    match /collaborators/{collaboratorId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Regla por defecto: Bloquear todo lo demás por seguridad
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

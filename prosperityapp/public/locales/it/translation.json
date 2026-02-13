@@ -1,0 +1,620 @@
+{
+    "sidebar": {
+        "agenda": "Agenda",
+        "dashboard": "Dashboard",
+        "dailyCash": "Cassa Giornaliera",
+        "clients": "Clienti",
+        "collaborators": "Collaboratori",
+        "payroll": "Buste Paga",
+        "monthlyClosing": "Chiusure Mensili",
+        "prices": "Listino Prezzi",
+        "inventory": "Inventario",
+        "giftcards": "Gift Cards",
+        "settings": "Impostazioni",
+        "theme": "Cambia Tema"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "tabs": {
+            "daily": "Analisi Giornaliera",
+            "period": "Analisi Periodo",
+            "closings": "Analisi Chiusure",
+            "clients": "Analisi Clienti"
+        },
+        "cards": {
+            "services": "Servizi Erogati",
+            "sales": "Vendite Prodotti",
+            "expenses": "Spese Totali",
+            "techCost": "Costo Tecnico (Usato)",
+            "cash": "Entrate Contanti",
+            "cards": "Entrate Carte",
+            "transfers": "Entrate Bonifici",
+            "advances": "Totale Anticipi",
+            "produced": "Totale Prodotto",
+            "income": "Entrate Totali",
+            "distributed": "Totale Distribuito",
+            "savings": "Totale Risparmi"
+        },
+        "ranking": "Classifica Servizi (Oggi)",
+        "noData": "Nessun dato registrato."
+    },
+    "dailyCash": {
+        "title": "Cassa Giornaliera",
+        "registerBtn": "Registra Operazione",
+        "cashInBox": "Contanti in Cassa",
+        "dateLocale": "it-IT",
+        "cards": {
+            "services": "Totale Servizi",
+            "sales": "Totale Vendite",
+            "tips": "Totale Mance",
+            "giftcards": "Totale Vendite GC",
+            "cards": "Totale Carte",
+            "transfers": "Totale Bonifici",
+            "gcPayments": "Totale Pagamenti GC",
+            "expenses": "Totale Spese",
+            "advances": "Totale Anticipi"
+        },
+        "columns": {
+            "transfers": "Bonifici",
+            "cards": "Carte",
+            "sales": "Vendita Prodotti",
+            "giftcards": "Vendita Gift Cards",
+            "gcPayments": "Pagamenti Gift Card",
+            "tips": "Mance",
+            "expenses": "Spese",
+            "advances": "Anticipi",
+            "services": "Servizi"
+        }
+    },
+    "inventory": {
+        "title": "Gestione Inventario",
+        "management": "Gestione Inventario",
+        "auditBtn": "Vedi Audit",
+        "viewAudit": "Vedi Audit",
+        "tabs": {
+            "tech": "Inventario Tecnico",
+            "technical": "Inventario Tecnico",
+            "retail": "Inventario Vendita"
+        },
+        "searchPlaceholder": "Cerca per prodotto o marca...",
+        "addTechBtn": "Aggiungi Prodotto Tecnico",
+        "addProductButton": "Aggiungi Prodotto Tecnico",
+        "addRetailBtn": "Aggiungi Prodotto Vendita",
+        "table": {
+            "product": "Prodotto",
+            "stock": "Giacenza",
+            "minStock": "Minimo",
+            "size": "Taglia",
+            "invoiceCost": "Costo Fattura",
+            "collabCost": "Costo Collab.",
+            "costPerGram": "Costo/g",
+            "created": "Creazione",
+            "actions": "Azioni",
+            "salePrice": "Prezzo Vendita",
+            "profit": "Profitto",
+            "totalValue": "Valore Totale"
+        },
+        "noCategory": "Nessuna Categoria",
+        "allCategories": "Tutte le categorie",
+        "audit": {
+            "title": "Audit Magazzino",
+            "subtitle": "Storico movimenti.",
+            "searchPlaceholder": "Cerca...",
+            "table": {
+                "date": "Data",
+                "product": "Prodotto",
+                "type": "Tipo",
+                "amount": "Qtà",
+                "reason": "Motivo",
+                "newStock": "Nuova Giacenza"
+            },
+            "typeEntry": "Entrata",
+            "typeExit": "Uscita"
+        }
+    },
+    "prices": {
+        "title": "Listino Prezzi",
+        "subtitle": "Visualizza e gestisci i prezzi.",
+        "addBtn": "Aggiungi Servizio",
+        "searchPlaceholder": "Cerca servizio...",
+        "allCategories": "Tutte le categorie",
+        "noServices": "Nessun servizio trovato.",
+        "sort": {
+            "nameAsc": "Nome (A-Z)",
+            "nameDesc": "Nome (Z-A)",
+            "priceAsc": "Prezzo (Crescente)",
+            "priceDesc": "Prezzo (Decrescente)"
+        }
+    },
+    "closings": {
+        "title": "Chiusure Mensili",
+        "subtitle": "Gestione contabile del mese",
+        "addBtn": "Inserisci Record",
+        "loading": "Caricamento record...",
+        "totalToDistribute": "TOTALE DA DISTRIBUIRE",
+        "calculationDetail": "Dettaglio Calcolo",
+        "totalIncome": "(+) Entrate Totali",
+        "totalOutgoings": "(-) Uscite e Buoni Totali",
+        "totalSavings": "(-) Risparmi Totali",
+        "partnerDistribution": "Distribuzione Soci",
+        "table": {
+            "partner": "Socio",
+            "percent": "Percentuale",
+            "amount": "Importo Calcolato"
+        },
+        "noPartners": "Nessun socio configurato.",
+        "categories": {
+            "cashUnsealed": "Contanti Liberi",
+            "cashWeekly": "Contanti Settimanali",
+            "transfers": "Bonifici",
+            "cards": "Carte / Depositi",
+            "partnersAdvances": "Buoni/Anticipi Soci",
+            "monthlyOutgoings": "Uscite Mensili",
+            "weeklySalesSavings": "Risparmio Vendite",
+            "taxSavings": "Risparmio Tasse",
+            "techSavings": "Risparmio Prodotti Tec."
+        }
+    },
+    "clients": {
+        "title": "Clienti",
+        "subtitle": "Gestisci il tuo database clienti.",
+        "addBtn": "Aggiungi Cliente",
+        "searchPlaceholder": "Cerca per nome o telefono...",
+        "lastVisit": "Ultima Visita:",
+        "viewHistory": "Vedi Storico",
+        "confirmDelete": "Eliminare {{clientName}}?",
+        "deleteSuccess": "Cliente eliminato.",
+        "deleteError": "Errore durante l'eliminazione del cliente.",
+        "editBtn": "Modifica Cliente",
+        "deleteBtn": "Elimina Cliente",
+        "noClientsFound": "Nessun cliente trovato."
+    },
+    "collaborators": {
+        "title": "Collaboratori",
+        "subtitle": "Gestisci il personale e le commissioni.",
+        "addBtn": "Aggiungi Collaboratore",
+        "searchPlaceholder": "Cerca per nome...",
+        "table": {
+            "name": "Nome",
+            "role": "Ruolo",
+            "commission": "Commissione",
+            "status": "Stato",
+            "actions": "Azioni"
+        },
+        "modal": {
+            "editTitle": "Modifica Collaboratore",
+            "newTitle": "Nuovo Collaboratore",
+            "tabs": {
+                "personal": "Info Personali",
+                "labor": "Dati Lavorativi",
+                "schedule": "Orario Settimanale",
+                "docs": "Documenti"
+            },
+            "form": {
+                "name": "Nome",
+                "lastName": "Cognome",
+                "docType": "Tipo Doc.",
+                "docNumber": "N° Documento",
+                "phone": "Telefono/WhatsApp",
+                "email": "Email",
+                "emergencyHeader": "Contatto di Emergenza",
+                "emergencyName": "Nome Contatto",
+                "emergencyPhone": "Telefono Contatto",
+                "hireDate": "Data Assunzione",
+                "status": "Stato",
+                "commService": "Commissione (Servizi) (%)",
+                "commSales": "Commissione Vendita (%)",
+                "terminationDate": "Data Cessazione"
+            },
+            "schedule": {
+                "workingDay": "Lavorativo",
+                "dayOff": "Riposo",
+                "entry": "Entrata",
+                "exit": "Uscita",
+                "lunch": "Pranzo",
+                "days": {
+                    "monday": "Lunedì",
+                    "tuesday": "Martedì",
+                    "wednesday": "Mercoledì",
+                    "thursday": "Giovedì",
+                    "friday": "Venerdì",
+                    "saturday": "Sabato",
+                    "sunday": "Domenica"
+                }
+            },
+            "statusOptions": {
+                "active": "Attivo",
+                "inactive": "Inattivo",
+                "terminated": "Ex dipendente"
+            },
+            "docs": {
+                "info": "Il caricamento file (Contratti, Liquidazioni) sarà presto disponibile.",
+                "contract": "Carica Contratto (PDF)",
+                "settlement": "Carica Liquidazione (PDF)"
+            }
+        },
+        "alerts": {
+            "created": "Creato con successo",
+            "updated": "Aggiornato con successo",
+            "deleted": "Eliminato con successo",
+            "confirmDelete": "Eliminare?",
+            "errorSave": "Errore durante il salvataggio",
+            "errorDelete": "Errore durante l'eliminazione"
+        }
+    },
+    "giftcards": {
+        "title": "Gestione Gift Cards",
+        "subtitle": "Registro carte.",
+        "searchPlaceholder": "Cerca...",
+        "table": {
+            "code": "Codice",
+            "buyer": "Acquirente",
+            "contact": "Contatto",
+            "initialValue": "Valore Iniziale",
+            "balance": "Saldo Attuale",
+            "status": "Stato",
+            "date": "Data Vendita"
+        },
+        "status": {
+            "active": "Attiva",
+            "exhausted": "Esaurita"
+        },
+        "noData": "Nessuna Gift Card trovata."
+    },
+    "payroll": {
+        "subtitle": "Seleziona i giorni per calcolare la busta paga.",
+        "thisWeek": "Questa Settimana",
+        "thisMonth": "Questo Mese",
+        "clear": "Pulisci",
+        "historyBtn": "Storico",
+        "closePeriodBtn": "Chiudi Periodo",
+        "historyTitle": "Storico Chiusure",
+        "historySubtitle": "Visualizza periodi salvati.",
+        "backToPayroll": "Torna a Buste Paga",
+        "backToHistory": "Torna allo Storico",
+        "customPeriod": "Periodo Personalizzato",
+        "successClose": "Periodo chiuso con successo!",
+        "table": {
+            "name": "Nome Chiusura",
+            "range": "Intervallo Date",
+            "date": "Data Chiusura"
+        },
+        "cards": {
+            "gross": "Produzione Lorda",
+            "techCost": "(-) Costo Tecnico",
+            "tax": "(-) Tasse",
+            "netBase": "Base Netta",
+            "participation": "(+) Partecipazione",
+            "commission": "(+) Commissioni Vendite",
+            "tips": "(+) Mance",
+            "advances": "(+/-) Anticipi",
+            "finalPay": "PAGAMENTO FINALE"
+        },
+        "modal": {
+            "closingName": "Nome Chiusura",
+            "totalToPay": "Totale da Pagare",
+            "warning": "Questa azione salverà un'istantanea di questa busta paga.",
+            "confirmBtn": "Conferma e Salva"
+        },
+        "errors": {
+            "nameRequired": "Il nome della chiusura è obbligatorio."
+        }
+    },
+    "modals": {
+        "registerTitle": "Registra Operazione",
+        "editTitle": "Modifica Operazione",
+        "summaryTitle": "Riepilogo Operazione",
+        "titles": {
+            "techCalc": "Costo Tecnico (Dettaglio)",
+            "techComm": "Commissione Vendita"
+        },
+        "accordions": {
+            "services": "Servizi",
+            "products": "Prodotti / Vendite",
+            "gcSell": "Vendi Gift Card",
+            "gcRedeem": "Riscatta Gift Card (Paga)",
+            "expenses": "Spese / Uscite",
+            "advances": "Anticipi",
+            "tips": "Mance / Commissione Manuale"
+        },
+        "forms": {
+            "clientSearch": "Cerca cliente...",
+            "collabSearch": "Cerca collaboratore...",
+            "serviceSearch": "Cerca servizio...",
+            "productSearch": "Cerca prodotto...",
+            "selectCollab": "Seleziona collaboratore...",
+            "itemDesc": "Descrizione",
+            "itemAmount": "Importo",
+            "itemQuantity": "Qtà",
+            "priceTotal": "Prezzo Totale",
+            "techCost": "Costo Tec:",
+            "commission": "Commissione:",
+            "paymentMethod": "Metodo di Pagamento",
+            "multiplePayments": "Metodi Multipli",
+            "total": "TOTALE:",
+            "date": "Data",
+            "category": "Categoria",
+            "addServiceSearch": "Aggiungi Servizio (Cerca)",
+            "addServiceManual": "Aggiungi Servizio (Manuale)",
+            "registerManual": "Registro Manuale",
+            "notFoundService": "Non trovi il servizio? Registra manualmente",
+            "addSalesSearch": "Aggiungi Prodotto (Cerca)",
+            "addSalesManual": "Aggiungi Vendita (Manuale)",
+            "manualSaleTitle": "Vendita Manuale",
+            "notFoundProduct": "Vendita manuale (senza magazzino)?",
+            "gcCode": "Codice Univoco",
+            "gcBuyer": "Nome Acquirente",
+            "gcContact": "Contatto (Email/Telefono)",
+            "gcAmount": "Importo",
+            "addGCSale": "Aggiungi Vendita Gift Card",
+            "addGCPay": "Aggiungi Pagamento (GC)",
+            "addExpense": "Aggiungi Spesa",
+            "advanceFor": "Anticipo per",
+            "addAdvance": "Aggiungi Anticipo",
+            "tipsDesc": "Descrizione (Es: Mancia)",
+            "tipDestination": "Destinazione:",
+            "tipNomina": "Aggiungi a Busta Paga",
+            "tipInstant": "Paga Ora (Spesa Cassa)",
+            "addTip": "Aggiungi Mancia/Commissione",
+            "cashPayment": "Contanti",
+            "cardPayment": "Carta",
+            "transferPayment": "Bonifico",
+            "giftCardPayment": "Gift Card",
+            "cashPaymentTotal": "Tutto in Contanti",
+            "cardPaymentTotal": "Tutto con Carta",
+            "transferPaymentTotal": "Tutto con Bonifico",
+            "commissionAssignmentTitle": "Assegna Commissione Vendita",
+            "soldBy": "Venduto da",
+            "commissionType": "Tipo Commissione",
+            "percentageAuto": "Automatico (Percentuale)",
+            "amountManual": "Manuale (Importo Fisso)",
+            "commissionAmount": "Importo Commissione",
+            "inCart": "nel carrello",
+            "create": "Salva",
+            "salon": "Salone",
+            "searchService": "Cerca Servizio",
+            "itemQuantityShort": "Qtà",
+            "manualRegistry": "Registro Manuale",
+            "desc": "Descrizione",
+            "amount": "Importo",
+            "gcSaleDesc": "Vendita Gift Card",
+            "gcPaymentDesc": "Pagamento con Gift Card"
+        },
+        "buttons": {
+            "deleteTransaction": "Elimina Transazione",
+            "updateChanges": "Aggiorna Modifiche",
+            "registerOperation": "Registra Operazione",
+            "saving": "Salvataggio...",
+            "updating": "Aggiornamento...",
+            "deleting": "Eliminazione...",
+            "techCalculatorTitle": "Calcolatrice Tecnica",
+            "saveCost": "Salva Costo",
+            "addManual": "+ Aggiungi Spesa Manualmente",
+            "cancel": "Annulla",
+            "confirm": "Conferma"
+        },
+        "errors": {
+            "noItems": "Nessun elemento nell'operazione.",
+            "stockCheck": "Giacenza insufficiente. Disponibile:",
+            "gcNotFound": "Gift Card non trovata.",
+            "gcInactive": "Gift Card non attiva.",
+            "gcBalanceLow": "ha solo",
+            "gcBalanceLowEnd": "di saldo.",
+            "completeFields": "Completa tutti i campi.",
+            "selectCollabService": "Seleziona collaboratore e servizio.",
+            "selectProduct": "Seleziona prodotto e quantità.",
+            "selectCollabAndAmount": "Seleziona collaboratore e importo.",
+            "completeFieldsTips": "Completa la mancia.",
+            "completeFieldsGC": "Completa dati Gift Card.",
+            "completeFieldsGCPay": "Completa dati pagamento."
+        },
+        "client": {
+            "editTitle": "Modifica Cliente",
+            "newTitle": "Nuovo Cliente",
+            "personal": "Info Personali",
+            "history": "Storico",
+            "name": "Nome",
+            "lastName": "Cognome",
+            "docNumber": "N° Documento",
+            "phone": "Telefono",
+            "email": "Email",
+            "birthday": "Compleanno",
+            "emergencyContact": "Contatto Emergenza",
+            "historyDesc": "Vedi storico dettagliato cliente.",
+            "clientSince": "Cliente dal:",
+            "lastVisitReg": "Ultima Visita:"
+        },
+        "techProduct": {
+            "editTitle": "Modifica Prodotto Tecnico",
+            "newTitle": "Nuovo Prodotto Tecnico",
+            "name": "Nome",
+            "brand": "Marca",
+            "category": "Categoria",
+            "size": "Taglia",
+            "measure": "Misura",
+            "costInvoice": "Costo Fattura",
+            "costCollab": "Costo Collab.",
+            "stock": "Giacenza Iniziale",
+            "minStock": "Giacenza Minima"
+        },
+        "retailProduct": {
+            "editTitle": "Modifica Prodotto Vendita",
+            "newTitle": "Nuovo Prodotto Vendita",
+            "name": "Nome",
+            "brand": "Marca",
+            "category": "Categoria",
+            "cost": "Costo",
+            "price": "Prezzo Vendita",
+            "stock": "Giacenza Iniziale",
+            "minStock": "Giacenza Minima"
+        },
+        "service": {
+            "editTitle": "Modifica Servizio",
+            "newTitle": "Nuovo Servizio",
+            "name": "Nome",
+            "category": "Categoria",
+            "price": "Prezzo",
+            "duration": "Durata",
+            "placeholders": {
+                "name": "Nome Servizio",
+                "category": "Categoria (Es: Taglio, Colore)",
+                "price": "Prezzo Vendita",
+                "duration": "Durata (minuti)"
+            }
+        },
+        "monthlyRecord": {
+            "newTitle": "Nuovo Record",
+            "editTitle": "Modifica Record",
+            "date": "Data",
+            "description": "Descrizione",
+            "category": "Categoria",
+            "amount": "Importo",
+            "save": "Salva Record",
+            "saving": "Salvataggio..."
+        }
+    },
+    "common": {
+        "loading": "Caricamento...",
+        "search": "Cerca...",
+        "cancel": "Annulla",
+        "save": "Salva",
+        "delete": "Elimina",
+        "edit": "Modifica",
+        "confirmDelete": "Sei sicuro?",
+        "success": "Successo!",
+        "error": "Errore",
+        "notAvailable": "N/D",
+        "actions": "Azioni",
+        "separator": "Separatore"
+    },
+    "settings": {
+        "title": "Impostazioni",
+        "subtitle": "Configurazione AgendiApp",
+        "brandIdentity": "Identità Brand",
+        "brandName": "Nome App",
+        "logoUrl": "URL Logo",
+        "saveAppearance": "Salva Aspetto",
+        "errorTotalPercent": "Il totale % soci è {{totalPercent}}%. Deve essere 100%.",
+        "tabs": {
+            "appearance": "Aspetto",
+            "accounting": "Contabilità",
+            "maintenance": "Manutenzione"
+        },
+        "accounting": {
+            "titleCommissions": "Commissioni e Costi",
+            "salesCommission": "Commissione Vendite (%)",
+            "generalTax": "Tassa Generale (%)",
+            "taxOverrides": "Deroghe Tasse (Per Collaboratore)",
+            "titlePartners": "Soci e Distribuzione Utili",
+            "addPartnerBtn": "Aggiungi Socio"
+        },
+        "appearance": {
+            "title": "Impostazioni Aspetto",
+            "darkMode": "Modalità Scura",
+            "language": "Lingua App"
+        },
+        "maintenance": {
+            "title": "Attività Manutenzione",
+            "clearCache": "Pulisci Cache Locale",
+            "backupData": "Genera Backup"
+        }
+    },
+    "hr": {
+        "title": "Rilevazione Presenze",
+        "selectStaff": "Seleziona Collaboratore",
+        "todayStatus": "Stato di Oggi",
+        "history": "Storico Recente",
+        "actions": {
+            "checkIn": "Entrata",
+            "lunchStart": "Inizio Pranzo",
+            "lunchEnd": "Fine Pranzo",
+            "checkOut": "Uscita"
+        },
+        "status": {
+            "notStarted": "Non Iniziato",
+            "working": "Al Lavoro",
+            "lunch": "In Pausa Pranzo",
+            "finished": "Turno Finito"
+        },
+        "success": "Timbratura registrata con successo."
+    },
+    "calendar": {
+        "title": "Agenda",
+        "subtitle": "Gestisci appuntamenti e disponibilità.",
+        "newBtn": "Nuovo Appuntamento",
+        "today": "Oggi",
+        "lunch": "Pranzo",
+        "status": {
+            "confirmed": "Confermato",
+            "pending": "In Attesa",
+            "cancelled": "Cancellato",
+            "completed": "Completato",
+            "no_show": "Non Presentato"
+        },
+        "modal": {
+            "newTitle": "Nuovo Appuntamento",
+            "editTitle": "Modifica Appuntamento",
+            "client": "Cliente",
+            "clientPlaceholder": "Cerca cliente...",
+            "stylist": "Stilista",
+            "stylistPlaceholder": "Seleziona stilista...",
+            "service": "Servizio",
+            "servicePlaceholder": "Cerca servizio...",
+            "date": "Data e Ora",
+            "duration": "Durata (min)",
+            "notes": "Note / Commenti",
+            "save": "Salva Appuntamento",
+            "delete": "Elimina Appuntamento"
+        },
+        "alerts": {
+            "created": "Appuntamento programmato con successo",
+            "updated": "Appuntamento aggiornato",
+            "deleted": "Appuntamento eliminato",
+            "overlap": "Lo stilista ha già un appuntamento in questo orario."
+        }
+    },
+    "orders": {
+        "title": "Ordini e Fornitori",
+        "subtitle": "Gestisci acquisti, fatture e conti da pagare.",
+        "tabs": {
+            "suppliers": "Fornitori",
+            "invoices": "Fatture",
+            "debts": "Debiti / Pagamenti"
+        },
+        "suppliers": {
+            "addBtn": "Aggiungi Fornitore",
+            "name": "Nome / Azienda",
+            "contact": "Contatto",
+            "phone": "Telefono",
+            "bank": "Banca",
+            "account": "N° Conto",
+            "email": "Email"
+        },
+        "invoices": {
+            "uploadBtn": "Carica Fattura (PDF)",
+            "date": "Data Emissione",
+            "method": "Metodo Pagamento",
+            "file": "File",
+            "preview": "Vedi PDF",
+            "methods": {
+                "cash": "Contanti",
+                "transfer": "Bonifico",
+                "check": "Assegno",
+                "card": "Carta Credito/Debito"
+            }
+        },
+        "debts": {
+            "addBtn": "Registra Debito",
+            "supplier": "Fornitore",
+            "totalAmount": "Importo Totale",
+            "installments": "N° Rate",
+            "initialPay": "Pagamento Iniziale",
+            "installmentValue": "Valore Rata",
+            "paid": "Pagato",
+            "pending": "In Attesa",
+            "status": "Stato",
+            "registerPayment": "Registra Pagamento",
+            "history": "Storico Pagamenti"
+        }
+    }
+}
