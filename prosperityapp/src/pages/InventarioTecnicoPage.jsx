@@ -1,7 +1,7 @@
 // ===== INICIO: src/pages/InventarioTecnicoPage.jsx (FINAL) =====
 import React, { useMemo, useEffect, useState } from 'react';
 import feather from 'feather-icons';
-import { useCollection } from '../hooks/useCollection';
+import { useData } from '../context/DataContext';
 import TechProductModal from '../components/modals/TechProductModal';
 import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
@@ -16,7 +16,8 @@ const InventarioTecnicoPage = () => {
   const [productToEdit, setProductToEdit] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const { data: techInventory, loading, error } = useCollection('technicalInventory');
+  const { technicalInventory: techInventory, isLoading: loading } = useData();
+  const error = null;
 
   const items = useMemo(() => {
     if (!techInventory) return [];

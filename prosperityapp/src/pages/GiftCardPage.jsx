@@ -1,7 +1,7 @@
 // ===== INICIO: src/pages/GiftCardPage.jsx (Sprint 98 - Final Fix) =====
 import React, { useMemo, useState } from 'react';
 import { useData } from '../context/DataContext';
-import { useCollection } from '../hooks/useCollection';
+import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import { useTranslation } from 'react-i18next';
 import { useStorage } from '../hooks/useStorage';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -23,8 +23,8 @@ const formatDate = (timestamp) => {
 
 const GiftCardPage = () => {
   const { t } = useTranslation();
-  const { data: giftCards, loading } = useCollection('giftCards');
   const { isLoading: isDataLoading } = useData();
+  const { data: giftCards, loading } = useSupabaseCollection('gift_cards');
   const { uploadFile, progress, isUploading } = useStorage();
   const [searchTerm, setSearchTerm] = useState('');
   const [uploadingCardId, setUploadingCardId] = useState(null);

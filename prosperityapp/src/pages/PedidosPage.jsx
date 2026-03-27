@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
-import { useCollection } from '../hooks/useCollection';
+import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import { db } from '../firebase/config';
 import { collection, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
@@ -17,9 +17,9 @@ const PedidosPage = () => {
     const [activeTab, setActiveTab] = useState('suppliers');
     const { uploadFile, progress, isUploading } = useStorage();
 
-    const { data: suppliersData, loading: loadSup } = useCollection('suppliers');
-    const { data: invoicesData, loading: loadInv } = useCollection('invoices');
-    const { data: debtsData, loading: loadDebts } = useCollection('debts');
+    const { data: suppliersData, loading: loadSup } = useSupabaseCollection('suppliers');
+    const { data: invoicesData, loading: loadInv } = useSupabaseCollection('invoices');
+    const { data: debtsData, loading: loadDebts } = useSupabaseCollection('debts');
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState(null);

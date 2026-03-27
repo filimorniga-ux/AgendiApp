@@ -1,7 +1,7 @@
 // ===== INICIO: src/pages/InventarioGeneralPage.jsx =====
 import React, { useState, useMemo, useEffect } from 'react';
 import feather from 'feather-icons';
-import { useCollection } from '../hooks/useCollection';
+import { useData } from '../context/DataContext';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -12,8 +12,7 @@ const InventarioGeneralPage = () => {
   const [activeTab, setActiveTab] = useState('technical');
   const [searchTerm, setSearchTerm] = useState('');
   
-  const { data: techInventory, loading: loadingTech } = useCollection('technicalInventory');
-  const { data: retailInventory, loading: loadingRetail } = useCollection('retailInventory');
+  const { technicalInventory: techInventory, retailInventory, isLoading } = useData();
 
   useEffect(() => {
     feather.replace();
@@ -47,8 +46,6 @@ const InventarioGeneralPage = () => {
       
     return { categories: Object.entries(categories).sort(([a], [b]) => a.localeCompare(b)), totalValue };
   }, [activeTab, searchTerm, techInventory, retailInventory]);
-
-  const isLoading = loadingTech || loadingRetail;
 
   return (
     <div className="h-full flex flex-col">

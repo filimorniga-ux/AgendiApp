@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
-import { useCollection } from '../hooks/useCollection';
+import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -16,8 +16,8 @@ const formatDate = (timestamp) => {
 
 const PayrollHistoryPage = () => {
   const { t } = useTranslation();
-  const { data: closings, loading } = useCollection('payrollClosings');
   const { isLoading: isDataLoading } = useData();
+  const { data: closings, loading } = useSupabaseCollection('payroll_closings');
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredClosings = useMemo(() => {

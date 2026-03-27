@@ -1,7 +1,7 @@
 // ===== INICIO: src/pages/VentaPublicoPage.jsx (CORREGIDO) =====
 import React, { useMemo, useEffect, useState } from 'react';
 import feather from 'feather-icons';
-import { useCollection } from '../hooks/useCollection';
+import { useData } from '../context/DataContext';
 import RetailProductModal from '../components/modals/RetailProductModal';
 import { db } from '../firebase/config';
 import { doc, deleteDoc } from 'firebase/firestore';
@@ -18,7 +18,8 @@ const VentaPublicoPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortOrder, setSortOrder] = useState('name-asc');
-  const { data: retailInventory, loading, error } = useCollection('retailInventory');
+  const { retailInventory, isLoading: loading } = useData();
+  const error = null; // Removed as context handles it globally
   
   const filteredItems = useMemo(() => {
     if (!retailInventory) return [];
