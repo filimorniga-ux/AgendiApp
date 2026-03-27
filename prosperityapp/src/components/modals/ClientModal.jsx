@@ -60,7 +60,7 @@ const ClientModal = ({ isOpen, onClose, clientToEdit }) => {
       toast.success(t('common.success'));
       onClose();
     } catch (error) {
-      console.error('Error guardando cliente:', error);
+      console.warn('Error guardando cliente:', error);
       toast.error(t('common.error'));
     } finally {
       setIsSaving(false);

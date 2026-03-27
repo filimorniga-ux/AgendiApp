@@ -50,7 +50,7 @@ const AppearanceTab = () => {
 
             toast.success("Logo actualizado correctamente");
         } catch (err) {
-            console.error("Error uploading logo:", err);
+            console.warn("Error uploading logo:", err);
             toast.error("Error al subir logo");
         }
     };

@@ -28,7 +28,7 @@ export const useDocument = (collectionName, id) => {
       }
       setLoading(false);
     }, (err) => {
-      console.error(err);
+      console.warn(err);
       setError('No se pudo cargar el documento.');
       setLoading(false);
     });

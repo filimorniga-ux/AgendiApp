@@ -43,7 +43,7 @@ const StockMovementModal = ({ isOpen, onClose, product, movementType, onSave }) 
       toast.success(t('modals.stockMovement.success'));
       onClose();
     } catch (error) {
-      console.error("Error:", error);
+      console.warn("Error:", error);
       toast.error(t('common.error'));
     } finally {
       setIsSaving(false);

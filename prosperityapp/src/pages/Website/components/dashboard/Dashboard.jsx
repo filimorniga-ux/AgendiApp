@@ -47,7 +47,7 @@ export const Dashboard = ({ user, isDarkMode }) => {
             try {
                 const userSnap = await getDoc(userRef);
                 if (!userSnap.exists()) {
-                    console.log("🆕 Creando perfil de usuario nuevo...");
+                    console.info("🆕 Creando perfil de usuario nuevo...");
                     await setDoc(userRef, {
                         email: user.email,
                         name: user.displayName || "Usuario Sin Nombre",
@@ -57,7 +57,7 @@ export const Dashboard = ({ user, isDarkMode }) => {
                     // No necesitamos setear estado local, DataContext lo recogerá en su próximo ciclo o recarga
                 }
             } catch (error) {
-                console.error("Error verificando usuario:", error);
+                console.warn("Error verificando usuario:", error);
             }
         };
 
@@ -89,7 +89,7 @@ export const Dashboard = ({ user, isDarkMode }) => {
                 setRevenue(total);
                 setLoadingStats(false);
             }, (error) => {
-                console.error("Error cargando ventas:", error);
+                console.warn("Error cargando ventas:", error);
                 setLoadingStats(false);
             });
             return () => unsubscribe();
@@ -111,7 +111,7 @@ export const Dashboard = ({ user, isDarkMode }) => {
             });
             alert("💰 ¡Venta de $45 registrada en Firebase!");
         } catch (e) {
-            console.error("Error guardando venta: ", e);
+            console.warn("Error guardando venta: ", e);
         }
     };
 

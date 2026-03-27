@@ -1,7 +1,7 @@
 // ===== src/context/DataContext.jsx — Firebase reads + Supabase writes =====
 import React, { createContext, useContext, useMemo } from 'react';
 import { useCollection } from '../hooks/useCollection';
-import { auth, db } from '../firebase/firebase';
+import { auth, db } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, where } from 'firebase/firestore';
 import { supabase } from '../supabase/client';
@@ -45,7 +45,7 @@ export const DataProvider = ({ children }) => {
             setRealRole('client');
           }
         } catch (err) {
-          console.error('[DataContext] Firebase role error:', err);
+          console.warn('[DataContext] Firebase role error:', err);
         }
 
         // 2. businessId desde Supabase (para escrituras)
@@ -83,7 +83,7 @@ export const DataProvider = ({ children }) => {
             }
           }
         } catch (err) {
-          console.error('[DataContext] Supabase businessId error:', err);
+          console.warn('[DataContext] Supabase businessId error:', err);
         }
       } else {
         setRealRole(null);

@@ -50,7 +50,7 @@ const GiftCardPage = () => {
 
       toast.success(`${type === 'purchase' ? 'Comprobante de compra' : 'Evidencia de canje'} subido correctamente`);
     } catch (err) {
-      console.error("Error uploading:", err);
+      console.warn("Error uploading:", err);
       toast.error("Error al subir archivo");
     } finally {
       setUploadingCardId(null);

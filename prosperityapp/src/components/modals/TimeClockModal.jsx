@@ -26,7 +26,7 @@ const TimeClockModal = ({ isOpen, onClose }) => {
         if (error) throw error;
         setCurrentShift(data && data.length > 0 ? data[0] : null);
       } catch (error) {
-        console.error('Error fetching shift:', error);
+        console.warn('Error fetching shift:', error);
       } finally {
         setLoading(false);
       }
@@ -65,7 +65,7 @@ const TimeClockModal = ({ isOpen, onClose }) => {
         setSelectedCollab(null);
         setTimeout(() => setSelectedCollab(tempCollab), 100);
     } catch (error) {
-        console.error(error);
+        console.warn(error);
         toast.error(t('common.error'));
     } finally {
         setLoading(false);

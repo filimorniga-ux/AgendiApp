@@ -114,7 +114,7 @@ const CierresMensualesPage = () => {
       await deleteDoc(docRef);
       toast.success(t('common.success'));
     } catch (error) {
-      console.error("Error:", error);
+      console.warn("Error:", error);
       toast.error(t('common.error'));
     }
   };
@@ -203,7 +203,7 @@ const CierresMensualesPage = () => {
       XLSX.writeFile(wb, `Cierre_Mensual_${monthName.replace(/\s/g, '_')}.xlsx`);
       toast.success(t('reports.exportSuccess'));
     } catch (error) {
-      console.error("Error exporting:", error);
+      console.warn("Error exporting:", error);
       toast.error(t('common.error'));
     }
   };

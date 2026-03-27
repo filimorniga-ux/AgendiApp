@@ -31,7 +31,7 @@ const ClosePeriodoModal = ({ isOpen, onClose, onSave, summaryData, dateRangeStri
       // El toast de éxito ya se maneja en el componente padre
       onClose();
     } catch (error) {
-      console.error("Error al cerrar el período: ", error);
+      console.warn("Error al cerrar el período: ", error);
       toast.error(t('common.error'));
     } finally {
       setIsSaving(false);

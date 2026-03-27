@@ -152,7 +152,7 @@ const ColaboradoresPage = () => {
   const handleDelete = async (collaborator) => {
     if (window.confirm(t('common.confirmDelete'))) {
       const { error } = await sbDelete('collaborators', collaborator.id);
-      if (error) console.error('Error eliminando colaborador:', error);
+      if (error) console.warn('Error eliminando colaborador:', error);
     }
   };
 

@@ -69,7 +69,7 @@ const InventarioTecnicoPage = () => {
       if (error) throw error;
       toast.success('Producto eliminado');
     } catch (err) {
-      console.error(err);
+      console.warn(err);
       toast.error(err.message);
     }
   };

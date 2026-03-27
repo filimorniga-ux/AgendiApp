@@ -92,7 +92,7 @@ const PreciosPage = () => {
       if (error) throw error;
       toast.success(t('common.success'));
     } catch (err) {
-      console.error(err);
+      console.warn(err);
       toast.error(t('common.error'));
     }
   };

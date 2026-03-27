@@ -65,7 +65,7 @@ const MonthlyRecordModal = ({ isOpen, onClose, recordToEdit, yearMonth, business
       toast.success(t('common.success'));
       onClose();
     } catch (error) {
-      console.error('Error:', error);
+      console.warn('Error:', error);
       toast.error(t('common.error'));
     } finally {
       setIsSaving(false);

@@ -93,7 +93,7 @@ const ContactImportModal = ({ isOpen, onClose, onImportComplete }) => {
                 setParsedContacts(contacts);
                 toast.success(`${contacts.length} ${t('clients.importModal.contactsFound')}`);
             } catch (error) {
-                console.error('Error parsing file:', error);
+                console.warn('Error parsing file:', error);
                 toast.error(t('clients.importModal.parseError'));
             }
         };
@@ -150,7 +150,7 @@ const ContactImportModal = ({ isOpen, onClose, onImportComplete }) => {
                     imported++;
                     existingPhones.add(contact.phone);
                 } catch (err) {
-                    console.error('Error importing contact:', err);
+                    console.warn('Error importing contact:', err);
                     errors++;
                 }
             }
@@ -162,7 +162,7 @@ const ContactImportModal = ({ isOpen, onClose, onImportComplete }) => {
                 onImportComplete();
             }
         } catch (error) {
-            console.error('Error during import:', error);
+            console.warn('Error during import:', error);
             toast.error(t('common.error'));
         } finally {
             setIsImporting(false);

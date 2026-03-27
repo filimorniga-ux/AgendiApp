@@ -357,7 +357,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       setGiftCard(prev => ({ ...prev, receiptUrl: url }));
       toast.success("Comprobante subido correctamente");
     } catch (err) {
-      console.error("Upload error:", err);
+      console.warn("Upload error:", err);
       toast.error("Error al subir comprobante");
     }
   };
@@ -373,7 +373,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       setPagoGiftCard(prev => ({ ...prev, receiptUrl: url }));
       toast.success("Evidencia de canje subida correctamente");
     } catch (err) {
-      console.error("Upload error:", err);
+      console.warn("Upload error:", err);
       toast.error("Error al subir evidencia");
     }
   };
@@ -574,7 +574,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       setIsPreviewOpen(true);
 
     } catch (error) {
-      console.error('Error saving operation:', error);
+      console.warn('Error saving operation:', error);
       toast.error(error.message || t('common.error'));
     } finally {
       setIsSaving(false);
@@ -611,7 +611,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       toast.success(t('modals.buttons.successDelete'));
       handleClose();
     } catch (error) {
-      console.error('Error al eliminar: ', error);
+      console.warn('Error al eliminar: ', error);
       toast.error(t('common.error') + ': ' + error.message);
       setIsSaving(false);
     }

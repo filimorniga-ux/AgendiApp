@@ -66,7 +66,7 @@ export const useSupabaseCollection = (
         setError(null);
       } catch (err) {
         if (!isMounted) return;
-        console.error(`[useSupabaseCollection] ${tableName}:`, err);
+        console.warn(`[useSupabaseCollection] ${tableName}:`, err);
         setError('No se pudieron cargar los datos.');
       } finally {
         if (isMounted) setLoading(false);

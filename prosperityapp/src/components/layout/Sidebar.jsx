@@ -146,7 +146,7 @@ const Sidebar = () => {
               toast.success(t('common.logoutSuccess') || 'Sesión cerrada correctamente');
               window.location.href = '/'; // Redirigir a la raíz
             } catch (error) {
-              console.error('Error al cerrar sesión:', error);
+              console.warn('Error al cerrar sesión:', error);
               toast.error(t('common.error') || 'Error al cerrar sesión');
             }
           }}

@@ -253,7 +253,7 @@ const NominasPage = () => {
       XLSX.writeFile(wb, `Nomina_${collaboratorId ? 'Detallada' : 'General'}_${dateStr}.xlsx`);
       toast.success(t('reports.exportSuccess'));
     } catch (error) {
-      console.error("Error exporting payroll detail:", error);
+      console.warn("Error exporting payroll detail:", error);
       toast.error(t('common.error'));
     }
   };
@@ -292,7 +292,7 @@ const NominasPage = () => {
       toast.success(t('payroll.successClose'));
       setIsCloseModalOpen(false);
     } catch (error) {
-      console.error('Error saving payroll closing:', error);
+      console.warn('Error saving payroll closing:', error);
       toast.error(t('common.error'));
     }
   };

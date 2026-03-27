@@ -203,7 +203,7 @@ const ReportsPage = () => {
 
       XLSX.writeFile(wb, `Reporte_${activeTab}_${dateStr}.xlsx`);
     } catch (error) {
-      console.error("Error exporting:", error);
+      console.warn("Error exporting:", error);
       alert("Error al exportar");
     }
   };
@@ -249,7 +249,7 @@ const ReportsPage = () => {
 
       XLSX.writeFile(wb, `Respaldo_Completo_AgendiApp_${dateStr}.xlsx`);
     } catch (error) {
-      console.error("Error generating full backup:", error);
+      console.warn("Error generating full backup:", error);
       alert("Error al generar el respaldo completo.");
     }
   };

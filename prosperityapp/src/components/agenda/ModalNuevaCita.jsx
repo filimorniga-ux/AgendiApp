@@ -67,7 +67,7 @@ const ModalNuevaCita = ({ isOpen, onClose, slotInfo }) => {
       toast.success('Cita guardada con éxito');
       onClose();
     } catch (error) {
-      console.error('Error al guardar la cita: ', error);
+      console.warn('Error al guardar la cita: ', error);
       toast.error('Hubo un error al guardar la cita.');
       setIsSaving(false);
     }

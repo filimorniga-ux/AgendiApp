@@ -30,7 +30,7 @@ export const useMonthlyRecords = (yearMonth) => {
           setPartners([]);
         }
       }, (err) => {
-        console.error(err);
+        console.warn(err);
         setError("Error cargando datos de socios.");
       });
 
@@ -45,7 +45,7 @@ export const useMonthlyRecords = (yearMonth) => {
         setRecords(results);
         setLoading(false);
       }, (err) => {
-        console.error(err);
+        console.warn(err);
         setError("Error cargando registros mensuales.");
         setLoading(false);
       });

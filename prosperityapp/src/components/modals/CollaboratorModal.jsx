@@ -55,7 +55,7 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
       setFormData(prev => ({ ...prev, [type]: url }));
       toast.success("Archivo subido correctamente");
     } catch (err) {
-      console.error("Upload error:", err);
+      console.warn("Upload error:", err);
       toast.error("Error al subir archivo");
     }
   };
@@ -86,7 +86,7 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
       }
       onClose();
     } catch (error) {
-      console.error('Error:', error);
+      console.warn('Error:', error);
       toast.error(t('collaborators.alerts.errorSave'));
     } finally {
       setIsSaving(false);
@@ -103,7 +103,7 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
       toast.success(t('collaborators.alerts.deleted'));
       onClose();
     } catch (error) {
-      console.error('Error:', error);
+      console.warn('Error:', error);
       toast.error(t('collaborators.alerts.errorDelete'));
     } finally {
       setIsSaving(false);

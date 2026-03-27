@@ -79,7 +79,7 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
       const { error } = await sbDelete('technicalInventory', product.id);
       if (error) throw error;
       toast.success(t('common.success'));
-    } catch (err) { console.error(err); toast.error(err.message); }
+    } catch (err) { console.warn(err); toast.error(err.message); }
   };
 
   if (loading) return null;
@@ -226,7 +226,7 @@ const TabInventarioRetail = ({ handleOpenStockModal }) => {
       const { error } = await sbDelete('retailInventory', product.id);
       if (error) throw error;
       toast.success(t('common.success'));
-    } catch (err) { console.error(err); toast.error(err.message); }
+    } catch (err) { console.warn(err); toast.error(err.message); }
   };
 
   if (loading) return null;
