@@ -27,6 +27,7 @@ import GiftCardPage from './pages/GiftCardPage';
 import ConfiguracionPage from './pages/ConfiguracionPage';
 import PedidosPage from './pages/PedidosPage';
 import ReportsPage from './pages/ReportsPage';
+import MigrationPage from './pages/MigrationPage';
 import WebsiteApp from './pages/Website/App';
 
 const PlaceholderPage = ({ title }) => (
@@ -73,6 +74,7 @@ function App() {
               <Route path="giftcards" element={<GiftCardPage />} />
               <Route path="configuracion" element={<ConfiguracionPage />} />
               <Route path="reportes" element={<ReportsPage />} />
+              <Route path="migration" element={<MigrationPage />} />
               <Route path="*" element={<PlaceholderPage title="404: Página no encontrada" />} />
             </Route>
           </Routes>
