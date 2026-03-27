@@ -1,9 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@reference "tailwindcss";
 
-/* @theme block removed for Tailwind 3 compatibility. 
-   Gold color #f6e05e is used directly in components. */
+/* Gold color #f6e05e is used directly in components. */
 
 body {
     @apply antialiased;

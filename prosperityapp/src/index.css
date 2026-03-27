@@ -1,9 +1,22 @@
-/* ===== INICIO: src/index.css (Sprint 104 - Agenda Kanban) ===== */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+/* ===== INICIO: src/index.css (Migración Tailwind v4) ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import "tailwindcss";
 
-    @tailwind base;
-    @tailwind components;
-    @tailwind utilities;
+/* --- Configuración de Tema (Tailwind v4 @theme) --- */
+@theme {
+  --font-sans: 'Inter', sans-serif;
+
+  /* Colores semánticos mapeados a CSS vars dinámicas */
+  --color-accent: var(--color-accent);
+  --color-accent-text: var(--color-accent-text);
+  --color-bg-main: var(--color-bg-main);
+  --color-bg-secondary: var(--color-bg-secondary);
+  --color-bg-tertiary: var(--color-bg-tertiary);
+  --color-text-main: var(--color-text-main);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-border-main: var(--color-border-main);
+}
 
     :root {
       /* Modo Claro */
@@ -70,7 +83,7 @@
       @apply bg-bg-tertiary text-accent font-bold;
     }
     .react-calendar-gema .react-calendar-tile-selected {
-      @apply bg-accent text-accent-text font-bold !important;
+      @apply !bg-accent !text-accent-text !font-bold;
     }
 
     /* ==========================================================================
