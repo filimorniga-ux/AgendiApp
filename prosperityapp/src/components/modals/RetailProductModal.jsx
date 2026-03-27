@@ -1,13 +1,14 @@
 // ===== INICIO: src/components/modals/RetailProductModal.jsx (Sprint 95) =====
 import React, { useState, useEffect } from 'react';
-import { db } from '../../firebase/config';
-import { doc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { sbCreate, sbUpdate } from '../../supabase/db';
+import { useData } from '../../context/DataContext';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import CurrencyInput from '../ui/CurrencyInput';
 
 const RetailProductModal = ({ isOpen, onClose, productToEdit }) => {
   const { t } = useTranslation();
+  const { businessId } = useData();
   const [formData, setFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const isEditMode = !!productToEdit;
@@ -35,27 +36,25 @@ const RetailProductModal = ({ isOpen, onClose, productToEdit }) => {
     setIsSaving(true);
     try {
       const dataToSave = {
-        ...formData,
-        cost: parseFloat(formData.cost) || 0,
-        price: parseFloat(formData.price) || 0,
-        stock: parseFloat(formData.stock) || 0,
-        minStock: parseFloat(formData.minStock) || 3,
-        updatedAt: serverTimestamp(),
+        name:       formData.name,
+        brand:      formData.brand || null,
+        category:   formData.category || null,
+        costPrice:  parseFloat(formData.cost) || 0,
+        salePrice:  parseFloat(formData.price) || 0,
+        stockCurrent: parseFloat(formData.stock) || 0,
+        stockMin:   parseFloat(formData.minStock) || 3,
       };
-
       if (isEditMode) {
-        const docRef = doc(db, 'retailInventory', productToEdit.id);
-        await setDoc(docRef, dataToSave, { merge: true });
-        toast.success(t('common.success'));
+        const { error } = await sbUpdate('retailInventory', productToEdit.id, dataToSave);
+        if (error) throw error;
       } else {
-        const docRef = collection(db, 'retailInventory');
-        dataToSave.createdAt = serverTimestamp();
-        await addDoc(docRef, dataToSave);
-        toast.success(t('common.success'));
+        const { error } = await sbCreate('retailInventory', dataToSave, businessId);
+        if (error) throw error;
       }
+      toast.success(t('common.success'));
       onClose();
     } catch (error) {
-      console.error("Error:", error);
+      console.error('Error:', error);
       toast.error(t('common.error'));
     } finally {
       setIsSaving(false);

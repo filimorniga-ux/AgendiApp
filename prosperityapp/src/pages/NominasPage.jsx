@@ -6,8 +6,7 @@ import DetailModal from '../components/modals/DetailModal';
 import ClosePeriodoModal from '../components/modals/ClosePeriodoModal';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { db } from '../firebase/config';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { sbCreate } from '../supabase/db';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -69,7 +68,7 @@ import { useReactToPrint } from 'react-to-print';
 
 const NominasPage = () => {
   const { t } = useTranslation();
-  const { movements, collaborators, config, isLoading } = useData();
+  const { movements, collaborators, config, isLoading, businessId } = useData();
   const { formatCurrency } = useCurrencyFormat();
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -272,9 +271,8 @@ const NominasPage = () => {
     try {
       const closingData = {
         name: closingName,
-        dateRange: summary.dateRangeString,
-        selectedDatesISO: selectedDates.map(toISODateString),
-        createdAt: serverTimestamp(),
+        date_range: summary.dateRangeString,
+        selected_dates: selectedDates.map(toISODateString),
         summary: summary.payrollCards.map(collab => ({
           collaboratorId: collab.id,
           collaboratorName: collab.name,
@@ -287,21 +285,14 @@ const NominasPage = () => {
           totalSalesCommissions: collab.totalSalesCommissions || 0,
           totalPropinas: collab.totalPropinas || 0,
           finalPayment: collab.finalPayment || 0,
-          detail: {
-            serviceItems: (collab.serviceItems || []).map(m => ({ desc: m.description, amount: m.amount })),
-            techCostItems: (collab.techCostItems || []).map(m => ({ desc: m.description, amount: m.amount })),
-            advanceItems: (collab.advanceItems || []).map(m => ({ desc: m.description, amount: m.amount })),
-            salesCommissionItems: (collab.salesCommissionItems || []).map(m => ({ desc: m.description, amount: m.amount })),
-            propinaItems: (collab.propinaItems || []).map(m => ({ desc: m.description, amount: m.amount })),
-          }
         })),
       };
-
-      await addDoc(collection(db, 'payrollClosings'), closingData);
+      const { error } = await sbCreate('payrollClosings', closingData, businessId);
+      if (error) throw error;
       toast.success(t('payroll.successClose'));
       setIsCloseModalOpen(false);
     } catch (error) {
-      console.error("Error saving payroll closing:", error);
+      console.error('Error saving payroll closing:', error);
       toast.error(t('common.error'));
     }
   };

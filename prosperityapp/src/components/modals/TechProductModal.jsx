@@ -1,13 +1,14 @@
 // ===== INICIO: src/components/modals/TechProductModal.jsx (Sprint 95) =====
 import React, { useState, useEffect } from 'react';
-import { db } from '../../firebase/config';
-import { doc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { sbCreate, sbUpdate } from '../../supabase/db';
+import { useData } from '../../context/DataContext';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import CurrencyInput from '../ui/CurrencyInput';
 
 const TechProductModal = ({ isOpen, onClose, productToEdit }) => {
   const { t } = useTranslation();
+  const { businessId } = useData();
   const [formData, setFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const isEditMode = !!productToEdit;
@@ -37,28 +38,28 @@ const TechProductModal = ({ isOpen, onClose, productToEdit }) => {
     setIsSaving(true);
     try {
       const dataToSave = {
-        ...formData,
-        unitSize: parseFloat(formData.unitSize) || 0,
-        facturaCost: parseFloat(formData.facturaCost) || 0,
-        collabCost: parseFloat(formData.collabCost) || 0,
-        stockUnits: parseFloat(formData.stockUnits) || 0,
-        minStock: parseFloat(formData.minStock) || 3,
-        updatedAt: serverTimestamp(),
+        name:       formData.name,
+        brand:      formData.brand || null,
+        category:   formData.category || null,
+        unitSize:   parseFloat(formData.unitSize) || 0,
+        unit:       formData.unitOfMeasure || 'g',
+        stockCurrent: parseFloat(formData.stockUnits) || 0,
+        stockMin:   parseFloat(formData.minStock) || 3,
+        costPerUnit: parseFloat(formData.facturaCost) || 0,
+        // campos extras no estándar guardados como-está
+        collabCost:  parseFloat(formData.collabCost) || 0,
       };
-
       if (isEditMode) {
-        const docRef = doc(db, 'technicalInventory', productToEdit.id);
-        await setDoc(docRef, dataToSave, { merge: true });
-        toast.success(t('common.success'));
+        const { error } = await sbUpdate('technicalInventory', productToEdit.id, dataToSave);
+        if (error) throw error;
       } else {
-        const docRef = collection(db, 'technicalInventory');
-        dataToSave.createdAt = serverTimestamp();
-        await addDoc(docRef, dataToSave);
-        toast.success(t('common.success'));
+        const { error } = await sbCreate('technicalInventory', dataToSave, businessId);
+        if (error) throw error;
       }
+      toast.success(t('common.success'));
       onClose();
     } catch (error) {
-      console.error("Error:", error);
+      console.error('Error:', error);
       toast.error(t('common.error'));
     } finally {
       setIsSaving(false);

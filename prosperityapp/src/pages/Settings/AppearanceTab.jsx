@@ -5,12 +5,11 @@ import { GLOBAL_CURRENCY_DATA } from '../../lib/currencyData';
 import feather from 'feather-icons';
 import toast from 'react-hot-toast';
 import { useStorage } from '../../hooks/useStorage'; // Import hook
-import { doc, updateDoc, setDoc } from 'firebase/firestore'; // Import firestore functions
-import { db } from '../../firebase/config'; // Import db
+import { sbUpdate } from '../../supabase/db';
 
 const AppearanceTab = () => {
     const { t, i18n } = useTranslation();
-    const { currentLocale, setCurrentCurrency, config } = useData();
+    const { currentLocale, setCurrentCurrency, config, businessId } = useData();
     const { uploadFile, progress, isUploading } = useStorage(); // Use hook
     const [selectedCountryCode, setSelectedCountryCode] = useState('');
     const [logoUrl, setLogoUrl] = useState('');
@@ -44,9 +43,10 @@ const AppearanceTab = () => {
             const url = await uploadFile(file, 'branding/logo');
             setLogoUrl(url);
 
-            // Save directly to Firestore (usar setDoc con merge para crear si no existe)
-            const settingsRef = doc(db, 'config', 'settings');
-            await setDoc(settingsRef, { logoUrl: url }, { merge: true });
+            // Guardar en Supabase
+            if (businessId) {
+              await sbUpdate('config', businessId, { logoUrl: url });
+            }
 
             toast.success("Logo actualizado correctamente");
         } catch (err) {

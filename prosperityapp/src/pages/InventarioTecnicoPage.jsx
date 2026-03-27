@@ -3,8 +3,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 import feather from 'feather-icons';
 import { useCollection } from '../hooks/useCollection';
 import TechProductModal from '../components/modals/TechProductModal';
-import { db } from '../firebase/config';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
 
 const formatCurrency = (value) => {
@@ -66,7 +65,8 @@ const InventarioTecnicoPage = () => {
   const handleDelete = async (product) => {
     if (!window.confirm(`¿Seguro que quieres eliminar "${product.name}"?`)) return;
     try {
-      await deleteDoc(doc(db, 'technicalInventory', product.id));
+      const { error } = await sbDelete('technicalInventory', product.id);
+      if (error) throw error;
       toast.success('Producto eliminado');
     } catch (err) {
       console.error(err);

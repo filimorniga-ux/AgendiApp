@@ -2,8 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
-import { db } from '../firebase/config';
-import { doc, setDoc } from 'firebase/firestore';
+import { sbUpdate } from '../supabase/db';
 import { handleSeedDatabase } from '../firebase/seedDatabase';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +11,7 @@ import { useStorage } from '../hooks/useStorage';
 
 const ConfiguracionPage = () => {
   const { t, i18n } = useTranslation();
-  const { config, collaborators, isLoading } = useData();
+  const { config, collaborators, isLoading, businessId } = useData();
   const { uploadFile, progress, isUploading } = useStorage();
 
   const [activeTab, setActiveTab] = useState('accounting');
@@ -134,11 +133,12 @@ const ConfiguracionPage = () => {
       };
     }
     try {
-      const settingsRef = doc(db, 'config', 'settings');
-      await setDoc(settingsRef, dataToSave, { merge: true });
+      if (!businessId) throw new Error('Business ID no disponible');
+      const { error } = await sbUpdate('config', businessId, dataToSave);
+      if (error) throw error;
       toast.success(t('common.success'));
     } catch (error) {
-      console.error("Error saving configuration: ", error);
+      console.error('Error saving configuration: ', error);
       toast.error(t('common.error'));
     }
   };
@@ -169,13 +169,14 @@ const ConfiguracionPage = () => {
     }
 
     try {
-      const settingsRef = doc(db, 'config', 'settings');
-      await setDoc(settingsRef, { securityPin: pinChangeData.newPin }, { merge: true });
+      if (!businessId) throw new Error('Business ID no disponible');
+      const { error } = await sbUpdate('config', businessId, { securityPin: pinChangeData.newPin });
+      if (error) throw error;
       toast.success(t('settings.security.pinChanged') || 'PIN actualizado correctamente');
       setIsPinModalOpen(false);
       setPinChangeData({ currentPin: '', newPin: '', confirmPin: '' });
     } catch (error) {
-      console.error("Error al cambiar PIN:", error);
+      console.error('Error al cambiar PIN:', error);
       toast.error(t('common.error'));
     }
   };

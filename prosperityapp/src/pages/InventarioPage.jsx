@@ -5,8 +5,7 @@ import { useData } from '../context/DataContext';
 import TechProductModal from '../components/modals/TechProductModal';
 import RetailProductModal from '../components/modals/RetailProductModal';
 import StockMovementModal from '../components/modals/StockMovementModal';
-import { db } from '../firebase/config';
-import { doc, deleteDoc, writeBatch, collection, serverTimestamp, increment } from 'firebase/firestore';
+import { sbDelete, sbUpdate, sbCreate } from '../supabase/db';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -77,7 +76,8 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
   const handleDelete = async (product) => {
     if (!window.confirm(t('common.confirmDelete'))) return;
     try {
-      await deleteDoc(doc(db, 'technicalInventory', product.id));
+      const { error } = await sbDelete('technicalInventory', product.id);
+      if (error) throw error;
       toast.success(t('common.success'));
     } catch (err) { console.error(err); toast.error(err.message); }
   };
@@ -223,7 +223,8 @@ const TabInventarioRetail = ({ handleOpenStockModal }) => {
   const handleDelete = async (product) => {
     if (!window.confirm(t('common.confirmDelete'))) return;
     try {
-      await deleteDoc(doc(db, 'retailInventory', product.id));
+      const { error } = await sbDelete('retailInventory', product.id);
+      if (error) throw error;
       toast.success(t('common.success'));
     } catch (err) { console.error(err); toast.error(err.message); }
   };
@@ -324,7 +325,7 @@ const InventarioPage = () => {
   const [currentProduct, setCurrentProduct] = useState(null);
   const [movementType, setMovementType] = useState('ingreso');
   const [collectionName, setCollectionName] = useState('technicalInventory');
-  const { isLoading } = useData();
+  const { isLoading, businessId } = useData();
 
   useEffect(() => {
     if (!isLoading) feather.replace();
@@ -338,26 +339,19 @@ const InventarioPage = () => {
   };
 
   const handleSaveStockMovement = async (product, amount, reason, newStock) => {
-    const productRef = doc(db, collectionName, product.id);
-    const logRef = doc(collection(db, 'stockMovements'));
-
-    const stockField = collectionName === 'technicalInventory' ? 'stockUnits' : 'stock';
-
-    const batch = writeBatch(db);
-
-    batch.update(productRef, { [stockField]: newStock });
-
-    batch.set(logRef, {
-      productId: product.id,
-      productName: product.name,
-      amount: amount,
-      reason: reason,
-      newStock: newStock,
-      createdAt: serverTimestamp(),
-      collection: collectionName,
-    });
-
-    await batch.commit();
+    const stockField = collectionName === 'technicalInventory' ? 'stockCurrent' : 'stockCurrent';
+    const tableName = collectionName; // ya está mapeado en tableMap.js
+    await Promise.all([
+      sbUpdate(tableName, product.id, { [stockField]: newStock }),
+      sbCreate('stockMovements', {
+        product_id: product.id,
+        product_name: product.name,
+        amount,
+        reason,
+        new_stock: newStock,
+        collection_name: collectionName,
+      }, businessId),
+    ]);
   };
 
   return (
