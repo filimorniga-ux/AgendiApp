@@ -2,8 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../../context/DataContext';
-import { db } from '../../firebase/config';
-import { collection, doc, writeBatch, serverTimestamp, updateDoc, deleteDoc, increment, query, where, getDocs } from 'firebase/firestore';
+import { supabase } from '../../supabase/client';
 import SearchableDropdown from '../ui/SearchableDropdown';
 import toast from 'react-hot-toast';
 import TechCalculatorModal from './TechCalculatorModal';
@@ -30,7 +29,7 @@ const formatCurrency = (value) => {
 
 const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) => {
   const { t } = useTranslation();
-  const { clients, collaborators, services, retailInventory, config, movements } = useData();
+  const { clients, collaborators, services, retailInventory, config, movements, businessId } = useData();
   const { uploadFile, progress, isUploading } = useStorage();
   const [cart, setCart] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
@@ -401,7 +400,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
     ));
   };
 
-  // --- GUARDAR OPERACIÓN ---
+  // --- GUARDAR OPERACIÓN (migrado a Supabase) ---
   const handleSaveOperation = async () => {
     if (cart.length === 0) {
       if (isEditMode) return await handleDeleteOperation();
@@ -410,136 +409,121 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
     }
     setIsSaving(true);
     const settings = (config && config.find(c => c.id === 'settings')) || { salesCommissionGeneral: 10 };
-    const commissionRate = (settings.salesCommissionGeneral || 10) / 100;
-    const batch = writeBatch(db);
-    const transactionId = isEditMode ? movementToEdit.transactionId : doc(collection(db, 'temp')).id;
+    const transactionId = isEditMode ? movementToEdit.transactionId : crypto.randomUUID();
     const today = new Date();
+    const todayISO = today.toISOString().split('T')[0];
     const clientName = selectedClient ? selectedClient.name : t('modals.forms.occasionalClient');
 
     try {
-      // Si editamos, borramos TODO lo anterior de esta transacción para reescribirlo
+      // 1. Si editamos, borrar movimientos y giftCards anteriores por transactionId
       if (isEditMode) {
-        const q = query(collection(db, 'movements'), where('transactionId', '==', transactionId));
-        const oldDocs = await getDocs(q);
-        oldDocs.forEach(doc => { batch.delete(doc.ref); });
-
-        const qGC = query(collection(db, 'giftCards'), where('transactionId', '==', transactionId));
-        const oldGC = await getDocs(qGC);
-        oldGC.forEach(doc => { batch.delete(doc.ref); });
+        await supabase.from('movements').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
+        await supabase.from('gift_cards').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
       }
 
-      // Validación de Gift Cards (Pagos)
-      const gcPayments = cart.filter(item => item.type === 'PagoGiftCard');
-      if (gcPayments.length > 0) {
-        for (const payment of gcPayments) {
-          // (Lógica simplificada de validación: asumimos que el backend/reglas de seguridad 
-          // deberían manejar la concurrencia, pero aquí hacemos un chequeo básico)
-          const gcQuery = query(collection(db, 'giftCards'), where('code', '==', payment.gcCode));
-          const gcSnap = await getDocs(gcQuery);
-
-          // Nota: En un entorno real, esto debería ser más robusto si hay múltiples cajas.
-          if (!gcSnap.empty) {
-            const gcDoc = gcSnap.docs[0];
-            const gcData = gcDoc.data();
-            if (gcData.balance < Math.abs(payment.amount)) {
-              throw new Error(`${t('modals.errors.gcBalanceLow')} ${formatCurrency(gcData.balance)}`);
-            }
-            batch.update(gcDoc.ref, {
-              balance: increment(payment.amount), // payment.amount es negativo
-              history: [...gcData.history, { date: new Date(), action: 'Canje', amount: payment.amount }]
-            });
-          }
-        }
-      }
+      // 2. Acumular todos los movimientos a insertar
+      const movementsToInsert = [];
 
       for (const item of cart) {
-        const moveRef = doc(collection(db, 'movements'));
-        const moveData = { ...item, client: clientName, date: today, createdAt: serverTimestamp(), transactionId, paymentMethod: paymentMethod === 'multi' ? item.paymentMethod : paymentMethod };
+        const effectivePaymentMethod = item.type === 'PagoGiftCard' ? 'Gift Card'
+          : paymentMethod === 'multi' ? (item.paymentMethod || 'Efectivo') : paymentMethod;
 
-        // Limpiar campos internos del carrito que no van a la BD
-        delete moveData.cartId;
-        delete moveData.destination;
-        delete moveData.id; // Si venía de edición
+        movementsToInsert.push({
+          business_id: businessId,
+          type: item.type,
+          description: item.description,
+          amount: item.amount,
+          collaborator_id: item.collaboratorId || null,
+          collaborator_name: item.collaboratorName || null,
+          client_name: clientName,
+          client_id: selectedClient?.id || null,
+          service_id: item.serviceId || null,
+          product_id: item.productId || null,
+          quantity: item.quantity || 1,
+          payment_method: effectivePaymentMethod,
+          technical_cost: item.technicalCost || 0,
+          products_used: item.productsUsed || [],
+          date: todayISO,
+          transaction_id: transactionId,
+          gc_code: item.gcCode || null,
+          gc_receipt_url: item.gcReceiptUrl || null,
+          gc_redeem_receipt_url: item.gcRedeemReceiptUrl || null,
+        });
 
-        if (moveData.type === 'PagoGiftCard') {
-          moveData.paymentMethod = 'Gift Card';
-        }
-
-        batch.set(moveRef, moveData);
-
-        // Lógica de Propinas (Destino)
+        // Lógica de Propinas (movimientos virtuales adicionales)
         if (item.type === 'Propina') {
           if (item.destination === 'instantanea') {
-            // Si es instantánea, se crea un gasto de salida de caja
-            const gastoRef = doc(collection(db, 'movements'));
-            batch.set(gastoRef, {
+            movementsToInsert.push({
+              business_id: businessId,
               type: 'Gasto',
               description: `${t('modals.forms.tipsTitle')}: ${item.description} -> ${item.collaboratorName}`,
               amount: -Math.abs(item.amount),
-              paymentMethod: item.paymentMethod,
-              date: today,
-              createdAt: serverTimestamp(),
-              transactionId: transactionId,
+              payment_method: item.paymentMethod || 'Efectivo',
+              date: todayISO,
+              transaction_id: transactionId,
             });
           } else {
-            // Si es a nómina, se crea un registro de comisión especial
-            const commRef = doc(collection(db, 'movements'));
-            batch.set(commRef, {
+            movementsToInsert.push({
+              business_id: businessId,
               type: 'ComisionPropina',
               description: item.description,
               amount: item.amount,
-              collaboratorId: item.collaboratorId,
-              collaboratorName: item.collaboratorName,
-              date: today,
-              createdAt: serverTimestamp(),
-              transactionId: transactionId,
-              // No afecta caja, es virtual para nómina
+              collaborator_id: item.collaboratorId || null,
+              collaborator_name: item.collaboratorName || null,
+              date: todayISO,
+              transaction_id: transactionId,
             });
           }
         }
 
-        // Venta de Gift Card
+        // 3. Venta de Gift Card → crear registro en gift_cards
         if (item.type === 'VentaGiftCard') {
-          let clientId = item.gcClientId || null;
-          let clientName = item.gcClientName;
-
-          // Si no tiene ID, es un cliente nuevo - crear automáticamente
-          if (!clientId && clientName) {
-            const newClientRef = doc(collection(db, 'clients'));
-            batch.set(newClientRef, {
-              name: clientName,
+          let gcClientId = item.gcClientId || null;
+          if (!gcClientId && item.gcClientName) {
+            const { data: newClient } = await supabase.from('clients').insert({
+              business_id: businessId,
+              name: item.gcClientName,
               phone: item.gcContact || '',
-              email: '',
-              createdAt: serverTimestamp(),
-              lastVisit: today.toISOString().split('T')[0],
+              last_visit: todayISO,
               notes: 'Cliente creado automáticamente desde venta de Gift Card'
-            });
-            clientId = newClientRef.id;
+            }).select('id').single();
+            gcClientId = newClient?.id || null;
           }
-
-          const gcRef = doc(collection(db, 'giftCards'));
-          batch.set(gcRef, {
+          await supabase.from('gift_cards').insert({
+            business_id: businessId,
             code: item.gcCode,
-            initialValue: item.amount,
+            initial_value: item.amount,
             balance: item.amount,
-            buyerName: clientName,
-            buyerContact: item.gcContact,
-            clientId: clientId, // Guardar referencia al cliente
-            receiptUrl: item.gcReceiptUrl || null, // Comprobante de venta
+            buyer_name: item.gcClientName,
+            buyer_contact: item.gcContact || null,
+            client_id: gcClientId,
+            receipt_url: item.gcReceiptUrl || null,
             status: 'Activa',
-            createdAt: serverTimestamp(),
-            transactionId: transactionId,
-            history: [{ date: new Date(), action: 'Compra', amount: item.amount }]
+            transaction_id: transactionId,
+            history: [{ date: today.toISOString(), action: 'Compra', amount: item.amount }]
           });
         }
 
-        // Descuento de Stock (Retail)
-        if (item.type === 'Venta' && item.productId) {
-          const productRef = doc(db, 'retailInventory', item.productId);
-          batch.update(productRef, { stock: increment(-item.quantity) });
+        // 4. Pago con Gift Card → actualizar balance de forma atómica
+        if (item.type === 'PagoGiftCard') {
+          const { data: gcResult } = await supabase.rpc('update_gift_card_balance', {
+            p_code: item.gcCode,
+            p_business_id: businessId,
+            p_delta: item.amount // negativo
+          });
+          if (gcResult?.error) throw new Error(gcResult.error);
         }
 
-        // Comisiones de Venta
+        // 5. Descuento de stock (Venta con productId)
+        if (item.type === 'Venta' && item.productId) {
+          await supabase.rpc('decrement_retail_stock', {
+            p_product_id: item.productId,
+            p_business_id: businessId,
+            p_quantity: item.quantity || 1
+          });
+        }
+
+        // 6. Comisión de Venta
         if (item.type === 'Venta' && item.collaboratorId) {
           let finalCommission = 0;
           if (item.commissionType === 'manual') {
@@ -549,31 +533,35 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
             const rate = (collaborator?.salesCommissionPercent || settings.salesCommissionGeneral || 10) / 100;
             finalCommission = item.amount * rate;
           }
-
           if (finalCommission > 0) {
-            const commRef = doc(collection(db, 'movements'));
-            batch.set(commRef, {
+            movementsToInsert.push({
+              business_id: businessId,
               type: 'ComisionVenta',
               description: `${t('modals.forms.commission')}: ${item.description}`,
               amount: finalCommission,
-              collaboratorId: item.collaboratorId,
-              collaboratorName: item.collaboratorName,
-              date: today,
-              createdAt: serverTimestamp(),
-              transactionId: transactionId,
+              collaborator_id: item.collaboratorId,
+              collaborator_name: item.collaboratorName,
+              date: todayISO,
+              transaction_id: transactionId,
             });
           }
         }
       }
 
-      // Actualizar última visita del cliente
-      if (selectedClient) { batch.update(doc(db, 'clients', selectedClient.id), { lastVisit: today.toISOString().split('T')[0] }); }
+      // 7. Batch insert de todos los movimientos
+      const { error: mvError } = await supabase.from('movements').insert(movementsToInsert);
+      if (mvError) throw mvError;
 
-      await batch.commit();
+      // 8. Actualizar última visita del cliente
+      if (selectedClient) {
+        await supabase.from('clients').update({ last_visit: todayISO }).eq('id', selectedClient.id);
+      }
+
+
       toast.success(isEditMode ? t('modals.buttons.updateChanges') : t('modals.buttons.successRegister'));
 
-      // Preparar datos para el ticket
-      const newTicketData = {
+      // Abrir vista previa del ticket
+      setTicketData({
         items: cart.map(item => ({
           description: item.description,
           amount: item.amount,
@@ -582,16 +570,14 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
         })),
         total: cart.reduce((sum, item) => sum + item.amount, 0),
         paymentMethod: paymentMethod
-      };
-
-      // Open Preview Modal instead of direct print
+      });
       setIsPreviewOpen(true);
 
     } catch (error) {
-      console.error("Error saving operation:", error);
-      toast.error(t('common.error'));
+      console.error('Error saving operation:', error);
+      toast.error(error.message || t('common.error'));
     } finally {
-      setIsSaving(false); // Assuming setIsLoading is a typo for setIsSaving based on context
+      setIsSaving(false);
     }
   };
 
@@ -611,29 +597,22 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
   const handleDeleteOperation = async () => {
     if (!window.confirm(t('common.confirmDelete'))) { return; }
     setIsSaving(true);
-    const transactionId = movementToEdit.transactionId;
+    const transactionId = movementToEdit?.transactionId;
     if (!transactionId) {
       toast.error(t('modals.errors.noItems'));
       setIsSaving(false);
       return;
     }
     try {
-      const batch = writeBatch(db);
-      const q = query(collection(db, 'movements'), where('transactionId', '==', transactionId));
-      const oldDocs = await getDocs(q);
-      oldDocs.forEach(doc => { batch.delete(doc.ref); });
-
-      // Borrar GC si existía
-      const qGC = query(collection(db, 'giftCards'), where('transactionId', '==', transactionId));
-      const oldGC = await getDocs(qGC);
-      oldGC.forEach(doc => { batch.delete(doc.ref); });
-
-      await batch.commit();
+      // Borrar todos los movimientos de esta transacción en Supabase
+      await supabase.from('movements').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
+      // Borrar gift cards asociadas (si existen)
+      await supabase.from('gift_cards').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
       toast.success(t('modals.buttons.successDelete'));
       handleClose();
     } catch (error) {
-      console.error("Error al eliminar: ", error);
-      toast.error(t('common.error') + ": " + error.message);
+      console.error('Error al eliminar: ', error);
+      toast.error(t('common.error') + ': ' + error.message);
       setIsSaving(false);
     }
   };
