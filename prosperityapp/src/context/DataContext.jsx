@@ -1,7 +1,7 @@
 // ===== INICIO: src/context/DataContext.jsx =====
 import React, { createContext, useContext, useMemo } from 'react';
 import { useCollection } from '../hooks/useCollection';
-import { auth, db } from '../firebase/firebase'; // Importar auth y db
+import { auth, db } from '../firebase/config'; // Importar auth y db
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, where, orderBy } from 'firebase/firestore';
 
@@ -46,7 +46,7 @@ export const DataProvider = ({ children }) => {
             setRealRole('client'); // Default role
           }
         } catch (error) {
-          console.error("Error fetching user role:", error);
+          console.warn("Error fetching user role:", error);
         }
       } else {
         setRealRole(null);

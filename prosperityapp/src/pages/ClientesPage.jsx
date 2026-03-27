@@ -51,7 +51,7 @@ const ClientesPage = () => {
       await deleteDoc(doc(db, 'clients', client.id));
       toast.success(t('clients.deleteSuccess'));
     } catch (err) {
-      console.error("Error eliminando cliente:", err);
+      console.warn("Error eliminando cliente:", err);
       toast.error(t('clients.deleteError'));
     }
   };

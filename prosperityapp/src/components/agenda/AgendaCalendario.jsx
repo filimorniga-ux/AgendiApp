@@ -278,7 +278,7 @@ const AgendaCalendario = () => {
         toast.success(t('calendar.alerts.created'));
       }
       setIsModalOpen(false);
-    } catch (error) { console.error(error); toast.error(t('common.error')); }
+    } catch (error) { console.warn(error); toast.error(t('common.error')); }
   };
 
   const handleDelete = async () => {
@@ -287,7 +287,7 @@ const AgendaCalendario = () => {
       await deleteDoc(doc(db, 'appointments', selectedEvent.id));
       toast.success(t('calendar.alerts.deleted'));
       setIsModalOpen(false);
-    } catch (error) { console.error(error); toast.error(t('common.error')); }
+    } catch (error) { console.warn(error); toast.error(t('common.error')); }
   };
 
   // Handler para TechCalculatorModal

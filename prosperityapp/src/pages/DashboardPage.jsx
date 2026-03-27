@@ -108,7 +108,7 @@ const TabDiario = () => {
       try {
         alert('En dispositivos móviles, usa el menú de compartir de tu navegador para guardar como PDF o imprimir');
       } catch (err) {
-        console.log('Share not supported');
+        console.info('Share not supported');
       }
     }
 

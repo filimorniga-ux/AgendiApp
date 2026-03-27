@@ -174,7 +174,7 @@ const ColaboradoresPage = () => {
           const docRef = doc(db, 'collaborators', collab.id);
           batch.update(docRef, { displayOrder: index });
         });
-        batch.commit().catch(console.error);
+        batch.commit().catch(console.warn);
 
         return newItems;
       });

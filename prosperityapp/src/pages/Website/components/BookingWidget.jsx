@@ -108,7 +108,7 @@ const BookingWidget = () => {
             setStep(1);
 
         } catch (error) {
-            console.error("Error creando reserva:", error);
+            console.warn("Error creando reserva:", error);
             toast.error("Error al procesar la reserva. Inténtalo de nuevo.");
         } finally {
             setIsSubmitting(false);

@@ -16,7 +16,7 @@ const formatDate = (date) => {
     });
 };
 
-const DailyReportTemplate = React.forwardRef(({ data, user, config }, ref) => {
+const DailyReportTemplate = ({ data, user, config, ref }) => {
     const settings = config?.find(c => c.id === 'settings') || {};
     const brandName = settings.brandName || 'AgendiApp';
     const logoUrl = settings.logoUrl;
@@ -192,7 +192,7 @@ const DailyReportTemplate = React.forwardRef(({ data, user, config }, ref) => {
             </div>
         </div>
     );
-});
+};
 
 DailyReportTemplate.displayName = 'DailyReportTemplate';
 

@@ -58,7 +58,7 @@ const ClientModal = ({ isOpen, onClose, clientToEdit }) => {
       }
       onClose();
     } catch (error) {
-      console.error("Error:", error);
+      console.warn("Error:", error);
       toast.error(t('common.error'));
     } finally {
       setIsSaving(false);

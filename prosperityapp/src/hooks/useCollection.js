@@ -33,7 +33,7 @@ export const useCollection = (collectionName, _queryConstraints = []) => {
       setLoading(false);
       setError(null);
     }, (err) => {
-      console.error(err);
+      console.warn(err);
       setError('No se pudieron cargar los datos.');
       setLoading(false);
     });

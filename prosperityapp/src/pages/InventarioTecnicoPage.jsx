@@ -69,7 +69,7 @@ const InventarioTecnicoPage = () => {
       await deleteDoc(doc(db, 'technicalInventory', product.id));
       toast.success('Producto eliminado');
     } catch (err) {
-      console.error(err);
+      console.warn(err);
       toast.error(err.message);
     }
   };

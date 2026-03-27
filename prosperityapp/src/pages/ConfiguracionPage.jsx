@@ -89,7 +89,7 @@ const ConfiguracionPage = () => {
       setFormData(prev => ({ ...prev, logoUrl: url }));
       toast.success("Logo subido. No olvides dar clic en Guardar.");
     } catch (error) {
-      console.error(error);
+      console.warn(error);
       toast.error("Error al subir logo");
     }
   };
@@ -138,7 +138,7 @@ const ConfiguracionPage = () => {
       await setDoc(settingsRef, dataToSave, { merge: true });
       toast.success(t('common.success'));
     } catch (error) {
-      console.error("Error saving configuration: ", error);
+      console.warn("Error saving configuration: ", error);
       toast.error(t('common.error'));
     }
   };
@@ -175,7 +175,7 @@ const ConfiguracionPage = () => {
       setIsPinModalOpen(false);
       setPinChangeData({ currentPin: '', newPin: '', confirmPin: '' });
     } catch (error) {
-      console.error("Error al cambiar PIN:", error);
+      console.warn("Error al cambiar PIN:", error);
       toast.error(t('common.error'));
     }
   };

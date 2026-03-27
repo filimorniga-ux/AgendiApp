@@ -1,7 +1,7 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-const TicketTemplate = forwardRef(({ data, config }, ref) => {
+const TicketTemplate = ({ data, config, ref }) => {
     const { t } = useTranslation();
 
     // Helper to format currency
@@ -87,7 +87,7 @@ const TicketTemplate = forwardRef(({ data, config }, ref) => {
             </div>
         </div>
     );
-});
+};
 
 TicketTemplate.displayName = 'TicketTemplate';
 

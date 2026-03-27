@@ -223,7 +223,7 @@
           snapshot.docs.forEach(doc => { deleteBatch.delete(doc.ref); });
         }
         await deleteBatch.commit();
-        console.log("Datos anteriores borrados.");
+        console.info("Datos anteriores borrados.");
         
         const seedBatch = writeBatch(db);
         for (const collName of Object.keys(defaultData)) {
@@ -243,7 +243,7 @@
         alert("¡Éxito! La base de datos ha sido restablecida con los datos de prueba. La página se recargará.");
         window.location.reload();
       } catch (error) {
-        console.error("Error al restablecer la base de datos: ", error);
+        console.warn("Error al restablecer la base de datos: ", error);
         alert("Error al restablecer la base de datos: " + error.message);
       }
     };

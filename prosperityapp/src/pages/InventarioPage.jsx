@@ -79,7 +79,7 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
     try {
       await deleteDoc(doc(db, 'technicalInventory', product.id));
       toast.success(t('common.success'));
-    } catch (err) { console.error(err); toast.error(err.message); }
+    } catch (err) { console.warn(err); toast.error(err.message); }
   };
 
   if (loading) return null;
@@ -225,7 +225,7 @@ const TabInventarioRetail = ({ handleOpenStockModal }) => {
     try {
       await deleteDoc(doc(db, 'retailInventory', product.id));
       toast.success(t('common.success'));
-    } catch (err) { console.error(err); toast.error(err.message); }
+    } catch (err) { console.warn(err); toast.error(err.message); }
   };
 
   if (loading) return null;

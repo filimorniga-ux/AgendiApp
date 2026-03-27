@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCurrencyFormat } from '../../hooks/useCurrencyFormat';
 
-const PayrollPrintTemplate = React.forwardRef(({ summary, selectedCollaboratorId, config, forPreview = false }, ref) => {
+const PayrollPrintTemplate = ({ summary, selectedCollaboratorId, config, forPreview = false, ref }) => {
     const { t } = useTranslation();
     const { formatCurrency } = useCurrencyFormat();
 
@@ -200,6 +200,6 @@ const PayrollPrintTemplate = React.forwardRef(({ summary, selectedCollaboratorId
             )}
         </div>
     );
-});
+};
 
 export default PayrollPrintTemplate;

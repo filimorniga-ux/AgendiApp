@@ -73,7 +73,7 @@ const VentaPublicoPage = () => {
       await deleteDoc(doc(db, 'retailInventory', product.id));
       toast.success('Producto eliminado');
     } catch (err) {
-      console.error(err);
+      console.warn(err);
       toast.error(err.message);
     }
   };

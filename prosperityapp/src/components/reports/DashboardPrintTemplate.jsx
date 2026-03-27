@@ -6,7 +6,7 @@ const formatCurrency = (value) => {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
 };
 
-const DashboardPrintTemplate = React.forwardRef(({ type, data, config, filterInfo, forPreview = false }, ref) => {
+const DashboardPrintTemplate = ({ type, data, config, filterInfo, forPreview = false, ref }) => {
     const { t } = useTranslation();
 
     // Get company info
@@ -245,6 +245,6 @@ const DashboardPrintTemplate = React.forwardRef(({ type, data, config, filterInf
             {type === 'clientes' && renderClientesContent()}
         </div>
     );
-});
+};
 
 export default DashboardPrintTemplate;

@@ -191,7 +191,7 @@ const AdvancedExportModal = ({ onClose }) => {
             onClose();
 
         } catch (error) {
-            console.error("Export Error:", error);
+            console.warn("Export Error:", error);
             toast.error("Error al exportar datos");
         } finally {
             setIsExporting(false);

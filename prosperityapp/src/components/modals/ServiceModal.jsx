@@ -55,7 +55,7 @@ const ServiceModal = ({ isOpen, onClose, serviceToEdit }) => {
       }
       onClose();
     } catch (error) {
-      console.error("Error guardando servicio: ", error);
+      console.warn("Error guardando servicio: ", error);
       toast.error(t('common.error'));
     } finally {
       setIsSaving(false);

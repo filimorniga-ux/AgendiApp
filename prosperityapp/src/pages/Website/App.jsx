@@ -49,7 +49,7 @@ function MainApp() {
                 setUser(currentUser);
                 setLoadingAuth(false);
                 if (currentUser) {
-                    console.log("✅ Usuario autenticado:", currentUser.email);
+                    console.info("✅ Usuario autenticado:", currentUser.email);
                 }
             });
             return () => unsubscribe();
@@ -91,7 +91,7 @@ function MainApp() {
             setShowLoginModal(false); // Cerrar modal al éxito
             navigate('/app'); // Redirección al Dashboard
         } catch (error) {
-            console.error("Error login:", error);
+            console.warn("Error login:", error);
             alert("Error: " + error.message);
         }
     };
@@ -105,7 +105,7 @@ function MainApp() {
             setShowRegisterModal(false);
             navigate('/app'); // Redirección al Dashboard
         } catch (error) {
-            console.error("Error registro:", error);
+            console.warn("Error registro:", error);
             alert("Error: " + error.message);
         }
     };
@@ -119,7 +119,7 @@ function MainApp() {
             setShowRegisterModal(false);
             navigate('/app'); // Redirección al Dashboard
         } catch (error) {
-            console.error("Google Auth Error:", error);
+            console.warn("Google Auth Error:", error);
         }
     };
 

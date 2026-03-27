@@ -108,7 +108,7 @@ const PedidosPage = () => {
             }
             toast.success("Archivo subido correctamente");
         } catch (err) {
-            console.error("Upload error:", err);
+            console.warn("Upload error:", err);
             toast.error("Error al subir archivo");
         }
     };
@@ -149,7 +149,7 @@ const PedidosPage = () => {
             }
             setIsModalOpen(false);
         } catch (error) {
-            console.error(error);
+            console.warn(error);
             toast.error(t('common.error'));
         }
     };
@@ -204,7 +204,7 @@ const PedidosPage = () => {
             // We might need to close modal or update selectedDebt state if we want to keep it open
             setSelectedDebt(null);
         } catch (error) {
-            console.error(error);
+            console.warn(error);
             toast.error("Error al registrar pago");
         }
     };

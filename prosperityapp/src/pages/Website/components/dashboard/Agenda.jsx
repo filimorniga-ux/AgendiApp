@@ -10,7 +10,7 @@ import {
     Timestamp,
     orderBy
 } from 'firebase/firestore';
-import { db } from '../../../firebase/firebase';
+import { db } from '../../../../firebase/config';
 import {
     Calendar,
     Clock,
@@ -57,7 +57,7 @@ export const Agenda = ({ isDarkMode }) => {
             staffData.sort((a, b) => a.name.localeCompare(b.name));
             setStaffMembers(staffData);
         }, (error) => {
-            console.error("Error cargando staff:", error);
+            console.warn("Error cargando staff:", error);
         });
 
         return () => unsubscribe();
@@ -93,7 +93,7 @@ export const Agenda = ({ isDarkMode }) => {
             setAppointments(apps);
             setLoading(false);
         }, (error) => {
-            console.error("Error cargando citas:", error);
+            console.warn("Error cargando citas:", error);
             setLoading(false);
         });
 
@@ -333,7 +333,7 @@ const AppointmentModal = ({
             }
             onClose();
         } catch (error) {
-            console.error("Error guardando cita:", error);
+            console.warn("Error guardando cita:", error);
             alert("Error al guardar. Revisa la consola.");
         }
     };

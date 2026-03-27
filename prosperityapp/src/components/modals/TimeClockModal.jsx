@@ -39,7 +39,7 @@ const TimeClockModal = ({ isOpen, onClose }) => {
           setCurrentShift(null); // No ha marcado entrada hoy
         }
       } catch (error) {
-        console.error("Error fetching shift:", error);
+        console.warn("Error fetching shift:", error);
       } finally {
         setLoading(false);
       }
@@ -92,7 +92,7 @@ const TimeClockModal = ({ isOpen, onClose }) => {
         setTimeout(() => setSelectedCollab(tempCollab), 100);
 
     } catch (error) {
-        console.error(error);
+        console.warn(error);
         toast.error(t('common.error'));
     } finally {
         setLoading(false);
