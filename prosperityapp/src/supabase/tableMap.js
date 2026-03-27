@@ -5,16 +5,21 @@
 
 // Firestore collection name → Supabase table name
 export const COLLECTION_TO_TABLE = {
-  clients:            'clients',
-  collaborators:      'collaborators',
-  services:           'services',
-  technicalInventory: 'technical_inventory',
-  retailInventory:    'retail_inventory',
-  config:             'config',
-  movements:          'movements',
-  appointments:       'appointments',
-  monthlyClosings:    'monthly_closings',
-  users:              'users',
+  clients:              'clients',
+  collaborators:        'collaborators',
+  services:             'services',
+  technicalInventory:   'technical_inventory',
+  retailInventory:      'retail_inventory',
+  config:               'config',
+  movements:            'movements',
+  appointments:         'appointments',
+  monthlyClosings:      'monthly_closings',
+  monthlyClosingRecords: 'monthly_closing_records',
+  workShifts:           'work_shifts',
+  payrollClosings:      'payroll_closings',
+  stockMovements:       'stock_movements',
+  giftCards:            'gift_cards',
+  users:                'users',
 };
 
 /**

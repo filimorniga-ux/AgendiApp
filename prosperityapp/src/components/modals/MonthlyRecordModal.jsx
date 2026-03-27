@@ -1,11 +1,10 @@
 // ===== INICIO: src/components/modals/MonthlyRecordModal.jsx (Sprint 91) =====
 import React, { useState, useEffect } from 'react';
-import { db } from '../../firebase/config';
-import { doc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { sbCreate, sbUpdate } from '../../supabase/db';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-const MonthlyRecordModal = ({ isOpen, onClose, recordToEdit, yearMonth }) => {
+const MonthlyRecordModal = ({ isOpen, onClose, recordToEdit, yearMonth, businessId }) => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
@@ -49,27 +48,24 @@ const MonthlyRecordModal = ({ isOpen, onClose, recordToEdit, yearMonth }) => {
     setIsSaving(true);
     
     try {
-      const collectionRef = collection(db, 'monthlyClosings', yearMonth, 'records');
-      
       const dataToSave = {
+        yearMonth,
         date: formData.date,
         description: formData.description,
-        [formData.category]: parseFloat(formData.amount) || 0,
-        _categoryKey: formData.category, 
-        _amountValue: parseFloat(formData.amount) || 0,
+        categoryKey: formData.category,
+        amountValue: parseFloat(formData.amount) || 0,
       };
-
       if (isEditMode) {
-        const docRef = doc(collectionRef, recordToEdit.id);
-        await setDoc(docRef, { ...dataToSave, updatedAt: serverTimestamp() }, { merge: true });
-        toast.success(t('common.success'));
+        const { error } = await sbUpdate('monthlyClosingRecords', recordToEdit.id, dataToSave);
+        if (error) throw error;
       } else {
-        await addDoc(collectionRef, { ...dataToSave, createdAt: serverTimestamp() });
-        toast.success(t('common.success'));
+        const { error } = await sbCreate('monthlyClosingRecords', dataToSave, businessId);
+        if (error) throw error;
       }
+      toast.success(t('common.success'));
       onClose();
     } catch (error) {
-      console.error("Error:", error);
+      console.error('Error:', error);
       toast.error(t('common.error'));
     } finally {
       setIsSaving(false);

@@ -1,8 +1,7 @@
 // ===== INICIO: src/components/agenda/ModalNuevaCita.jsx (Refactorizado) =====
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext'; // <-- 1. USAR DATACONTEXT
-import { db } from '../../firebase/config';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { sbCreate } from '../../supabase/db';
 import SearchableDropdown from '../ui/SearchableDropdown';
 import toast from 'react-hot-toast';
 
@@ -12,7 +11,7 @@ const ModalNuevaCita = ({ isOpen, onClose, slotInfo }) => {
   const [isSaving, setIsSaving] = useState(false);
 
   // --- 2. Consumir datos desde el "cerebro" ---
-  const { clients, services, isLoading } = useData();
+  const { clients, services, isLoading, businessId } = useData();
   const loadingClients = isLoading; // Simplificado
   const loadingServices = isLoading; // Simplificado
   // --- Fin de cambios ---
@@ -63,14 +62,13 @@ const ModalNuevaCita = ({ isOpen, onClose, slotInfo }) => {
     };
 
     try {
-      // Guardar en la colección principal de 'movements'
-      const collectionRef = collection(db, 'movements');
-      await addDoc(collectionRef, appointmentData);
+      const { error } = await sbCreate('movements', appointmentData, businessId);
+      if (error) throw error;
       toast.success('Cita guardada con éxito');
       onClose();
     } catch (error) {
-      console.error("Error al guardar la cita: ", error);
-      toast.error("Hubo un error al guardar la cita.");
+      console.error('Error al guardar la cita: ', error);
+      toast.error('Hubo un error al guardar la cita.');
       setIsSaving(false);
     }
   };

@@ -2,8 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../../context/DataContext';
-import { db } from '../../firebase/config';
-import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { sbCreate, sbUpdate, sbDelete } from '../../supabase/db';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import SearchableDropdown from '../ui/SearchableDropdown';
@@ -103,7 +102,7 @@ const StylistColumn = ({ stylist, appointments, onAdd, onEdit }) => {
 
 const AgendaCalendario = () => {
   const { t, i18n } = useTranslation();
-  const { appointments, clients, collaborators, services, isLoading } = useData();
+  const { appointments, clients, collaborators, services, isLoading, businessId } = useData();
 
   const [date, setDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -234,12 +233,10 @@ const AgendaCalendario = () => {
     };
 
     try {
-      const batch = writeBatch(db);
-
       if (selectedEvent) {
         let paymentRegistered = false;
-        // Lógica de Ingreso a Caja (Trigger: status 'completed')
         if (formData.status === 'completed' && !selectedEvent.movementId) {
+          const transactionId = crypto.randomUUID();
           const movementData = {
             type: 'Servicio',
             description: `Servicio: ${formData.service.name}`,
@@ -248,33 +245,22 @@ const AgendaCalendario = () => {
             client: formData.client.name,
             collaboratorId: formData.stylist.id,
             collaboratorName: formData.stylist.name,
-            technicalCost: technicalCost, // Transferir costo técnico al movimiento
-            productsUsed: techProducts, // Transferir productos al movimiento
-            date: new Date(),
-            createdAt: serverTimestamp(),
-            paymentMethod: 'Efectivo', // Default
-            transactionId: doc(collection(db, 'temp')).id // Generar ID único de transacción
+            technicalCost: technicalCost,
+            productsUsed: techProducts,
+            date: new Date().toISOString(),
+            paymentMethod: 'Efectivo',
+            transactionId,
           };
-          const movementRef = doc(collection(db, 'movements'));
-          batch.set(movementRef, movementData);
-          appointmentData.movementId = movementRef.id;
-
+          const { data: mv } = await sbCreate('movements', movementData, businessId);
+          appointmentData.movementId = mv?.id || null;
+          await sbUpdate('appointments', selectedEvent.id, appointmentData);
           paymentRegistered = true;
-        }
-
-        const aptRef = doc(db, 'appointments', selectedEvent.id);
-        batch.update(aptRef, appointmentData);
-
-        await batch.commit();
-
-        if (paymentRegistered) {
-          toast.success(t('calendar.alerts.paymentRegistered'));
         } else {
-          toast.success(t('calendar.alerts.updated'));
+          await sbUpdate('appointments', selectedEvent.id, appointmentData);
         }
+        toast.success(paymentRegistered ? t('calendar.alerts.paymentRegistered') : t('calendar.alerts.updated'));
       } else {
-        appointmentData.createdAt = serverTimestamp();
-        await addDoc(collection(db, 'appointments'), appointmentData);
+        await sbCreate('appointments', { ...appointmentData }, businessId);
         toast.success(t('calendar.alerts.created'));
       }
       setIsModalOpen(false);
@@ -284,7 +270,8 @@ const AgendaCalendario = () => {
   const handleDelete = async () => {
     if (!selectedEvent || !window.confirm(t('common.confirmDelete'))) return;
     try {
-      await deleteDoc(doc(db, 'appointments', selectedEvent.id));
+      const { error } = await sbDelete('appointments', selectedEvent.id);
+      if (error) throw error;
       toast.success(t('calendar.alerts.deleted'));
       setIsModalOpen(false);
     } catch (error) { console.error(error); toast.error(t('common.error')); }

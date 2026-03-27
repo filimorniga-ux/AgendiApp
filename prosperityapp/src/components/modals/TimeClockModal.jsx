@@ -1,7 +1,6 @@
 // ===== INICIO: src/components/modals/TimeClockModal.jsx =====
 import React, { useState, useEffect } from 'react';
-import { db } from '../../firebase/config';
-import { collection, addDoc, query, where, getDocs, updateDoc, serverTimestamp, orderBy, limit, doc } from 'firebase/firestore';
+import { sbCreate, sbUpdate, sbGetAll } from '../../supabase/db';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useData } from '../../context/DataContext';
@@ -9,7 +8,7 @@ import SearchableDropdown from '../ui/SearchableDropdown';
 
 const TimeClockModal = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
-  const { collaborators } = useData();
+  const { collaborators, businessId } = useData();
   const [selectedCollab, setSelectedCollab] = useState(null);
   const [currentShift, setCurrentShift] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -17,29 +16,17 @@ const TimeClockModal = ({ isOpen, onClose }) => {
   // Buscar estado actual del colaborador seleccionado
   useEffect(() => {
     const fetchStatus = async () => {
-      if (!selectedCollab) {
-        setCurrentShift(null);
-        return;
-      }
+      if (!selectedCollab) { setCurrentShift(null); return; }
       setLoading(true);
       try {
-        // Buscar si tiene un turno abierto hoy
         const todayStr = new Date().toISOString().split('T')[0];
-        const q = query(
-          collection(db, 'workShifts'),
-          where('collaboratorId', '==', selectedCollab.id),
-          where('dateStr', '==', todayStr),
-          limit(1)
-        );
-        const snapshot = await getDocs(q);
-
-        if (!snapshot.empty) {
-          setCurrentShift({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() });
-        } else {
-          setCurrentShift(null); // No ha marcado entrada hoy
-        }
+        const { data, error } = await sbGetAll('workShifts', businessId, {
+          filters: { collaborator_id: selectedCollab.id, date_str: todayStr }
+        });
+        if (error) throw error;
+        setCurrentShift(data && data.length > 0 ? data[0] : null);
       } catch (error) {
-        console.error("Error fetching shift:", error);
+        console.error('Error fetching shift:', error);
       } finally {
         setLoading(false);
       }
@@ -54,43 +41,29 @@ const TimeClockModal = ({ isOpen, onClose }) => {
     try {
         const now = new Date();
         const todayStr = now.toISOString().split('T')[0];
-        const shiftsRef = collection(db, 'workShifts');
 
         if (actionType === 'checkIn') {
-            // Crear nuevo turno
-            await addDoc(shiftsRef, {
+            const { error } = await sbCreate('workShifts', {
                 collaboratorId: selectedCollab.id,
                 collaboratorName: selectedCollab.name,
                 dateStr: todayStr,
-                checkIn: serverTimestamp(),
+                checkIn: now.toISOString(),
                 status: 'working',
-                createdAt: serverTimestamp()
-            });
+            }, businessId);
+            if (error) throw error;
         } else if (currentShift) {
-            // Actualizar turno existente
-            const docRef = doc(db, 'workShifts', currentShift.id);
-            const updateData = { status: 'working' }; // Default return status
-
-            if (actionType === 'lunchStart') {
-                updateData.lunchStart = serverTimestamp();
-                updateData.status = 'lunch';
-            } else if (actionType === 'lunchEnd') {
-                updateData.lunchEnd = serverTimestamp();
-                updateData.status = 'working';
-            } else if (actionType === 'checkOut') {
-                updateData.checkOut = serverTimestamp();
-                updateData.status = 'finished';
-            }
-
-            await updateDoc(docRef, updateData);
+            const updateData = { status: 'working' };
+            if (actionType === 'lunchStart') { updateData.lunchStart = now.toISOString(); updateData.status = 'lunch'; }
+            else if (actionType === 'lunchEnd') { updateData.lunchEnd = now.toISOString(); updateData.status = 'working'; }
+            else if (actionType === 'checkOut') { updateData.checkOut = now.toISOString(); updateData.status = 'finished'; }
+            const { error } = await sbUpdate('workShifts', currentShift.id, updateData);
+            if (error) throw error;
         }
 
         toast.success(t('hr.success'));
-        // Refrescar estado local (simulado re-ejecutando el effect al limpiar y setear de nuevo)
         const tempCollab = selectedCollab;
-        setSelectedCollab(null); 
+        setSelectedCollab(null);
         setTimeout(() => setSelectedCollab(tempCollab), 100);
-
     } catch (error) {
         console.error(error);
         toast.error(t('common.error'));
