@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import * as XLSX from 'xlsx';
 import feather from 'feather-icons';
 import { useData } from '../../context/DataContext';
-import { useCollection } from '../../hooks/useCollection';
+import { useSupabaseCollection } from '../../hooks/useSupabaseCollection';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import toast from 'react-hot-toast';
@@ -24,8 +24,8 @@ const AdvancedExportModal = ({ onClose }) => {
     const [selectedClosingId, setSelectedClosingId] = useState('');
 
     // Collections for Dropdowns
-    const { data: payrolls } = useCollection('payrollClosings');
-    const { data: closings } = useCollection('monthlyClosings');
+    const { data: payrolls } = useSupabaseCollection('payroll_closings');
+    const { data: closings } = useSupabaseCollection('monthly_closings');
 
     const [isExporting, setIsExporting] = useState(false);
 

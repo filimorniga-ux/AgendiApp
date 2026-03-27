@@ -1,7 +1,7 @@
 // ===== INICIO: src/pages/StockMovementsPage.jsx (Sprint 97 - Hotfix Ordenamiento) =====
 import React, { useEffect, useState, useMemo } from 'react';
 import feather from 'feather-icons';
-import { useCollection } from '../hooks/useCollection';
+import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import { useData } from '../context/DataContext';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -16,9 +16,9 @@ const formatDate = (timestamp) => {
 
 const StockMovementsPage = () => {
   const { t } = useTranslation();
-  // --- BUG CORREGIDO: Eliminamos 'orderBy' para evitar crash ---
-  const { data: movements, loading } = useCollection('stockMovements');
   const { isLoading: isGlobalLoading } = useData();
+  // --- BUG CORREGIDO: Eliminamos 'orderBy' para evitar crash ---
+  const { data: movements, loading } = useSupabaseCollection('stock_movements');
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredMovements = useMemo(() => {

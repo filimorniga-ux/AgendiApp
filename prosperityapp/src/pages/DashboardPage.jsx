@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
-import { useCollection } from '../hooks/useCollection';
+import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { Link } from 'react-router-dom';
@@ -372,8 +372,8 @@ const TabNominas = () => {
 // --- Pestaña 3: Cierres (Con i18n) ---
 const TabCierres = () => {
   const { t } = useTranslation();
-  const { data: closings, loading } = useCollection('monthlyClosings', 'id');
   const { config } = useData();
+  const { data: closings, loading } = useSupabaseCollection('monthly_closings');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const componentRef = useRef();
 

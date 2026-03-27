@@ -1,28 +1,24 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabase/client';
 import { COLLECTION_TO_TABLE, rowToCamel, fieldToColumn } from '../supabase/tableMap';
+import { useData } from '../context/DataContext';
 
 /**
  * Hook que reemplaza useCollection (Firebase) con Supabase.
  * Mantiene la misma API: { data, loading, error }
  *
- * @param {string} collectionName   - Nombre Firestore (ej: 'collaborators')
- * @param {string|Array} constraints - string = orderBy field | array = ignored for now
- * @param {string|null} businessId  - UUID del business para filtrar
- * @param {Object} extraFilters     - Filtros adicionales {column: value}
+ * @param {string} tableName - nombre de la tabla en Supabase (snake_case)
+ * @param {Array} filters    - array de objetos { field, op, value } (opcional)
  */
-export const useSupabaseCollection = (
-  collectionName,
-  constraints = [],
-  businessId = null,
-  extraFilters = {}
-) => {
+export const useSupabaseCollection = (tableNameInput, filters = []) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const channelRef = useRef(null);
 
-  const tableName = COLLECTION_TO_TABLE[collectionName] || collectionName;
+  const { businessId } = useData();
+
+  const tableName = COLLECTION_TO_TABLE[tableNameInput] || tableNameInput;
 
   useEffect(() => {
     if (!businessId) {
@@ -42,19 +38,17 @@ export const useSupabaseCollection = (
           .select('*')
           .eq('business_id', businessId);
 
-        // Aplicar filtros extra (ej: solo citas del colaborador)
-        for (const [col, val] of Object.entries(extraFilters)) {
-          query = query.eq(col, val);
+        // Apply filters: array de objetos { field, op, value }
+        if (Array.isArray(filters)) {
+          filters.forEach(f => {
+            if (f.field && f.op && f.value !== undefined) {
+              query = query.filter(f.field, f.op, f.value);
+            }
+          });
         }
 
-        // orderBy a partir del string constraints
-        if (typeof constraints === 'string' && constraints) {
-          const col = fieldToColumn(constraints);
-          query = query.order(col, { ascending: true });
-        } else {
-          // Orden por defecto: más reciente primero
-          query = query.order('created_at', { ascending: false });
-        }
+        // Orden por defecto: más reciente primero
+        query = query.order('created_at', { ascending: false });
 
         const { data: rows, error: err } = await query;
 
@@ -100,7 +94,7 @@ export const useSupabaseCollection = (
         channelRef.current = null;
       }
     };
-  }, [tableName, businessId, typeof constraints === 'string' ? constraints : JSON.stringify(constraints), JSON.stringify(extraFilters)]);
+  }, [tableName, businessId, JSON.stringify(filters)]);
 
   return { data, loading, error };
 };
