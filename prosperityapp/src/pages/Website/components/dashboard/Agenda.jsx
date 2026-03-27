@@ -1,16 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-    collection,
-    query,
-    where,
-    onSnapshot,
-    addDoc,
-    updateDoc,
-    doc,
-    Timestamp,
-    orderBy
-} from 'firebase/firestore';
-import { db } from '../../../../firebase/config';
+import { supabase } from '../../../../supabase/client';
+import { useSupabaseCollection } from '../../../../hooks/useSupabaseCollection';
 import {
     Calendar,
     Clock,
@@ -30,75 +20,44 @@ import {
 
 export const Agenda = ({ isDarkMode }) => {
     // Estados de Datos
-    const [staffMembers, setStaffMembers] = useState([]);
-    const [appointments, setAppointments] = useState([]);
-    const [loading, setLoading] = useState(true);
-
     // Estados de UI
     const [currentDate, setCurrentDate] = useState(new Date());
+
+    const startOfDay = new Date(currentDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(currentDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const { data: staffData } = useSupabaseCollection('users', [{ field: 'role', op: 'in', value: ['staff', 'admin'] }]);
+
+    // El hook se encargará de traer por business_id
+    const { data: appsData, loading } = useSupabaseCollection('appointments', [
+        { field: 'starts_at', op: 'gte', value: startOfDay.toISOString() },
+        { field: 'starts_at', op: 'lte', value: endOfDay.toISOString() }
+    ]);
+
+    const staffMembers = useMemo(() => {
+        if (!staffData) return [];
+        const data = staffData.map(u => ({ id: u.id, ...u, name: u.name || u.email }));
+        return data.sort((a, b) => a.name.localeCompare(b.name));
+    }, [staffData]);
+
+    const appointments = useMemo(() => {
+        if (!appsData) return [];
+        return appsData.map(appt => ({
+            id: appt.id,
+            ...appt,
+            date: new Date(appt.date || appt.startsAt), // fallback if camelCased by the hook
+            clientName: appt.clientName || appt.client_name,
+            serviceName: appt.serviceName || appt.service_name,
+            durationMinutes: appt.serviceDuration || appt.durationMinutes,
+            staffId: appt.stylistId || appt.staffId,
+        }));
+    }, [appsData]);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAppointment, setEditingAppointment] = useState(null);
-
-    // --- 1. CARGAR PERSONAL (STAFF) ---
-    useEffect(() => {
-        // Escuchamos usuarios que sean 'staff' o 'admin' (para que aparezcan en columnas)
-        const q = query(
-            collection(db, "users"),
-            where("role", "in", ["staff", "admin"])
-        );
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const staffData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-
-            // Ordenar alfabéticamente
-            staffData.sort((a, b) => a.name.localeCompare(b.name));
-            setStaffMembers(staffData);
-        }, (error) => {
-            console.warn("Error cargando staff:", error);
-        });
-
-        return () => unsubscribe();
-    }, []);
-
-    // --- 2. CARGAR CITAS (APPOINTMENTS) ---
-    useEffect(() => {
-        // Definir rango del día seleccionado (00:00 a 23:59)
-        const startOfDay = new Date(currentDate);
-        startOfDay.setHours(0, 0, 0, 0);
-
-        const endOfDay = new Date(currentDate);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        const q = query(
-            collection(db, "appointments"),
-            where("date", ">=", startOfDay),
-            where("date", "<=", endOfDay)
-            // Nota: Firestore requiere índice compuesto para filtrar por rango y ordenar.
-            // Si falla, ver consola para crear el índice.
-        );
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const apps = snapshot.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    id: doc.id,
-                    ...data,
-                    date: data.date instanceof Timestamp ? data.date.toDate() : new Date(data.date)
-                };
-            });
-
-            setAppointments(apps);
-            setLoading(false);
-        }, (error) => {
-            console.warn("Error cargando citas:", error);
-            setLoading(false);
-        });
-
-        return () => unsubscribe();
-    }, [currentDate]);
 
     // --- HELPERS ---
 
@@ -318,18 +277,43 @@ const AppointmentModal = ({
 
         const payload = {
             ...formData,
-            date: finalDate,
+            client_name: formData.clientName,
+            service_name: formData.serviceName,
             price: Number(formData.price),
-            durationMinutes: Number(formData.durationMinutes)
+            service_duration: Number(formData.durationMinutes),
+            status: formData.status,
+            stylist_id: formData.staffId,
+            date: finalDate.toISOString(),
+            starts_at: finalDate.toISOString(),
         };
 
+        // Remove camelCase redundant props
+        delete payload.clientName;
+        delete payload.serviceName;
+        delete payload.durationMinutes;
+        delete payload.staffId;
+
         try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeBusinessId = urlParams.get('business_id');
+
+            if (activeBusinessId && !payload.business_id) {
+                payload.business_id = activeBusinessId;
+            }
+
             if (initialData?.id) {
                 // Editar
-                await updateDoc(doc(db, "appointments", initialData.id), payload);
+                const { error } = await supabase
+                    .from('appointments')
+                    .update(payload)
+                    .eq('id', initialData.id);
+                if (error) throw error;
             } else {
                 // Crear
-                await addDoc(collection(db, "appointments"), payload);
+                const { error } = await supabase
+                    .from('appointments')
+                    .insert(payload);
+                if (error) throw error;
             }
             onClose();
         } catch (error) {

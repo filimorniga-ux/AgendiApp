@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { collection, query, where, onSnapshot, addDoc, doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../../../firebase/config';
+import { supabase } from '../../../../supabase/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../../../context/DataContext'; // Import useData
 import { Icons } from '../ui/Icons';
@@ -26,7 +25,7 @@ const RoleBadge = ({ role }) => {
 
 export const Dashboard = ({ user, isDarkMode }) => {
     const { t } = useLanguage();
-    const { userRole, updateRoleSimulation, realRole } = useData(); // Use global context
+    const { userRole, updateRoleSimulation, realRole, businessId } = useData(); // Use global context
     const navigate = useNavigate();
 
     // Verificar si el usuario actual es el super admin
@@ -39,20 +38,27 @@ export const Dashboard = ({ user, isDarkMode }) => {
     // 1. EFECTO: IDENTIFICACIÓN Y CREACIÓN DE USUARIO (Mantenemos la creación si no existe, pero el rol viene del context)
     useEffect(() => {
         const checkUserRole = async () => {
-            if (!db || !user) return;
+            if (!user) return;
 
             // La lógica de creación de usuario nuevo sigue siendo útil aquí si DataContext no lo maneja
             // Pero DataContext ya lee el rol. Solo nos aseguramos de crear el doc si no existe.
-            const userRef = doc(db, "users", user.uid);
             try {
-                const userSnap = await getDoc(userRef);
-                if (!userSnap.exists()) {
+                const { data: userSnap, error: fetchError } = await supabase
+                    .from('users')
+                    .select('firebase_uid')
+                    .eq('firebase_uid', user.uid)
+                    .single();
+
+                if (fetchError && fetchError.code !== 'PGRST116') {
+                    throw fetchError;
+                }
+
+                if (!userSnap) {
                     console.info("🆕 Creando perfil de usuario nuevo...");
-                    await setDoc(userRef, {
+                    await supabase.from('users').insert({
+                        firebase_uid: user.uid,
                         email: user.email,
-                        name: user.displayName || "Usuario Sin Nombre",
                         role: 'client', // Por defecto todos son clientes
-                        createdAt: new Date()
                     });
                     // No necesitamos setear estado local, DataContext lo recogerá en su próximo ciclo o recarga
                 }
@@ -66,7 +72,7 @@ export const Dashboard = ({ user, isDarkMode }) => {
 
     // 2. EFECTO: DATOS EN TIEMPO REAL (Solo si eres Admin o Staff)
     useEffect(() => {
-        if (!db || !user) return;
+        if (!user) return;
 
         // Solo cargamos estadísticas financieras si estamos en vista Admin
         if (userRole === 'admin') {
@@ -74,42 +80,70 @@ export const Dashboard = ({ user, isDarkMode }) => {
             const startOfToday = new Date();
             startOfToday.setHours(0, 0, 0, 0);
 
-            // Escuchamos la colección real de citas
-            const q = query(
-                collection(db, "appointments"),
-                where("status", "==", "completed"),
-                where("date", ">=", startOfToday)
-            );
+            const fetchRevenue = async () => {
+                try {
+                    // Try to get businessId from Context or URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const localBusinessId = businessId || urlParams.get('business_id'); // We'll try to find business id
 
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                const total = snapshot.docs.reduce((acc, doc) => {
-                    const data = doc.data();
-                    return acc + (Number(data.price) || 0);
-                }, 0);
-                setRevenue(total);
-                setLoadingStats(false);
-            }, (error) => {
-                console.warn("Error cargando ventas:", error);
-                setLoadingStats(false);
-            });
-            return () => unsubscribe();
+                    let query = supabase
+                        .from('appointments')
+                        .select('price')
+                        .eq('status', 'completed')
+                        .gte('starts_at', startOfToday.toISOString());
+
+                    if (localBusinessId) {
+                        query = query.eq('business_id', localBusinessId);
+                    }
+
+                    const { data, error } = await query;
+
+                    if (error) throw error;
+
+                    const total = data.reduce((acc, appt) => acc + (Number(appt.price) || 0), 0);
+                    setRevenue(total);
+                } catch (error) {
+                    console.warn("Error cargando ventas:", error);
+                } finally {
+                    setLoadingStats(false);
+                }
+            };
+
+            fetchRevenue();
+
+            const channel = supabase
+                .channel('public:appointments')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, payload => {
+                    fetchRevenue();
+                })
+                .subscribe();
+
+            return () => {
+                supabase.removeChannel(channel);
+            };
         }
     }, [user, userRole]); // Dependencia userRole
 
     // Función para simular venta (Escribe en la DB real)
     const simulateSale = async () => {
-        if (!db) return;
         try {
-            await addDoc(collection(db, "appointments"), {
-                clientName: "Cliente Casual",
-                serviceName: "Corte Rápido",
-                date: new Date(),
+            const urlParams = new URLSearchParams(window.location.search);
+            const localBusinessId = businessId || urlParams.get('business_id');
+
+            let payload = {
+                client_name: "Cliente Casual",
+                service_name: "Corte Rápido",
+                date: new Date().toISOString(),
+                starts_at: new Date().toISOString(),
                 status: "completed",
                 price: 45.00, // Precio real
                 cost: 10.00,
-                staffId: user.uid
-            });
-            alert("💰 ¡Venta de $45 registrada en Firebase!");
+                stylist_id: user.uid
+            };
+            if (localBusinessId) payload.business_id = localBusinessId;
+
+            await supabase.from('appointments').insert(payload);
+            alert("💰 ¡Venta de $45 registrada en Supabase!");
         } catch (e) {
             console.warn("Error guardando venta: ", e);
         }

@@ -3,13 +3,12 @@ import { useData } from '../../../context/DataContext';
 import SearchableDropdown from '../../../components/ui/SearchableDropdown';
 import { useTranslation } from 'react-i18next';
 import feather from 'feather-icons';
-import { db } from '../../../firebase/config';
-import { addDoc, collection, serverTimestamp, Timestamp, query, where, getDocs, setDoc, doc } from 'firebase/firestore';
+import { supabase } from '../../../supabase/client';
 import toast from 'react-hot-toast';
 
 const BookingWidget = () => {
     const { t } = useTranslation();
-    const { services, collaborators, isLoading } = useData();
+    const { services, collaborators, isLoading, businessId } = useData();
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [bookingData, setBookingData] = useState({
@@ -43,25 +42,38 @@ const BookingWidget = () => {
         try {
             // 1. Identificar o Crear Cliente
             let clientId = null;
-            const clientsRef = collection(db, 'clients');
-            const q = query(clientsRef, where("email", "==", bookingData.clientEmail));
-            const querySnapshot = await getDocs(q);
+            // Extraer businessId de la URL si no viene del contexto
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeBusinessId = businessId || urlParams.get('business_id');
 
-            if (!querySnapshot.empty) {
+            const { data: existingClients, error: clientsError } = await supabase
+                .from('clients')
+                .select('id')
+                .eq('email', bookingData.clientEmail)
+                .eq('business_id', activeBusinessId);
+
+            if (clientsError) throw clientsError;
+
+            if (existingClients && existingClients.length > 0) {
                 // Cliente existe
-                clientId = querySnapshot.docs[0].id;
+                clientId = existingClients[0].id;
             } else {
                 // Crear nuevo cliente
-                const newClientRef = doc(collection(db, 'clients'));
-                clientId = newClientRef.id;
-                await setDoc(newClientRef, {
-                    name: bookingData.clientName,
-                    email: bookingData.clientEmail,
-                    role: 'client',
-                    createdAt: serverTimestamp(),
-                    phone: '', // Opcional por ahora
-                    preferences: {}
-                });
+                const { data: newClient, error: createError } = await supabase
+                    .from('clients')
+                    .insert({
+                        name: bookingData.clientName,
+                        email: bookingData.clientEmail,
+                        role: 'client',
+                        phone: '', // Opcional por ahora
+                        preferences: {},
+                        business_id: activeBusinessId
+                    })
+                    .select()
+                    .single();
+
+                if (createError) throw createError;
+                clientId = newClient.id;
             }
 
             // 2. Crear Cita
@@ -75,24 +87,30 @@ const BookingWidget = () => {
             const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
 
             const appointmentData = {
-                serviceId: bookingData.service.id,
-                serviceName: bookingData.service.name,
-                servicePrice: bookingData.service.price,
-                serviceDuration: durationMinutes,
-                stylistId: bookingData.stylist.id,
-                stylistName: bookingData.stylist.name,
-                clientId: clientId,
-                clientName: bookingData.clientName,
-                clientEmail: bookingData.clientEmail,
-                date: Timestamp.fromDate(startDate),
-                endDate: Timestamp.fromDate(endDate),
+                service_id: bookingData.service.id,
+                service_name: bookingData.service.name,
+                service_price: bookingData.service.price,
+                service_duration: durationMinutes,
+                stylist_id: bookingData.stylist.id,
+                stylist_name: bookingData.stylist.name,
+                client_id: clientId,
+                client_name: bookingData.clientName,
+                client_email: bookingData.clientEmail,
+                date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
                 time: bookingData.time,
                 status: 'pending',
-                createdAt: serverTimestamp(),
-                source: 'web_widget'
+                source: 'web_widget',
+                business_id: activeBusinessId,
+                starts_at: startDate.toISOString(),
+                ends_at: endDate.toISOString(),
             };
 
-            await addDoc(collection(db, 'appointments'), appointmentData);
+            const { error: apptError } = await supabase
+                .from('appointments')
+                .insert(appointmentData);
+
+            if (apptError) throw apptError;
 
             toast.success("¡Reserva enviada con éxito!");
 
