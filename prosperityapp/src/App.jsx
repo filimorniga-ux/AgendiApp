@@ -1,6 +1,6 @@
 // ===== INICIO: src/App.jsx (Sprint 108) =====
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { DataProvider } from './context/DataContext';
 import { Toaster } from 'react-hot-toast';
@@ -50,7 +50,7 @@ function App() {
         />
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
-            <Route path="/" element={<WebsiteApp />} />
+            <Route path="/" element={<Navigate to="/app" replace />} />
 
             <Route path="/app" element={
               <ProtectedRoute>
