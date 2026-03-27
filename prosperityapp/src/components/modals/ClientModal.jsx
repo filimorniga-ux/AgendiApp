@@ -1,13 +1,14 @@
-// ===== INICIO: src/components/modals/ClientModal.jsx (Sprint 90) =====
+// ===== src/components/modals/ClientModal.jsx — Migrado a Supabase =====
 import React, { useState, useEffect } from 'react';
 import feather from 'feather-icons';
-import { db } from '../../firebase/config';
-import { doc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { sbCreate, sbUpdate } from '../../supabase/db';
+import { useData } from '../../context/DataContext';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 const ClientModal = ({ isOpen, onClose, clientToEdit }) => {
   const { t } = useTranslation();
+  const { businessId } = useData();
   const [formData, setFormData] = useState({});
   const [activeTab, setActiveTab] = useState('personal');
   const [isSaving, setIsSaving] = useState(false);
@@ -15,8 +16,8 @@ const ClientModal = ({ isOpen, onClose, clientToEdit }) => {
 
   useEffect(() => {
     if (isOpen) {
-      if (isEditMode) { 
-        setFormData(clientToEdit); 
+      if (isEditMode) {
+        setFormData(clientToEdit);
       } else {
         setFormData({
           name: '', lastName: '', docType: 'DNI', docNumber: '',
@@ -36,29 +37,30 @@ const ClientModal = ({ isOpen, onClose, clientToEdit }) => {
   };
 
   const handleSave = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setIsSaving(true);
     try {
-      let docRef;
       const dataToSave = {
         ...formData,
         lastVisit: formData.lastVisit || new Date().toISOString().split('T')[0],
-        updatedAt: serverTimestamp(),
       };
+      // Eliminar campos que no van a Supabase
+      delete dataToSave.id;
+      delete dataToSave.createdAt;
+      delete dataToSave.updatedAt;
 
       if (isEditMode) {
-        docRef = doc(db, 'clients', clientToEdit.id);
-        await setDoc(docRef, dataToSave, { merge: true });
-        toast.success(t('common.success'));
+        const { error } = await sbUpdate('clients', clientToEdit.id, dataToSave);
+        if (error) throw error;
       } else {
-        docRef = collection(db, 'clients');
-        dataToSave.createdAt = serverTimestamp();
-        await addDoc(docRef, dataToSave);
-        toast.success(t('common.success'));
+        const { error } = await sbCreate('clients', dataToSave, businessId);
+        if (error) throw error;
       }
+
+      toast.success(t('common.success'));
       onClose();
     } catch (error) {
-      console.error("Error:", error);
+      console.error('Error guardando cliente:', error);
       toast.error(t('common.error'));
     } finally {
       setIsSaving(false);
@@ -85,7 +87,6 @@ const ClientModal = ({ isOpen, onClose, clientToEdit }) => {
         </nav>
 
         <form onSubmit={handleSave} className="p-6 overflow-y-auto flex-grow space-y-6">
-
           <div className={activeTab === 'personal' ? 'space-y-4' : 'hidden'}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input type="text" name="name" value={formData.name || ''} onChange={handleInputChange} placeholder={t('modals.client.name')} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" required />
@@ -112,7 +113,11 @@ const ClientModal = ({ isOpen, onClose, clientToEdit }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs text-text-muted">{t('modals.client.clientSince')}</label>
-                <p className="font-semibold text-text-main">{formData.createdAt ? new Date(formData.createdAt.seconds * 1000).toLocaleDateString('es-CL') : t('common.notAvailable')}</p>
+                <p className="font-semibold text-text-main">
+                  {formData.createdAt
+                    ? new Date(formData.createdAt).toLocaleDateString('es-CL')
+                    : t('common.notAvailable')}
+                </p>
               </div>
               <div>
                 <label className="text-xs text-text-muted">{t('modals.client.lastVisitReg')}</label>
@@ -120,7 +125,6 @@ const ClientModal = ({ isOpen, onClose, clientToEdit }) => {
               </div>
             </div>
           </div>
-
         </form>
 
         <div className="p-4 border-t border-border-main bg-bg-main/50 flex justify-between flex-shrink-0">

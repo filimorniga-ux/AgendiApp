@@ -2,8 +2,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
-import { db } from '../firebase/config';
-import { doc, writeBatch } from 'firebase/firestore';
+import { sbDelete, sbUpdate } from '../supabase/db';
 import {
   DndContext,
   closestCenter,
@@ -89,7 +88,7 @@ const ColaboradoresPage = () => {
   const [collaboratorToEdit, setCollaboratorToEdit] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('custom'); // 'custom' | 'alphabetical'
-  const { collaborators, isLoading, deleteCollaborator } = useData();
+  const { collaborators, isLoading } = useData();
   const loading = isLoading;
   const error = null;
 
@@ -152,30 +151,24 @@ const ColaboradoresPage = () => {
 
   const handleDelete = async (collaborator) => {
     if (window.confirm(t('common.confirmDelete'))) {
-      await deleteCollaborator(collaborator.id);
+      const { error } = await sbDelete('collaborators', collaborator.id);
+      if (error) console.error('Error eliminando colaborador:', error);
     }
   };
 
   const handleDragEnd = async (event) => {
     const { active, over } = event;
-
     if (active.id !== over.id) {
       setCollabList((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
-
         const newItems = arrayMove(items, oldIndex, newIndex);
-
-        // Update Firestore
-        const batch = writeBatch(db);
-        newItems.forEach((collab, index) => {
-          // Update local object
+        // Actualizar Supabase en paralelo
+        const updates = newItems.map((collab, index) => {
           collab.displayOrder = index;
-          const docRef = doc(db, 'collaborators', collab.id);
-          batch.update(docRef, { displayOrder: index });
+          return sbUpdate('collaborators', collab.id, { displayOrder: index });
         });
-        batch.commit().catch(console.error);
-
+        Promise.all(updates).catch(console.error);
         return newItems;
       });
     }

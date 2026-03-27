@@ -3,8 +3,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
 import ServiceModal from '../components/modals/ServiceModal';
-import { db } from '../firebase/config';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next'; // <-- Importar
 
@@ -89,7 +88,8 @@ const PreciosPage = () => {
   const handleDeleteService = async (service) => {
     if (!window.confirm(t('common.confirmDelete'))) return;
     try {
-      await deleteDoc(doc(db, 'services', service.id));
+      const { error } = await sbDelete('services', service.id);
+      if (error) throw error;
       toast.success(t('common.success'));
     } catch (err) {
       console.error(err);

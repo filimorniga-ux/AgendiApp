@@ -3,8 +3,7 @@ import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
 import ClientModal from '../components/modals/ClientModal';
 import ContactImportModal from '../components/modals/ContactImportModal';
-import { db } from '../firebase/config';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -48,10 +47,11 @@ const ClientesPage = () => {
   const handleDeleteClient = async (client) => {
     if (!window.confirm(t('clients.confirmDelete', { clientName: client.name }))) return;
     try {
-      await deleteDoc(doc(db, 'clients', client.id));
+      const { error } = await sbDelete('clients', client.id);
+      if (error) throw error;
       toast.success(t('clients.deleteSuccess'));
     } catch (err) {
-      console.error("Error eliminando cliente:", err);
+      console.error('Error eliminando cliente:', err);
       toast.error(t('clients.deleteError'));
     }
   };

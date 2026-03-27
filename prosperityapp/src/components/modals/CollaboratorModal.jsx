@@ -1,15 +1,15 @@
-// ===== INICIO: src/components/modals/CollaboratorModal.jsx (Sprint 91) =====
 import React, { useState, useEffect } from 'react';
 import feather from 'feather-icons';
-import { db } from '../../firebase/config';
-import { doc, setDoc, addDoc, collection, serverTimestamp, deleteDoc, getDocs, query, runTransaction } from 'firebase/firestore';
+import { sbCreate, sbUpdate, sbDelete, sbGetAll } from '../../supabase/db';
+import { useData } from '../../context/DataContext';
 import toast from 'react-hot-toast';
-import { useTranslation } from 'react-i18next'; // <-- Importar
-import { useStorage } from '../../hooks/useStorage'; // Import hook
+import { useTranslation } from 'react-i18next';
+import { useStorage } from '../../hooks/useStorage';
 
 const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
-  const { t } = useTranslation(); // <-- Hook
-  const { uploadFile, progress, isUploading, error: uploadError } = useStorage(); // Use hook
+  const { t } = useTranslation();
+  const { businessId } = useData();
+  const { uploadFile, progress, isUploading } = useStorage();
   const [formData, setFormData] = useState({});
   const [activeTab, setActiveTab] = useState('personal');
   const [isSaving, setIsSaving] = useState(false);
@@ -65,26 +65,28 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
     setIsSaving(true);
     try {
       if (!isEditMode) {
-        await runTransaction(db, async (transaction) => {
-          const collRef = collection(db, 'collaborators');
-          const q = query(collRef);
-          const querySnapshot = await getDocs(q);
-          querySnapshot.forEach((docSnap) => {
-            const oldOrder = docSnap.data().displayOrder || 0;
-            transaction.update(docSnap.ref, { displayOrder: oldOrder + 1 });
-          });
-          const newDocRef = doc(collection(db, 'collaborators'));
-          transaction.set(newDocRef, { ...formData, displayOrder: 0, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-        });
+        // Incrementar displayOrder de todos los existentes y crear el nuevo al inicio
+        const { data: existing } = await sbGetAll('collaborators', businessId);
+        if (existing?.length > 0) {
+          await Promise.all(
+            existing.map((c) => sbUpdate('collaborators', c.id, { displayOrder: (c.display_order ?? 0) + 1 }))
+          );
+        }
+        const payload = { ...formData, displayOrder: 0 };
+        delete payload.id;
+        const { error } = await sbCreate('collaborators', payload, businessId);
+        if (error) throw error;
         toast.success(t('collaborators.alerts.created'));
       } else {
-        const docRef = doc(db, 'collaborators', collaboratorToEdit.id);
-        await setDoc(docRef, { ...formData, updatedAt: serverTimestamp() }, { merge: true });
+        const payload = { ...formData };
+        delete payload.id;
+        const { error } = await sbUpdate('collaborators', collaboratorToEdit.id, payload);
+        if (error) throw error;
         toast.success(t('collaborators.alerts.updated'));
       }
       onClose();
     } catch (error) {
-      console.error("Error:", error);
+      console.error('Error:', error);
       toast.error(t('collaborators.alerts.errorSave'));
     } finally {
       setIsSaving(false);
@@ -93,14 +95,15 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
 
   const handleDelete = async () => {
     if (!isEditMode) return;
-    if (!window.confirm(t('collaborators.alerts.confirmDelete', { name: formData.name }))) { return; }
+    if (!window.confirm(t('collaborators.alerts.confirmDelete', { name: formData.name }))) return;
     setIsSaving(true);
     try {
-      await deleteDoc(doc(db, 'collaborators', collaboratorToEdit.id));
+      const { error } = await sbDelete('collaborators', collaboratorToEdit.id);
+      if (error) throw error;
       toast.success(t('collaborators.alerts.deleted'));
       onClose();
     } catch (error) {
-      console.error("Error:", error);
+      console.error('Error:', error);
       toast.error(t('collaborators.alerts.errorDelete'));
     } finally {
       setIsSaving(false);
