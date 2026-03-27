@@ -168,7 +168,7 @@ const ColaboradoresPage = () => {
           collab.displayOrder = index;
           return sbUpdate('collaborators', collab.id, { displayOrder: index });
         });
-        Promise.all(updates).catch(console.error);
+        Promise.all(updates).catch(console.warn);
         return newItems;
       });
     }

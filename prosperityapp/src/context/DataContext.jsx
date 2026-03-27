@@ -1,9 +1,9 @@
 // ===== src/context/DataContext.jsx — Firebase reads + Supabase writes =====
 import React, { createContext, useContext, useMemo } from 'react';
-import { useCollection } from '../hooks/useCollection';
+import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import { auth, db } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, where } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { supabase } from '../supabase/client';
 
 const DataContext = createContext();
@@ -96,22 +96,22 @@ export const DataProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // ── Colecciones Firebase (reads — sin cambio) ──────────────────
-  const { data: clients,            loading: loadingClients }     = useCollection('clients');
-  const { data: collaborators,      loading: loadingCollabs }     = useCollection('collaborators', 'displayOrder');
-  const { data: services,           loading: loadingServices }    = useCollection('services');
-  const { data: technicalInventory, loading: loadingTech }        = useCollection('technicalInventory');
-  const { data: retailInventory,    loading: loadingRetail }      = useCollection('retailInventory');
-  const { data: config,             loading: loadingConfig }      = useCollection('config');
-  const { data: movements,          loading: loadingMovements }   = useCollection('movements');
+  // ── Colecciones Supabase ─────────────────────────────────────────
+  const { data: clients,            loading: loadingClients }     = useSupabaseCollection('clients');
+  const { data: collaborators,      loading: loadingCollabs }     = useSupabaseCollection('collaborators'); // El hook ordena por created_at por defecto. Si se necesita orderBy específico, se agregaría al hook en el futuro.
+  const { data: services,           loading: loadingServices }    = useSupabaseCollection('services');
+  const { data: technicalInventory, loading: loadingTech }        = useSupabaseCollection('technical_inventory');
+  const { data: retailInventory,    loading: loadingRetail }      = useSupabaseCollection('retail_inventory');
+  const { data: config,             loading: loadingConfig }      = useSupabaseCollection('config');
+  const { data: movements,          loading: loadingMovements }   = useSupabaseCollection('movements');
 
   const appointmentsConstraints = useMemo(() => {
     if (!user || !userRole) return [];
     if (['admin', 'owner'].includes(userRole)) return [];
-    return [where('stylistId', '==', user.uid)];
+    return [{ field: 'stylist_id', op: 'eq', value: user.uid }];
   }, [user, userRole]);
 
-  const { data: appointments, loading: loadingAppointments } = useCollection('appointments', appointmentsConstraints);
+  const { data: appointments, loading: loadingAppointments } = useSupabaseCollection('appointments', appointmentsConstraints);
 
   const isLoading =
     loadingClients || loadingCollabs || loadingServices ||
