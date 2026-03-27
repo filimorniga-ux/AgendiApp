@@ -1,27 +1,22 @@
-// ===== INICIO: src/firebase/config.js (FINAL) =====
-
-import { initializeApp } from "firebase/app";
+// ===== src/firebase/config.js — Credenciales via variables de entorno =====
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-// Configuración de Firebase para "Prosperity Suite"
 const firebaseConfig = {
-  apiKey: "AIzaSyA_DRItdey17fAAvPLQxrOBzK7kHkJXzo0",
-  authDomain: "prosperitysuiteapp.firebaseapp.com",
-  projectId: "prosperitysuiteapp",
-  storageBucket: "prosperitysuiteapp.firebasestorage.app",
-  messagingSenderId: "932761267995",
-  appId: "1:932761267995:web:2f85d39a64212fe8baadbe",
-  measurementId: "G-EBXC1SEV95"
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// Inicializar Firebase
-const app = initializeApp(firebaseConfig);
+// Reutiliza la instancia si firebase.ts ya la inicializó
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-// Exportar la instancia de Firestore para usarla en la aplicación
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+export const db      = getFirestore(app);
+export const auth    = getAuth(app);
 export const storage = getStorage(app);
-
-// ===== FIN: src/firebase/config.js (FINAL) =====

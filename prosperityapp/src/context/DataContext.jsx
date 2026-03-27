@@ -1,32 +1,23 @@
-// ===== INICIO: src/context/DataContext.jsx =====
+// ===== src/context/DataContext.jsx =====
 import React, { createContext, useContext, useMemo } from 'react';
 import { useCollection } from '../hooks/useCollection';
-import { auth, db } from '../firebase/firebase'; // Importar auth y db
+import { auth, db } from '../firebase/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, where, orderBy } from 'firebase/firestore';
+import { doc, getDoc, where } from 'firebase/firestore';
 
-// 1. Crear el Contexto
 const DataContext = createContext();
 
-// 2. Crear el "Proveedor" (El "Cerebro")
 export const DataProvider = ({ children }) => {
-  // 3. Cargar TODAS las colecciones principales UNA SOLA VEZ
   const [user, setUser] = React.useState(null);
-  const [realRole, setRealRole] = React.useState(null); // Store the REAL role from DB
-  const [simulatedRole, setSimulatedRole] = React.useState(null); // Store the SIMULATED role
+  const [realRole, setRealRole] = React.useState(null);
+  const [simulatedRole, setSimulatedRole] = React.useState(null);
   const [loadingAuth, setLoadingAuth] = React.useState(true);
 
-  // Derived userRole: Simulated takes precedence over Real
   const userRole = simulatedRole || realRole;
+  const updateRoleSimulation = (role) => setSimulatedRole(role);
 
-  const updateRoleSimulation = (role) => {
-    setSimulatedRole(role);
-  };
-
-  // Global Currency State
   const [currentLocale, setCurrentLocale] = React.useState('es-CL');
   const [currentCurrencySymbol, setCurrentCurrencySymbol] = React.useState('$');
-
   const setCurrentCurrency = (locale, symbol) => {
     setCurrentLocale(locale);
     setCurrentCurrencySymbol(symbol);
@@ -43,97 +34,54 @@ export const DataProvider = ({ children }) => {
             setRealRole(userDoc.data().role);
           } else {
             console.warn("Usuario autenticado pero sin documento en 'users'");
-            setRealRole('client'); // Default role
+            setRealRole('client');
           }
         } catch (error) {
           console.error("Error fetching user role:", error);
         }
       } else {
         setRealRole(null);
-        setSimulatedRole(null); // Reset simulation on logout
+        setSimulatedRole(null);
       }
       setLoadingAuth(false);
     });
     return () => unsubscribe();
   }, []);
 
-  const { data: clients, loading: loadingClients } = useCollection('clients');
-  const { data: collaborators, loading: loadingCollabs } = useCollection('collaborators', 'displayOrder');
-  const { data: services, loading: loadingServices } = useCollection('services');
-  const { data: technicalInventory, loading: loadingTech } = useCollection('technicalInventory');
-  const { data: retailInventory, loading: loadingRetail } = useCollection('retailInventory');
-  const { data: config, loading: loadingConfig } = useCollection('config');
-  const { data: movements, loading: loadingMovements } = useCollection('movements');
+  const { data: clients,            loading: loadingClients }     = useCollection('clients');
+  const { data: collaborators,      loading: loadingCollabs }     = useCollection('collaborators', 'displayOrder');
+  const { data: services,           loading: loadingServices }    = useCollection('services');
+  const { data: technicalInventory, loading: loadingTech }        = useCollection('technicalInventory');
+  const { data: retailInventory,    loading: loadingRetail }      = useCollection('retailInventory');
+  const { data: config,             loading: loadingConfig }      = useCollection('config');
+  const { data: movements,          loading: loadingMovements }   = useCollection('movements');
 
-  // 3.1. Cargar CITAS con seguridad (Filtro por Rol)
   const appointmentsConstraints = useMemo(() => {
-    if (!user || !userRole) return []; // Si no hay usuario, no cargar nada (o array vacío)
-
-    if (['admin', 'owner'].includes(userRole)) {
-      // Admin/Owner: Ver todo (podríamos limitar por fecha si son muchas)
-      return [];
-    } else {
-      // Staff/Stylist: Solo sus citas
-      return [where('stylistId', '==', user.uid)];
-    }
+    if (!user || !userRole) return [];
+    if (['admin', 'owner'].includes(userRole)) return [];
+    return [where('stylistId', '==', user.uid)];
   }, [user, userRole]);
 
   const { data: appointments, loading: loadingAppointments } = useCollection('appointments', appointmentsConstraints);
 
-  // 4. Determinar si la app está "lista"
   const isLoading =
-    loadingClients ||
-    loadingCollabs ||
-    loadingServices ||
-    loadingTech ||
-    loadingRetail ||
-    loadingConfig ||
-    loadingConfig ||
-    loadingMovements ||
-    loadingAppointments ||
-    loadingAuth; // Incluimos loadingAuth
+    loadingClients || loadingCollabs || loadingServices ||
+    loadingTech || loadingRetail || loadingConfig ||
+    loadingMovements || loadingAppointments || loadingAuth;
 
-  // 5. Crear el objeto de valor que compartiremos
   const value = useMemo(() => ({
     isLoading,
-    clients,
-    collaborators,
-    services,
-    technicalInventory,
-    retailInventory,
-    config,
-    movements,
-    appointments,
-    user,
-    userRole,
-    realRole, // Export realRole if needed for UI checks
-    updateRoleSimulation, // Export the updater
+    clients, collaborators, services, technicalInventory,
+    retailInventory, config, movements, appointments,
+    user, userRole, realRole,
+    updateRoleSimulation,
     loadingAuth,
-    // Global Currency
-    currentLocale,
-    currentCurrencySymbol,
-    setCurrentCurrency,
-    // (Podemos añadir datos filtrados/calculados aquí más tarde)
-
+    currentLocale, currentCurrencySymbol, setCurrentCurrency,
   }), [
-    isLoading,
-    clients,
-    collaborators,
-    services,
-    technicalInventory,
-    retailInventory,
-    config,
-    movements,
-    appointments,
-    user,
-    userRole,
-    realRole,
-    simulatedRole, // Add to dependency array
-    loadingAuth,
-    // Global Currency
-    currentLocale,
-    currentCurrencySymbol,
-    setCurrentCurrency,
+    isLoading, clients, collaborators, services, technicalInventory,
+    retailInventory, config, movements, appointments,
+    user, userRole, realRole, simulatedRole, loadingAuth,
+    currentLocale, currentCurrencySymbol,
   ]);
 
   return (
@@ -143,7 +91,6 @@ export const DataProvider = ({ children }) => {
   );
 };
 
-// 6. Crear un hook personalizado para consumir los datos fácilmente
 export const useData = () => {
   const context = useContext(DataContext);
   if (context === undefined) {
