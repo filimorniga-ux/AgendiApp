@@ -3,8 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
 import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
-import { db } from '../firebase/config';
-import { collection, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { sbCreate, sbUpdate, sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import SearchableDropdown from '../components/ui/SearchableDropdown';
@@ -16,6 +15,7 @@ const PedidosPage = () => {
     const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState('suppliers');
     const { uploadFile, progress, isUploading } = useStorage();
+    const { businessId } = useData();
 
     const { data: suppliersData, loading: loadSup } = useSupabaseCollection('suppliers');
     const { data: invoicesData, loading: loadInv } = useSupabaseCollection('invoices');
@@ -117,34 +117,27 @@ const PedidosPage = () => {
         e.preventDefault();
         try {
             if (modalType === 'supplier') {
-                await addDoc(collection(db, 'suppliers'), { ...formData, createdAt: serverTimestamp() });
+                await sbCreate('suppliers', { ...formData }, businessId);
                 toast.success(t('common.success'));
             } else if (modalType === 'invoice') {
-                let invoiceDate = new Date();
-                if (formData.date) {
-                    const parts = formData.date.split('-');
-                    invoiceDate = new Date(parts[0], parts[1] - 1, parts[2]);
-                }
-                await addDoc(collection(db, 'invoices'), { ...formData, date: invoiceDate, createdAt: serverTimestamp() });
+                let invoiceDate = new Date().toISOString().split('T')[0];
+                if (formData.date) invoiceDate = formData.date;
+                await sbCreate('invoices', { ...formData, date: invoiceDate }, businessId);
                 toast.success(t('common.success'));
             } else if (modalType === 'debt') {
                 const total = parseFloat(formData.amount);
                 const initial = parseFloat(formData.initialPay) || 0;
                 const pending = total - initial;
-
-                // Use generated installments or create default if none
                 let finalInstallments = generatedInstallments;
-
-                await addDoc(collection(db, 'debts'), {
+                await sbCreate('debts', {
                     ...formData,
                     totalAmount: total,
                     paidAmount: initial,
                     pendingAmount: pending,
                     status: pending <= 0 ? 'paid' : 'pending',
-                    history: initial > 0 ? [{ date: new Date(), amount: initial, type: 'initial' }] : [],
+                    history: initial > 0 ? [{ date: new Date().toISOString(), amount: initial, type: 'initial' }] : [],
                     installments: finalInstallments,
-                    createdAt: serverTimestamp()
-                });
+                }, businessId);
                 toast.success(t('common.success'));
             }
             setIsModalOpen(false);
@@ -159,10 +152,8 @@ const PedidosPage = () => {
         if (!selectedDebt || !formData.installmentId) return;
 
         try {
-            const debtRef = doc(db, 'debts', selectedDebt.id);
             const amount = parseFloat(formData.paymentAmount);
 
-            // Update installments
             const updatedInstallments = selectedDebt.installments?.map(inst => {
                 if (inst.id === formData.installmentId) {
                     return {
@@ -176,9 +167,8 @@ const PedidosPage = () => {
                 return inst;
             }) || [];
 
-            // Update history
             const newHistoryItem = {
-                date: new Date(),
+                date: new Date().toISOString(),
                 amount: amount,
                 type: 'installment',
                 installmentId: formData.installmentId,
@@ -190,7 +180,7 @@ const PedidosPage = () => {
             const newPendingAmount = (selectedDebt.totalAmount || 0) - newPaidAmount;
             const newStatus = newPendingAmount <= 0 ? 'paid' : 'pending';
 
-            await updateDoc(debtRef, {
+            await sbUpdate('debts', selectedDebt.id, {
                 installments: updatedInstallments,
                 history: [...(selectedDebt.history || []), newHistoryItem],
                 paidAmount: newPaidAmount,
@@ -200,8 +190,6 @@ const PedidosPage = () => {
 
             toast.success("Cuota pagada correctamente");
             setIsModalOpen(false);
-            // Refresh selected debt locally if needed, but useCollection should handle it
-            // We might need to close modal or update selectedDebt state if we want to keep it open
             setSelectedDebt(null);
         } catch (error) {
             console.warn(error);
@@ -212,7 +200,7 @@ const PedidosPage = () => {
     const handleDelete = async (collectionName, id) => {
         if (!window.confirm(t('common.confirmDelete'))) return;
         try {
-            await deleteDoc(doc(db, collectionName, id));
+            await sbDelete(collectionName, id);
             toast.success(t('common.success'));
         } catch (e) { toast.error(t('common.error')); }
     };

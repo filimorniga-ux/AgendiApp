@@ -37,3 +37,6 @@ Thumbs.db
 
 # Vite
 *.local
+migration/serviceAccountKey.json
+migration/package-lock.json
+migration/package.json.tmp

@@ -4,8 +4,7 @@ import { useData } from '../context/DataContext';
 import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import { useTranslation } from 'react-i18next';
 import { useStorage } from '../hooks/useStorage';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { sbUpdate } from '../supabase/db';
 import toast from 'react-hot-toast';
 
 const formatCurrency = (value) => {
@@ -44,9 +43,8 @@ const GiftCardPage = () => {
     try {
       const url = await uploadFile(file, path);
 
-      const cardRef = doc(db, 'giftCards', cardId);
       const updateField = type === 'purchase' ? 'receiptUrl' : 'redemptionReceiptUrl';
-      await updateDoc(cardRef, { [updateField]: url });
+      await sbUpdate('gift_cards', cardId, { [updateField]: url });
 
       toast.success(`${type === 'purchase' ? 'Comprobante de compra' : 'Evidencia de canje'} subido correctamente`);
     } catch (err) {

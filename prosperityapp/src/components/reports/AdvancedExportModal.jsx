@@ -1,17 +1,15 @@
-// ===== INICIO: src/components/reports/AdvancedExportModal.jsx =====
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as XLSX from 'xlsx';
 import feather from 'feather-icons';
 import { useData } from '../../context/DataContext';
 import { useSupabaseCollection } from '../../hooks/useSupabaseCollection';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { db } from '../../firebase/config';
+import { supabase } from '../../supabase/client';
 import toast from 'react-hot-toast';
 
 const AdvancedExportModal = ({ onClose }) => {
     const { t } = useTranslation();
-    const { clients, collaborators, technicalInventory, retailInventory, config } = useData();
+    const { clients, collaborators, technicalInventory, retailInventory, config, businessId } = useData();
 
     // State for Period Selection
     const [periodType, setPeriodType] = useState('day'); // day, month, year, custom, payroll, closing
@@ -50,8 +48,6 @@ const AdvancedExportModal = ({ onClose }) => {
         try {
             // 1. Fetch Movements based on Period
             let startDate, endDate;
-            const movementsRef = collection(db, 'movements');
-            let q = query(movementsRef, orderBy('date', 'desc'));
 
             if (periodType === 'day') {
                 startDate = new Date(selectedDate);
@@ -90,10 +86,17 @@ const AdvancedExportModal = ({ onClose }) => {
             }
 
             // Fetch logic for movements (Common for time-based)
-            if (['day', 'month', 'year', 'custom'].includes(periodType)) {
-                q = query(movementsRef, where('date', '>=', startDate), where('date', '<=', endDate), orderBy('date', 'desc'));
-                const querySnapshot = await getDocs(q);
-                movements = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            if (['day', 'month', 'year', 'custom'].includes(periodType) && startDate && endDate) {
+                const { data: rows, error: movErr } = await supabase
+                    .from('movements')
+                    .select('*')
+                    .eq('business_id', businessId)
+                    .gte('date', startDate.toISOString().split('T')[0])
+                    .lte('date', endDate.toISOString().split('T')[0])
+                    .order('date', { ascending: false });
+
+                if (movErr) throw movErr;
+                movements = rows || [];
             }
 
             // --- SHEET 1: RESUMEN GERENCIAL ---

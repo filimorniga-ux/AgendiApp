@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next';
 import feather from 'feather-icons';
 import Papa from 'papaparse';
 import VCard from 'vcf';
-import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
-import { db } from '../../firebase/config';
+import { supabase } from '../../supabase/client';
+import { sbCreate } from '../../supabase/db';
+import { useData } from '../../context/DataContext';
 import toast from 'react-hot-toast';
 
 const ContactImportModal = ({ isOpen, onClose, onImportComplete }) => {
     const { t } = useTranslation();
+    const { businessId } = useData();
     const [isDragging, setIsDragging] = useState(false);
     const [parsedContacts, setParsedContacts] = useState([]);
     const [isImporting, setIsImporting] = useState(false);
@@ -124,28 +126,29 @@ const ContactImportModal = ({ isOpen, onClose, onImportComplete }) => {
         let errors = 0;
 
         try {
-            // Get existing clients to check for duplicates
-            const clientsSnapshot = await getDocs(collection(db, 'clients'));
+            // Get existing phones from Supabase to check for duplicates
+            const { data: existingClients } = await supabase
+                .from('clients')
+                .select('phone')
+                .eq('business_id', businessId);
+
             const existingPhones = new Set(
-                clientsSnapshot.docs.map(doc => doc.data().phone).filter(Boolean)
+                (existingClients || []).map(c => c.phone).filter(Boolean)
             );
 
             for (const contact of parsedContacts) {
                 try {
-                    // Skip if duplicate
                     if (contact.phone && existingPhones.has(contact.phone)) {
                         duplicates++;
                         continue;
                     }
 
-                    // Import contact
-                    await addDoc(collection(db, 'clients'), {
+                    await sbCreate('clients', {
                         name: contact.name,
                         phone: contact.phone || '',
                         email: contact.email || '',
-                        createdAt: new Date(),
                         source: contact.source
-                    });
+                    }, businessId);
 
                     imported++;
                     existingPhones.add(contact.phone);

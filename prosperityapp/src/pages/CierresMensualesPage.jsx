@@ -1,11 +1,9 @@
-// ===== INICIO: src/pages/CierresMensualesPage.jsx (Sprint 91) =====
 import React, { useState, useMemo, useEffect } from 'react';
 import feather from 'feather-icons';
 import { useMonthlyRecords } from '../hooks/useMonthlyRecords';
 import { useData } from '../context/DataContext';
 import MonthlyRecordModal from '../components/modals/MonthlyRecordModal';
-import { db } from '../firebase/config';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import * as XLSX from 'xlsx';
@@ -110,8 +108,7 @@ const CierresMensualesPage = () => {
   const handleDeleteRecord = async (record) => {
     if (!window.confirm(t('common.confirmDelete'))) return;
     try {
-      const docRef = doc(db, 'monthlyClosings', selectedMonth, 'records', record.id);
-      await deleteDoc(docRef);
+      await sbDelete('monthly_closing_records', record.id);
       toast.success(t('common.success'));
     } catch (error) {
       console.warn("Error:", error);

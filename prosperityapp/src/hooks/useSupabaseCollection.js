@@ -7,10 +7,11 @@ import { useData } from '../context/DataContext';
  * Hook que reemplaza useCollection (Firebase) con Supabase.
  * Mantiene la misma API: { data, loading, error }
  *
- * @param {string} tableName - nombre de la tabla en Supabase (snake_case)
- * @param {Array} filters    - array de objetos { field, op, value } (opcional)
+ * @param {string} tableName  - nombre de la tabla en Supabase (snake_case)
+ * @param {Array}  filters    - array de objetos { field, op, value } (opcional)
+ * @param {Object} orderBy    - objeto { column: string, ascending: boolean } (opcional)
  */
-export const useSupabaseCollection = (tableNameInput, filters = []) => {
+export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = null) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,8 +48,12 @@ export const useSupabaseCollection = (tableNameInput, filters = []) => {
           });
         }
 
-        // Orden por defecto: más reciente primero
-        query = query.order('created_at', { ascending: false });
+        // Orden: usar orderBy personalizado o fallback a created_at DESC
+        if (orderBy?.column) {
+          query = query.order(orderBy.column, { ascending: orderBy.ascending ?? true });
+        } else {
+          query = query.order('created_at', { ascending: false });
+        }
 
         const { data: rows, error: err } = await query;
 
@@ -94,7 +99,8 @@ export const useSupabaseCollection = (tableNameInput, filters = []) => {
         channelRef.current = null;
       }
     };
-  }, [tableName, businessId, JSON.stringify(filters)]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableName, businessId, JSON.stringify(filters), JSON.stringify(orderBy)]);
 
   return { data, loading, error };
 };
