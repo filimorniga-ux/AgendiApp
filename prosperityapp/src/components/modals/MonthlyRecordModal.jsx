@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { sbCreate, sbUpdate } from '../../supabase/db';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { parseDate } from '../../lib/dateUtils';
 
 const MonthlyRecordModal = ({ isOpen, onClose, recordToEdit, yearMonth, businessId }) => {
   const { t } = useTranslation();
@@ -26,7 +27,12 @@ const MonthlyRecordModal = ({ isOpen, onClose, recordToEdit, yearMonth, business
   useEffect(() => {
     if (isOpen) {
       if (isEditMode) {
-        setFormData(recordToEdit);
+        setFormData({
+          ...recordToEdit,
+          date: recordToEdit.date ? parseDate(recordToEdit.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          category: recordToEdit.category_key ?? recordToEdit.categoryKey ?? categories[0].key,
+          amount: recordToEdit.amount_value ?? recordToEdit.amountValue ?? recordToEdit.amount ?? '',
+        });
       } else {
         setFormData({
           date: new Date().toISOString().split('T')[0],
@@ -49,17 +55,17 @@ const MonthlyRecordModal = ({ isOpen, onClose, recordToEdit, yearMonth, business
     
     try {
       const dataToSave = {
-        yearMonth,
+        year_month: yearMonth || formData.yearMonth || formData.year_month,
         date: formData.date,
         description: formData.description,
-        categoryKey: formData.category,
-        amountValue: parseFloat(formData.amount) || 0,
+        category_key: formData.category,
+        amount_value: parseFloat(formData.amount) || 0,
       };
       if (isEditMode) {
-        const { error } = await sbUpdate('monthlyClosingRecords', recordToEdit.id, dataToSave);
+        const { error } = await sbUpdate('monthly_closing_records', recordToEdit.id, dataToSave);
         if (error) throw error;
       } else {
-        const { error } = await sbCreate('monthlyClosingRecords', dataToSave, businessId);
+        const { error } = await sbCreate('monthly_closing_records', dataToSave, businessId);
         if (error) throw error;
       }
       toast.success(t('common.success'));

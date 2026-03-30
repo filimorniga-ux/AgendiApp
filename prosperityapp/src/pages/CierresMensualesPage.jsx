@@ -7,6 +7,7 @@ import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import * as XLSX from 'xlsx';
+import { parseDate } from '../lib/dateUtils';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -14,8 +15,16 @@ const formatCurrency = (value) => {
 };
 
 const MonthlyColumn = ({ title, icon, records = [], categoryKey, onEdit, onDelete }) => {
-  const filteredRecords = records.filter(r => (r[categoryKey] || 0) !== 0);
-  const total = filteredRecords.reduce((sum, r) => sum + (r[categoryKey] || 0), 0);
+  const filteredRecords = records.filter(r => {
+    // legacy support vs current column structure
+    const recCat = r.category_key ?? r.categoryKey;
+    if (recCat) return recCat === categoryKey;
+    return (r[categoryKey] || 0) !== 0;
+  });
+  const total = filteredRecords.reduce((sum, r) => {
+    const val = r.amount_value ?? r.amountValue ?? r.amount ?? r[categoryKey] ?? 0;
+    return sum + (parseFloat(val) || 0);
+  }, 0);
   const locale = 'es-CL';
   return (
     <div className="bg-bg-secondary rounded-lg p-4 flex flex-col min-w-[380px] lg:min-w-[420px] max-h-[75vh] border border-border-main transition-all duration-300 print:min-w-0 print:max-h-none print:border-gray-300 print:bg-white print:break-inside-avoid">
@@ -26,9 +35,11 @@ const MonthlyColumn = ({ title, icon, records = [], categoryKey, onEdit, onDelet
         <div className="space-y-1">
           {filteredRecords.length > 0 ? filteredRecords.map(record => (
             <div key={record.id} className="grid grid-cols-[auto,1fr,auto,auto] gap-x-2 items-center text-sm p-2 border-b border-border-main/50 hover:bg-bg-tertiary rounded-md group">
-              <span className="text-text-muted">{new Date(record.date + 'T00:00:00').toLocaleDateString(locale, { day: '2-digit', month: '2-digit' })}</span>
+              <span className="text-text-muted">{parseDate(record.date).toLocaleDateString(locale, { day: '2-digit', month: '2-digit' })}</span>
               <span className="truncate text-text-secondary" title={record.description}>{record.description}</span>
-              <span className="font-semibold text-right w-20 text-text-main">{formatCurrency(record[categoryKey])}</span>
+              <span className="font-semibold text-right w-20 text-text-main">
+                {formatCurrency(parseFloat(record.amount_value ?? record.amountValue ?? record.amount ?? record[categoryKey]) || 0)}
+              </span>
               <div className="opacity-0 group-hover:opacity-100 transition-opacity flex print:hidden">
                 <button onClick={() => onEdit(record)} className="p-1 text-text-muted hover:text-accent">
                   <i data-feather="edit-2" className="w-3 h-3"></i>
@@ -77,9 +88,15 @@ const CierresMensualesPage = () => {
     const totals = {};
     Object.keys(monthlyCategories).forEach(key => totals[key] = 0);
     (records || []).forEach(record => {
-      Object.keys(monthlyCategories).forEach(key => {
-        totals[key] += (parseFloat(record[key]) || 0);
-      });
+      const recCat = record.category_key ?? record.categoryKey;
+      if (recCat && totals[recCat] !== undefined) {
+        totals[recCat] += (parseFloat(record.amount_value ?? record.amountValue ?? record.amount) || 0);
+      } else {
+        // legacy structure:
+        Object.keys(monthlyCategories).forEach(key => {
+          totals[key] += (parseFloat(record[key]) || 0);
+        });
+      }
     });
     const totalIncome = totals.cashUnsealed + totals.cashWeekly + totals.transfers + totals.cards;
     const totalOutgoings = totals.partnersAdvances + totals.monthlyOutgoings;
@@ -123,28 +140,36 @@ const CierresMensualesPage = () => {
   const handleExport = () => {
     try {
       const wb = XLSX.utils.book_new();
-      const monthName = new Date(selectedMonth + '-01').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+      const monthDate = parseDate(selectedMonth + '-01');
+      const monthName = monthDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+
+      // Helper to sum a specific category securely across formats
+      const sumCategory = (key) => records.reduce((s, r) => {
+        const recCat = r.category_key ?? r.categoryKey;
+        if (recCat) return s + (recCat === key ? (parseFloat(r.amount_value ?? r.amountValue ?? r.amount) || 0) : 0);
+        return s + (parseFloat(r[key]) || 0);
+      }, 0);
 
       // Sheet 1: Resumen General
       const summaryData = [
         ['CIERRE MENSUAL - ' + monthName.toUpperCase()],
         [''],
         ['INGRESOS'],
-        [t('closings.categories.cashUnsealed'), summary.totalIncome > 0 ? records.reduce((s, r) => s + (r.cashUnsealed || 0), 0) : 0],
-        [t('closings.categories.cashWeekly'), summary.totalIncome > 0 ? records.reduce((s, r) => s + (r.cashWeekly || 0), 0) : 0],
-        [t('closings.categories.transfers'), summary.totalIncome > 0 ? records.reduce((s, r) => s + (r.transfers || 0), 0) : 0],
-        [t('closings.categories.cards'), summary.totalIncome > 0 ? records.reduce((s, r) => s + (r.cards || 0), 0) : 0],
+        [t('closings.categories.cashUnsealed'), summary.totalIncome > 0 ? sumCategory('cashUnsealed') : 0],
+        [t('closings.categories.cashWeekly'), summary.totalIncome > 0 ? sumCategory('cashWeekly') : 0],
+        [t('closings.categories.transfers'), summary.totalIncome > 0 ? sumCategory('transfers') : 0],
+        [t('closings.categories.cards'), summary.totalIncome > 0 ? sumCategory('cards') : 0],
         ['TOTAL INGRESOS', summary.totalIncome],
         [''],
         ['EGRESOS'],
-        [t('closings.categories.partnersAdvances'), summary.totalOutgoings > 0 ? records.reduce((s, r) => s + (r.partnersAdvances || 0), 0) : 0],
-        [t('closings.categories.monthlyOutgoings'), summary.totalOutgoings > 0 ? records.reduce((s, r) => s + (r.monthlyOutgoings || 0), 0) : 0],
+        [t('closings.categories.partnersAdvances'), summary.totalOutgoings > 0 ? sumCategory('partnersAdvances') : 0],
+        [t('closings.categories.monthlyOutgoings'), summary.totalOutgoings > 0 ? sumCategory('monthlyOutgoings') : 0],
         ['TOTAL EGRESOS', summary.totalOutgoings],
         [''],
         ['AHORROS'],
-        [t('closings.categories.weeklySalesSavings'), summary.totalSavings > 0 ? records.reduce((s, r) => s + (r.weeklySalesSavings || 0), 0) : 0],
-        [t('closings.categories.taxSavings'), summary.totalSavings > 0 ? records.reduce((s, r) => s + (r.taxSavings || 0), 0) : 0],
-        [t('closings.categories.techSavings'), summary.totalSavings > 0 ? records.reduce((s, r) => s + (r.techSavings || 0), 0) : 0],
+        [t('closings.categories.weeklySalesSavings'), summary.totalSavings > 0 ? sumCategory('weeklySalesSavings') : 0],
+        [t('closings.categories.taxSavings'), summary.totalSavings > 0 ? sumCategory('taxSavings') : 0],
+        [t('closings.categories.techSavings'), summary.totalSavings > 0 ? sumCategory('techSavings') : 0],
         ['TOTAL AHORROS', summary.totalSavings],
         [''],
         ['TOTAL A DISTRIBUIR', summary.totalToDistribute],
@@ -161,18 +186,23 @@ const CierresMensualesPage = () => {
           'Vales/Adelantos', 'Salidas Mensuales', 'Ahorro Ventas', 'Ahorro Impuestos', 'Ahorro Téc.']
       ];
       records.forEach(r => {
+        const getVal = (k) => {
+          const recCat = r.category_key ?? r.categoryKey;
+          if (recCat) return recCat === k ? (parseFloat(r.amount_value ?? r.amountValue ?? r.amount) || 0) : 0;
+          return r[k] || 0;
+        };
         detailData.push([
           r.date,
           r.description,
-          r.cashUnsealed || 0,
-          r.cashWeekly || 0,
-          r.transfers || 0,
-          r.cards || 0,
-          r.partnersAdvances || 0,
-          r.monthlyOutgoings || 0,
-          r.weeklySalesSavings || 0,
-          r.taxSavings || 0,
-          r.techSavings || 0
+          getVal('cashUnsealed'),
+          getVal('cashWeekly'),
+          getVal('transfers'),
+          getVal('cards'),
+          getVal('partnersAdvances'),
+          getVal('monthlyOutgoings'),
+          getVal('weeklySalesSavings'),
+          getVal('taxSavings'),
+          getVal('techSavings')
         ]);
       });
       const wsDetail = XLSX.utils.aoa_to_sheet(detailData);
@@ -180,7 +210,12 @@ const CierresMensualesPage = () => {
 
       // Sheet 3: Detalle por cada categoría (con movimientos individuales)
       Object.entries(monthlyCategories).forEach(([key, data]) => {
-        const categoryRecords = records.filter(r => (r[key] || 0) !== 0);
+        const categoryRecords = records.filter(r => {
+          const recCat = r.category_key ?? r.categoryKey;
+          if (recCat) return recCat === key;
+          return (r[key] || 0) !== 0;
+        });
+
         if (categoryRecords.length > 0) {
           const categoryData = [
             [data.title.toUpperCase()],
@@ -188,9 +223,15 @@ const CierresMensualesPage = () => {
             ['Fecha', 'Descripción', 'Monto']
           ];
           categoryRecords.forEach(r => {
-            categoryData.push([r.date, r.description, r[key]]);
+            const val = r.amount_value ?? r.amountValue ?? r.amount ?? r[key] ?? 0;
+            categoryData.push([r.date, r.description, val]);
           });
-          categoryData.push(['', 'TOTAL', categoryRecords.reduce((s, r) => s + (r[key] || 0), 0)]);
+
+          const catTotal = categoryRecords.reduce((s, r) => {
+            const val = r.amount_value ?? r.amountValue ?? r.amount ?? r[key] ?? 0;
+            return s + (parseFloat(val) || 0);
+          }, 0);
+          categoryData.push(['', 'TOTAL', catTotal]);
 
           const wsCategory = XLSX.utils.aoa_to_sheet(categoryData);
           XLSX.utils.book_append_sheet(wb, wsCategory, data.title.substring(0, 31));
@@ -210,7 +251,7 @@ const CierresMensualesPage = () => {
       {/* Print Header */}
       <div className="hidden print:block mb-6 border-b-2 border-black pb-4">
         <h1 className="text-2xl font-bold uppercase">Cierre Mensual</h1>
-        <p className="text-lg">{new Date(selectedMonth + '-01').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</p>
+        <p className="text-lg">{parseDate(selectedMonth + '-01').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</p>
         <p className="text-sm text-gray-600">Generado: {new Date().toLocaleDateString()}</p>
       </div>
 
