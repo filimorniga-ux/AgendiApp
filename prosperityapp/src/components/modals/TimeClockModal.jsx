@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useData } from '../../context/DataContext';
 import SearchableDropdown from '../ui/SearchableDropdown';
+import { parseDate } from '../../lib/dateUtils';
 
 const TimeClockModal = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
@@ -81,9 +82,11 @@ const TimeClockModal = ({ isOpen, onClose }) => {
   if (!currentShift) {
       buttons.push({ key: 'checkIn', label: t('hr.actions.checkIn'), color: 'bg-green-600' });
   } else {
+      const lunchStartDate = currentShift.lunchStart ?? currentShift.lunch_start ? parseDate(currentShift.lunchStart ?? currentShift.lunch_start) : null;
+
       if (currentShift.status === 'working') {
           statusText = t('hr.status.working');
-          if (!currentShift.lunchStart) {
+          if (!lunchStartDate) {
               buttons.push({ key: 'lunchStart', label: t('hr.actions.lunchStart'), color: 'bg-yellow-600' });
           }
           buttons.push({ key: 'checkOut', label: t('hr.actions.checkOut'), color: 'bg-red-600' });

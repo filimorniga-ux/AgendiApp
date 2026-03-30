@@ -5,6 +5,7 @@ import { useData } from '../context/DataContext';
 import { useDocument } from '../hooks/useDocument';
 import { useParams, Link } from 'react-router-dom';
 import DetailModal from '../components/modals/DetailModal';
+import { parseDate } from '../lib/dateUtils';
 import { useTranslation } from 'react-i18next';
 
 const formatCurrency = (value) => {
@@ -68,7 +69,7 @@ const PayrollDetailPage = () => {
         </Link>
         <h2 className="text-3xl font-bold text-text-main">{closing.name}</h2>
         <p className="text-text-muted">
-          {t('payroll.table.date')}: {closing.createdAt ? new Date(closing.createdAt.seconds * 1000).toLocaleDateString('es-CL') : t('common.na')} |
+          {t('payroll.table.date')}: {closing.createdAt ? parseDate(closing.createdAt).toLocaleDateString('es-CL') : t('common.na')} |
           {t('payroll.table.range')}: {closing.dateRange}
         </p>
       </div>

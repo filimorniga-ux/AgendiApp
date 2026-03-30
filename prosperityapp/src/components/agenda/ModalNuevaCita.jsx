@@ -54,8 +54,8 @@ const ModalNuevaCita = ({ isOpen, onClose, slotInfo }) => {
       amount: selectedService.price, // Guardamos el precio
       startTime: slotInfo.time,
       endTime: `${endH}:${endM}`,
-      date: new Date(), // Guarda como Timestamp
-      createdAt: serverTimestamp(),
+      date: new Date().toISOString(), // Guarda como Timestamp
+      createdAt: new Date().toISOString(),
       paymentMethod: 'Pendiente', // Las citas no se pagan al agendar
       technicalCost: 0,
       productsUsed: []
