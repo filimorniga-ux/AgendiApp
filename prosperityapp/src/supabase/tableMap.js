@@ -20,6 +20,9 @@ export const COLLECTION_TO_TABLE = {
   stockMovements:       'stock_movements',
   giftCards:            'gift_cards',
   users:                'users',
+  suppliers:            'suppliers',
+  invoices:             'invoices',
+  debts:                'debts',
 };
 
 /**
@@ -61,6 +64,10 @@ export function rowToCamel(row, aliases = FIELD_ALIASES) {
       mapped[targetKey] = parseFloat(value);
     } else {
       mapped[targetKey] = value;
+    }
+
+    if (key === 'amount_value') {
+      mapped['amount'] = typeof value === 'string' ? parseFloat(value) : value;
     }
   }
 
