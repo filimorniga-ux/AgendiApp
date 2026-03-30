@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import SearchableDropdown from '../components/ui/SearchableDropdown';
 import { useStorage } from '../hooks/useStorage';
+import { parseDate } from '../lib/dateUtils';
 
 const formatCurrency = (value) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
 
@@ -53,20 +54,20 @@ const PedidosPage = () => {
         }
         if (invoiceFilters.dateStart) {
             filtered = filtered.filter(i => {
-                const date = i.date?.toDate ? i.date.toDate() : new Date(i.date * 1000);
+                const date = parseDate(i.date);
                 return date >= new Date(invoiceFilters.dateStart);
             });
         }
         if (invoiceFilters.dateEnd) {
             filtered = filtered.filter(i => {
-                const date = i.date?.toDate ? i.date.toDate() : new Date(i.date * 1000);
+                const date = parseDate(i.date);
                 return date <= new Date(invoiceFilters.dateEnd);
             });
         }
 
         return filtered.sort((a, b) => {
-            const dateA = a.date?.seconds || 0;
-            const dateB = b.date?.seconds || 0;
+            const dateA = parseDate(a.date).getTime();
+            const dateB = parseDate(b.date).getTime();
             return dateB - dateA;
         });
     }, [invoicesData, invoiceFilters]);
@@ -74,8 +75,8 @@ const PedidosPage = () => {
     const debts = useMemo(() => {
         if (!debtsData) return [];
         return [...debtsData].sort((a, b) => {
-            const dateA = a.createdAt?.seconds || 0;
-            const dateB = b.createdAt?.seconds || 0;
+            const dateA = parseDate(a.createdAt).getTime();
+            const dateB = parseDate(b.createdAt).getTime();
             return dateB - dateA;
         });
     }, [debtsData]);
@@ -277,7 +278,7 @@ const PedidosPage = () => {
                 <tbody>
                     {invoices?.map(inv => (
                         <tr key={inv.id} className="border-b border-border-main text-sm hover:bg-bg-tertiary">
-                            <td className="p-3 text-text-main">{inv.date?.toDate ? inv.date.toDate().toLocaleDateString() : (inv.date ? new Date(inv.date * 1000).toLocaleDateString() : 'N/A')}</td>
+                            <td className="p-3 text-text-main">{inv.date ? parseDate(inv.date).toLocaleDateString() : 'N/A'}</td>
                             <td className="p-3 text-text-main font-semibold">{inv.supplierName}</td>
                             <td className="p-3 text-text-muted">{inv.rut || '-'}</td>
                             <td className="p-3 text-text-muted">{inv.brand || '-'}</td>

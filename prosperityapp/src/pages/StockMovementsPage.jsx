@@ -5,10 +5,11 @@ import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import { useData } from '../context/DataContext';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { parseDate } from '../lib/dateUtils';
 
 const formatDate = (timestamp) => {
   if (!timestamp) return 'N/A';
-  return new Date(timestamp.seconds * 1000).toLocaleString('es-CL', {
+  return parseDate(timestamp).toLocaleString('es-CL', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit'
   });
@@ -26,8 +27,8 @@ const StockMovementsPage = () => {
     
     // Ordenamiento local seguro
     const sorted = [...movements].sort((a, b) => {
-      const timeA = a.createdAt?.seconds || 0;
-      const timeB = b.createdAt?.seconds || 0;
+      const timeA = parseDate(a.createdAt).getTime();
+      const timeB = parseDate(b.createdAt).getTime();
       return timeB - timeA; // Descendente
     });
 
