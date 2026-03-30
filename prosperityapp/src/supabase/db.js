@@ -16,7 +16,7 @@
 
 import { supabase }      from './client';
 import { COLLECTION_TO_TABLE, objToSnake } from './tableMap';
-import { enqueueWrite, syncOfflineQueue }  from '../lib/offlineQueue';
+import { enqueueWrite, syncOfflineQueue, optimisticWrite, optimisticDelete } from '../lib/offlineQueue';
 
 function getTable(collectionName) {
   return COLLECTION_TO_TABLE[collectionName] || collectionName;
@@ -39,12 +39,15 @@ if (typeof window !== 'undefined') {
  * @returns {Promise<{data, error, queued?}>}
  */
 export async function sbCreate(collectionName, payload, businessId) {
-  const table       = getTable(collectionName);
+  const table        = getTable(collectionName);
   const snakePayload = objToSnake({ ...payload, businessId });
 
   if (!navigator.onLine) {
+    const offlineId = `offline_${Date.now()}`;
     await enqueueWrite('insert', table, snakePayload);
-    return { data: { ...snakePayload, id: `offline_${Date.now()}` }, error: null, queued: true };
+    // Escritura optimística: la UI ve el registro inmediatamente
+    await optimisticWrite(table, { ...snakePayload, id: offlineId });
+    return { data: { ...snakePayload, id: offlineId }, error: null, queued: true };
   }
 
   return supabase.from(table).insert(snakePayload).select().single();
@@ -62,6 +65,13 @@ export async function sbUpdate(collectionName, id, payload) {
 
   if (!navigator.onLine) {
     await enqueueWrite('update', table, snakePayload, id);
+    // Escritura optimística en Dexie
+    try {
+      const { rowToCamel } = await import('./tableMap');
+      await import('../lib/localDb').then(({ default: db }) =>
+        db.table(table).where('id').equals(id).modify(rowToCamel(snakePayload))
+      );
+    } catch (_) {}
     return { data: { id, ...snakePayload }, error: null, queued: true };
   }
 
@@ -79,6 +89,8 @@ export async function sbDelete(collectionName, id) {
 
   if (!navigator.onLine) {
     await enqueueWrite('delete', table, {}, id);
+    // Eliminación optimística de Dexie
+    await optimisticDelete(table, id);
     return { error: null, queued: true };
   }
 
