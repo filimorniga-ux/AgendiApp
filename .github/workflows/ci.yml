@@ -1,0 +1,42 @@
+name: CI — Build & Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build AgendiApp
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: prosperityapp
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: prosperityapp/package-lock.json
+
+      - name: 📦 Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: 🔨 Build project
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: ✅ Verify dist output
+        run: |
+          ls -la dist/
+          test -f dist/index.html && echo "✅ index.html found" || (echo "❌ index.html missing" && exit 1)
+          test -f dist/sw.js      && echo "✅ Service Worker found" || echo "⚠️  sw.js not found"
