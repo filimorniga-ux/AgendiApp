@@ -1,10 +1,14 @@
-// ===== src/context/DataContext.jsx — Firebase reads + Supabase writes =====
+// ===== src/context/DataContext.jsx — Firebase Auth + Supabase writes =====
 import React, { createContext, useContext, useMemo } from 'react';
 import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
-import { auth, db } from '../firebase/config';
+import { auth } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 import { supabase } from '../supabase/client';
+
+// Bypass de autenticación — activado con VITE_DEV_BYPASS_AUTH=true en .env
+const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
+// Usuario simulado para el modo bypass (rol 'owner', uid placeholder)
+const DEV_USER = DEV_BYPASS ? { uid: 'filimorniga-uid-placeholder', email: 'dev@local.dev' } : null;
 
 const DataContext = createContext();
 
@@ -31,30 +35,36 @@ export const DataProvider = ({ children }) => {
 
   // ── Auth Effect ────────────────────────────────────────────────
   React.useEffect(() => {
+    // ── Modo bypass: sin Firebase Auth ─────────────────────────
+    if (DEV_BYPASS) {
+      setUser(DEV_USER);
+      setRealRole('owner');
+      // Cargar el primer business existente en Supabase
+      supabase
+        .from('businesses')
+        .select('id')
+        .limit(1)
+        .then(({ data }) => {
+          if (data?.[0]?.id) setBusinessId(data[0].id);
+          setLoadingAuth(false);
+        });
+      return; // No suscribirse a Firebase Auth
+    }
+
+    // ── Flujo normal con Firebase Auth ─────────────────────────
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
 
       if (currentUser) {
-        // 1. Rol desde Firebase (Firestore legacy)
-        try {
-          const userDocRef = doc(db, 'users', currentUser.uid);
-          const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists()) {
-            setRealRole(userDoc.data().role);
-          } else {
-            setRealRole('client');
-          }
-        } catch (err) {
-          console.warn('[DataContext] Firebase role error:', err);
-        }
-
-        // 2. businessId desde Supabase (para escrituras)
+        // 1. Rol + businessId desde Supabase tabla users
         try {
           const { data: sbUser } = await supabase
             .from('users')
-            .select('business_id')
+            .select('business_id, role')
             .eq('firebase_uid', currentUser.uid)
             .single();
+
+          if (sbUser?.role) setRealRole(sbUser.role);
 
           if (sbUser?.business_id) {
             setBusinessId(sbUser.business_id);
@@ -83,7 +93,7 @@ export const DataProvider = ({ children }) => {
             }
           }
         } catch (err) {
-          console.warn('[DataContext] Supabase businessId error:', err);
+          console.warn('[DataContext] Supabase user error:', err);
         }
       } else {
         setRealRole(null);
@@ -98,7 +108,7 @@ export const DataProvider = ({ children }) => {
 
   // ── Colecciones Supabase ─────────────────────────────────────────
   const { data: clients,            loading: loadingClients }     = useSupabaseCollection('clients');
-  const { data: collaborators,      loading: loadingCollabs }     = useSupabaseCollection('collaborators'); // El hook ordena por created_at por defecto. Si se necesita orderBy específico, se agregaría al hook en el futuro.
+  const { data: collaborators,      loading: loadingCollabs }     = useSupabaseCollection('collaborators', [], { column: 'display_order', ascending: true });
   const { data: services,           loading: loadingServices }    = useSupabaseCollection('services');
   const { data: technicalInventory, loading: loadingTech }        = useSupabaseCollection('technical_inventory');
   const { data: retailInventory,    loading: loadingRetail }      = useSupabaseCollection('retail_inventory');

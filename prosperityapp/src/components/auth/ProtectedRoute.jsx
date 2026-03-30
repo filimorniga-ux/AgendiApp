@@ -7,7 +7,15 @@ import {
   signInWithPopup,
 } from 'firebase/auth';
 
+// ── Bypass de autenticación para desarrollo ───────────────────────────────────
+// Actívalo con VITE_DEV_BYPASS_AUTH=true en tu .env local.
+// En Vercel/producción, NO pongas esta variable → flujo normal de login.
+const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
+
 const ProtectedRoute = ({ children }) => {
+  // Si el bypass está activo entramos directo — sin login
+  if (DEV_BYPASS) return children;
+
   const { user, loadingAuth } = useData();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
