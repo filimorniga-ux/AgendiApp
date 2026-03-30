@@ -7,6 +7,7 @@ import ReportFilters from '../components/reports/ReportFilters';
 import { useMonthlyRecords } from '../hooks/useMonthlyRecords';
 
 import AdvancedExportModal from '../components/reports/AdvancedExportModal';
+import { parseDate } from '../lib/dateUtils';
 
 // Helper para iconos
 const Icon = ({ name, className }) => {
@@ -58,7 +59,7 @@ const ReportsPage = () => {
   const filteredMovements = useMemo(() => {
     if (!movements) return [];
     return movements.filter(m => {
-      const date = m.date.toDate();
+      const date = parseDate(m.date);
       const inDateRange = date >= filters.startDate && date <= filters.endDate;
       const matchesSearch = filters.search === '' ||
         m.description.toLowerCase().includes(filters.search.toLowerCase());
@@ -170,7 +171,7 @@ const ReportsPage = () => {
 
       if (activeTab === 'financial') {
         const ws = XLSX.utils.json_to_sheet(filteredMovements.map(m => ({
-          Fecha: m.date.toDate().toLocaleDateString(),
+          Fecha: parseDate(m.date).toLocaleDateString(),
           Descripcion: m.description,
           Monto: m.amount,
           Tipo: m.type,
@@ -232,7 +233,7 @@ const ReportsPage = () => {
       if (movements && movements.length > 0) {
         const ws = XLSX.utils.json_to_sheet(movements.map(m => ({
           ...m,
-          date: m.date?.toDate?.()?.toISOString() || m.date
+          date: m.date ? parseDate(m.date).toISOString() : null
         })));
         XLSX.utils.book_append_sheet(wb, ws, "Movimientos");
       }
@@ -274,7 +275,7 @@ const ReportsPage = () => {
         <tbody className="divide-y divide-border-main print:divide-gray-300">
           {filteredMovements.map(m => (
             <tr key={m.id} className="hover:bg-bg-tertiary/50 print:hover:bg-transparent">
-              <td className="p-3">{m.date.toDate().toLocaleDateString()}</td>
+              <td className="p-3">{parseDate(m.date).toLocaleDateString()}</td>
               <td className="p-3">{m.description}</td>
               <td className="p-3">
                 <span className={`px-2 py-1 rounded-full text-xs font-semibold ${m.amount > 0 ? 'bg-green-500/20 text-green-500 print:text-green-700 print:bg-transparent' : 'bg-red-500/20 text-red-500 print:text-red-700 print:bg-transparent'

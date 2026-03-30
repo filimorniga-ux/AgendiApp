@@ -3,6 +3,7 @@ import React, { useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useData } from '../context/DataContext'; // <-- 1. USAR DATACONTEXT
 import feather from 'feather-icons';
+import { parseDate } from '../lib/dateUtils';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -32,7 +33,7 @@ const ClientDetailPage = () => {
 
     const clientHistory = movements
       .filter(m => m.client === currentClient.name)
-      .sort((a, b) => b.date.toDate() - a.date.toDate());
+      .sort((a, b) => parseDate(b.date) - parseDate(a.date));
 
     return { client: currentClient, history: clientHistory };
   }, [clientId, clients, movements]);
@@ -73,7 +74,7 @@ const ClientDetailPage = () => {
               {history.map(m => (
                 <tr key={m.id} className="border-b border-border-main text-sm hover:bg-tertiary/50">
                   <td className="p-3">
-                    {m.date.toDate().toLocaleDateString('es-CL')}
+                    {parseDate(m.date).toLocaleDateString('es-CL')}
                   </td>
                   <td className="p-3 text-white">{m.description}</td>
                   <td className="p-3">

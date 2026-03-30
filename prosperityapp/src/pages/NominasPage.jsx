@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useCurrencyFormat } from '../hooks/useCurrencyFormat';
 import * as XLSX from 'xlsx';
 import PrintPreviewModal from '../components/modals/PrintPreviewModal';
+import { parseDate } from '../lib/dateUtils';
 
 
 
@@ -109,7 +110,7 @@ const NominasPage = () => {
     const selectedDateStrings = selectedDates.map(toISODateString);
 
     const filteredMovements = movements.filter(m => {
-      const moveDateStr = m.date.toDate().toISOString().split('T')[0];
+      const moveDateStr = parseDate(m.date).toISOString().split('T')[0];
       // Option B: If no date selected, show 0 (don't include any movements)
       return selectedDateStrings.length > 0 && selectedDateStrings.includes(moveDateStr);
     });
@@ -203,7 +204,7 @@ const NominasPage = () => {
           c.serviceItems.forEach(s => {
             allServices.push({
               Colaborador: c.name,
-              Fecha: s.date?.toDate?.()?.toLocaleDateString() || 'N/A',
+              Fecha: s.date ? parseDate(s.date).toLocaleDateString() : 'N/A',
               Cliente: s.client || 'N/A',
               Servicio: s.description,
               Monto: s.amount,
@@ -217,7 +218,7 @@ const NominasPage = () => {
           c.salesCommissionItems.forEach(s => {
             allSales.push({
               Colaborador: c.name,
-              Fecha: s.date?.toDate?.()?.toLocaleDateString() || 'N/A',
+              Fecha: s.date ? parseDate(s.date).toLocaleDateString() : 'N/A',
               Cliente: s.client || 'N/A',
               Producto: s.description,
               Comision: s.amount
@@ -229,7 +230,7 @@ const NominasPage = () => {
           c.advanceItems.forEach(a => {
             allAdvances.push({
               Colaborador: c.name,
-              Fecha: a.date?.toDate?.()?.toLocaleDateString() || 'N/A',
+              Fecha: a.date ? parseDate(a.date).toLocaleDateString() : 'N/A',
               Descripcion: a.description,
               Monto: a.amount
             });

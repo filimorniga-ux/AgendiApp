@@ -36,14 +36,12 @@ export const BusinessProvider = ({ children }) => {
         .select('id')
         .eq('owner_uid', 'filimorniga-uid-placeholder')
         .limit(1)
-        .then(({ data, error }) => {
+        .then(async ({ data, error }) => {
           if (error) console.warn('[BusinessProvider Dev Bypass] Error fetching business:', error);
           const id = data?.[0]?.id ?? null;
           if (id) {
             setBusinessId(id);
-            // Setear app.business_id para que get_my_business_id() funcione
-            // en las colecciones que usan RLS con esa función
-            supabase.rpc('set_config', { key: 'app.business_id', value: id }).catch(() => {});
+            // set_config RPC no existe en este proyecto — se omite intencionalmente
           }
           setLoadingAuth(false);
         });

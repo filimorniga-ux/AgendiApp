@@ -6,6 +6,7 @@ import { useData } from '../../context/DataContext';
 import { useSupabaseCollection } from '../../hooks/useSupabaseCollection';
 import { supabase } from '../../supabase/client';
 import toast from 'react-hot-toast';
+import { parseDate } from '../../lib/dateUtils';
 
 const AdvancedExportModal = ({ onClose }) => {
     const { t } = useTranslation();
@@ -122,7 +123,7 @@ const AdvancedExportModal = ({ onClose }) => {
             // --- SHEET 2: DETALLE FINANCIERO ---
             if (movements.length > 0) {
                 const wsFinancial = XLSX.utils.json_to_sheet(movements.map(m => ({
-                    Fecha: m.date?.toDate ? m.date.toDate().toLocaleDateString() : m.date,
+                    Fecha: m.date ? parseDate(m.date).toLocaleDateString() : 'N/A',
                     Descripción: m.description,
                     Tipo: m.type,
                     Monto: m.amount,
@@ -158,7 +159,7 @@ const AdvancedExportModal = ({ onClose }) => {
                     Apellido: c.lastName,
                     Teléfono: c.phone,
                     Email: c.email,
-                    UltimaVisita: c.lastVisit ? new Date(c.lastVisit.seconds * 1000).toLocaleDateString() : ''
+                    UltimaVisita: c.lastVisit ? parseDate(c.lastVisit).toLocaleDateString() : ''
                 })));
                 XLSX.utils.book_append_sheet(wb, wsClients, "Clientes");
             }
@@ -256,7 +257,7 @@ const AdvancedExportModal = ({ onClose }) => {
                             <select value={selectedClosingId} onChange={e => setSelectedClosingId(e.target.value)} className="w-full bg-bg-main border border-border-main rounded p-2 text-text-main">
                                 <option value="">Seleccionar Cierre</option>
                                 {closings?.map(c => (
-                                    <option key={c.id} value={c.id}>{c.id} (Generado: {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleDateString() : 'N/A'})</option>
+                                    <option key={c.id} value={c.id}>{c.id} (Generado: {c.createdAt ? parseDate(c.createdAt).toLocaleDateString() : 'N/A'})</option>
                                 ))}
                             </select>
                         )}

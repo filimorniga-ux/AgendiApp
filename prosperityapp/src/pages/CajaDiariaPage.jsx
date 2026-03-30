@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useReactToPrint } from 'react-to-print';
 import DailyReportTemplate from '../components/reports/DailyReportTemplate';
 import PrintPreviewModal from '../components/modals/PrintPreviewModal';
+import { parseDate } from '../lib/dateUtils';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -81,7 +82,7 @@ const CajaDiariaPage = () => {
       totalGastos: 0, totalAdelantos: 0, efectivoEnCaja: 0
     };
     const dailyMovements = movements.filter(m =>
-      m.date.toDate().toISOString().split('T')[0] === todayStr
+      parseDate(m.date).toISOString().split('T')[0] === todayStr
     );
     const services = dailyMovements.filter(m => m.type === 'Servicio' || m.type === 'Cita');
     const sales = dailyMovements.filter(m => m.type === 'Venta');

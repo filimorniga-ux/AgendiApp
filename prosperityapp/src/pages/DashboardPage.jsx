@@ -19,7 +19,24 @@ const formatCurrency = (value) => {
 
 const formatDate = (timestamp) => {
   if (!timestamp) return 'N/A';
-  return new Date(timestamp.seconds * 1000).toLocaleDateString('es-CL');
+  // Supabase: string ISO; Firestore legacy: { seconds }
+  if (typeof timestamp === 'string') return new Date(timestamp).toLocaleDateString('es-CL');
+  if (timestamp.seconds) return new Date(timestamp.seconds * 1000).toLocaleDateString('es-CL');
+  return 'N/A';
+};
+
+/**
+ * Convierte cualquier formato de fecha a objeto Date.
+ * Soporta: string ISO (Supabase), Firestore Timestamp { seconds }, Date
+ */
+const parseDate = (date) => {
+  if (!date) return new Date(0);
+  if (date instanceof Date) return date;
+  if (typeof date === 'string') return new Date(date);
+  if (typeof date === 'number') return new Date(date);
+  if (date.toDate) return date.toDate();      // Firestore Timestamp
+  if (date.seconds) return new Date(date.seconds * 1000); // Firestore raw
+  return new Date(0);
 };
 
 // --- Componente de Tarjeta (Tema Corregido) ---
@@ -52,7 +69,7 @@ const TabDiario = () => {
       totalCostoTecnico: 0, ranking: []
     };
     const dailyMovements = movements.filter(m =>
-      m.date.toDate().toISOString().split('T')[0] === todayStr
+      parseDate(m.date).toISOString().split('T')[0] === todayStr
     );
     const totalServicios = dailyMovements.filter(m => m.type === 'Servicio').reduce((s, m) => s + m.amount, 0);
     const totalVentas = dailyMovements.filter(m => m.type === 'Venta').reduce((s, m) => s + m.amount, 0);
@@ -229,7 +246,7 @@ const TabNominas = () => {
     };
     const selectedDateStrings = selectedDates.map(toISODateString);
     const filteredMovements = movements.filter(m => {
-      const moveDateStr = m.date.toDate().toISOString().split('T')[0];
+      const moveDateStr = parseDate(m.date).toISOString().split('T')[0];
       return selectedDateStrings.includes(moveDateStr);
     });
     const totalProduccion = filteredMovements
@@ -582,7 +599,7 @@ const TabClientes = () => {
   const clientSummary = useMemo(() => {
     if (!movements || !clients || !collaborators) return [];
     const filteredMovements = movements.filter(m => {
-      const moveDate = m.date.toDate();
+      const moveDate = parseDate(m.date);
       return moveDate >= dateRange.start && moveDate <= dateRange.end && (m.type === 'Servicio' || m.type === 'Venta');
     });
     const clientData = {};
@@ -598,7 +615,7 @@ const TabClientes = () => {
         };
       }
       clientData[clientName].totalSpent += move.amount;
-      clientData[clientName].visits.add(move.date.toDate().toISOString().split('T')[0]);
+      clientData[clientName].visits.add(parseDate(move.date).toISOString().split('T')[0]);
       if (move.type === 'Servicio') {
         const collabName = move.collaboratorName || collaborators.find(c => c.id === move.collaboratorId)?.name || 'Salón';
         clientData[clientName].services.push({

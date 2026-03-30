@@ -31,6 +31,29 @@ localDb.version(1).stores({
   offline_queue:        '++id, table, operation, status, createdAt',
 });
 
+// ── Schema v2: tablas adicionales para pedidos, contabilidad y cierres ────────
+localDb.version(2).stores({
+  clients:                  '++_localId, id, business_id, firebaseId',
+  collaborators:            '++_localId, id, business_id, firebaseId',
+  services:                 '++_localId, id, business_id, firebaseId',
+  technical_inventory:      '++_localId, id, business_id, firebaseId',
+  retail_inventory:         '++_localId, id, business_id, firebaseId',
+  config:                   '++_localId, id, business_id',
+  movements:                '++_localId, id, business_id, firebaseId',
+  appointments:             '++_localId, id, business_id, firebaseId',
+  offline_queue:            '++id, table, operation, status, createdAt',
+  // Nuevas tablas v2
+  suppliers:                '++_localId, id, business_id, firebaseId',
+  invoices:                 '++_localId, id, business_id, firebaseId',
+  debts:                    '++_localId, id, business_id, firebaseId',
+  gift_cards:               '++_localId, id, business_id, firebaseId',
+  payroll_closings:         '++_localId, id, business_id',
+  monthly_closings:         '++_localId, id, business_id, firebaseId',
+  monthly_closing_records:  '++_localId, id, business_id',
+  work_shifts:              '++_localId, id, business_id',
+  stock_movements:          '++_localId, id, business_id',
+});
+
 /**
  * Guarda (o reemplaza) un array entero de rows para una tabla y businessId.
  * Se usa después de un fetch exitoso de Supabase para poblar el caché.

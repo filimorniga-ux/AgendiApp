@@ -41,7 +41,7 @@ export const useMonthlyRecords = (yearMonth) => {
         const { data: recordRows, error: recordsErr } = await supabase
           .from('monthly_closing_records')
           .select('*')
-          .eq('period', yearMonth)
+          .eq('year_month', yearMonth)
           .order('date', { ascending: false });
 
         if (recordsErr) throw recordsErr;
@@ -74,7 +74,7 @@ export const useMonthlyRecords = (yearMonth) => {
         event: '*',
         schema: 'public',
         table: 'monthly_closing_records',
-        filter: `period=eq.${yearMonth}`,
+        filter: `year_month=eq.${yearMonth}`,
       }, fetchData)
       .subscribe();
 
