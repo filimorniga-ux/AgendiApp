@@ -44,7 +44,7 @@ export const DataProvider = ({ children }) => {
   const isLoading =
     loadingClients || loadingCollabs || loadingServices ||
     loadingTech || loadingRetail || loadingConfig ||
-    loadingMovements || loadingAppointments || loadingAuth;
+    loadingMovements || loadingAppointments;
 
   const value = useMemo(() => ({
     isLoading,

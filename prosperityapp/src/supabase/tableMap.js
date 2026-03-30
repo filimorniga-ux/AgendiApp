@@ -23,17 +23,62 @@ export const COLLECTION_TO_TABLE = {
 };
 
 /**
- * Convierte un objeto snake_case de Supabase → camelCase para React
- * Solo mapea los campos que cambiaron de nombre; el resto queda igual.
+ * Mapeo explícito de columnas Supabase → campos que usan los componentes
+ * (aliasing para compatibilidad con nombres heredados de Firestore)
  */
-export function rowToCamel(row) {
+const FIELD_ALIASES = {
+  // Campos comunes
+  stock_current:   'stockUnits',
+  stock_min:       'minStock',
+  is_active:       'isActive',
+  firebase_id:     'firebaseId',
+
+  // technical_inventory nuevos campos
+  unit_size:       'unitSize',
+  unit_of_measure: 'unitOfMeasure',
+  factura_cost:    'facturaCost',
+  collab_cost:     'collabCost',
+  
+  // legacy
+  cost_per_unit:   'costPerUnit',
+};
+
+
+/**
+ * Convierte un objeto snake_case de Supabase → camelCase para React.
+ * Aplica aliases explícitos si existen, o conversión automática snake→camel.
+ *
+ * @param {Object} row        - Fila de Supabase
+ * @param {Object} [aliases]  - Mapa de aliases { col_name: 'jsFieldName' }
+ */
+export function rowToCamel(row, aliases = FIELD_ALIASES) {
   if (!row) return row;
   const mapped = {};
   for (const [key, value] of Object.entries(row)) {
-    const camel = snakeToCamel(key);
-    mapped[camel] = value;
+    const targetKey = aliases[key] ?? snakeToCamel(key);
+    // Parseo de numéricos que llegan como string desde postgres
+    if ((key === 'stock_current' || key === 'stock_min') && typeof value === 'string') {
+      mapped[targetKey] = parseFloat(value);
+    } else {
+      mapped[targetKey] = value;
+    }
   }
+
   return mapped;
+}
+
+/**
+ * Versión específica para retail_inventory
+ * Columnas reales: stock_current, stock_min, cost_price, sale_price
+ */
+export function retailRowToCamel(row) {
+  const RETAIL_ALIASES = {
+    ...FIELD_ALIASES,
+    stock_current: 'stock',   // override: retail usa 'stock' no 'stockUnits'
+    cost_price:    'cost',
+    sale_price:    'price',
+  };
+  return rowToCamel(row, RETAIL_ALIASES);
 }
 
 /**

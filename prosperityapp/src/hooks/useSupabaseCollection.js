@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useContext } from 'react';
 import { supabase } from '../supabase/client';
-import { COLLECTION_TO_TABLE, rowToCamel } from '../supabase/tableMap';
+import { COLLECTION_TO_TABLE, rowToCamel, retailRowToCamel } from '../supabase/tableMap';
 import { BusinessContext } from '../context/BusinessContext';
 
 /**
@@ -29,6 +29,8 @@ export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = nu
   const businessId   = businessCtx?.businessId ?? null;
   const tableName    = COLLECTION_TO_TABLE[tableNameInput] || tableNameInput;
 
+  // Seleccionar el transformer interno (eliminado del outer scope para forzar su uso dentro de useEffect)
+
   useEffect(() => {
     if (!businessId) {
       setLoading(false);
@@ -40,6 +42,9 @@ export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = nu
     setLoading(true);
 
     const fetchData = async () => {
+      // Seleccionar transformer aquí, dentro del efecto, para garantizar
+      // que siempre se use la versión más actualizada
+      const xform = tableName === 'retail_inventory' ? retailRowToCamel : rowToCamel;
       try {
         let query = supabase
           .from(tableName)
@@ -63,7 +68,7 @@ export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = nu
         const { data: rows, error: err } = await query;
         if (!isMounted) return;
         if (err) throw err;
-        setData((rows || []).map(rowToCamel));
+        setData((rows || []).map(r => xform(r)));
         setError(null);
       } catch (err) {
         if (!isMounted) return;

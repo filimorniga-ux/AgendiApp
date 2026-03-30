@@ -34,9 +34,17 @@ export const BusinessProvider = ({ children }) => {
       supabase
         .from('businesses')
         .select('id')
+        .eq('owner_uid', 'filimorniga-uid-placeholder')
         .limit(1)
-        .then(({ data }) => {
-          if (data?.[0]?.id) setBusinessId(data[0].id);
+        .then(({ data, error }) => {
+          if (error) console.warn('[BusinessProvider Dev Bypass] Error fetching business:', error);
+          const id = data?.[0]?.id ?? null;
+          if (id) {
+            setBusinessId(id);
+            // Setear app.business_id para que get_my_business_id() funcione
+            // en las colecciones que usan RLS con esa función
+            supabase.rpc('set_config', { key: 'app.business_id', value: id }).catch(() => {});
+          }
           setLoadingAuth(false);
         });
       return;
@@ -48,25 +56,37 @@ export const BusinessProvider = ({ children }) => {
 
       if (currentUser) {
         try {
-          const { data: sbUser } = await supabase
+          const { data: sbUser, error: userErr } = await supabase
             .from('users')
             .select('business_id, role')
             .eq('firebase_uid', currentUser.uid)
-            .single();
+            .maybeSingle();
+
+          if (userErr) throw userErr;
 
           if (sbUser?.role)        setRealRole(sbUser.role);
           if (sbUser?.business_id) {
             setBusinessId(sbUser.business_id);
           } else {
-            // Auto-seed: primer login → crear business + user
-            const { data: biz } = await supabase
+            // Check if business already exists for this owner (migration edge case)
+            let { data: biz } = await supabase
               .from('businesses')
-              .upsert(
-                { owner_uid: currentUser.uid, name: 'Mi Salón' },
-                { onConflict: 'owner_uid', ignoreDuplicates: false }
-              )
-              .select()
-              .single();
+              .select('id')
+              .eq('owner_uid', currentUser.uid)
+              .maybeSingle();
+
+            if (!biz) {
+              // Auto-seed: primer login → crear business
+              const { data: newBiz } = await supabase
+                .from('businesses')
+                .upsert(
+                  { owner_uid: currentUser.uid, name: 'Mi Salón' },
+                  { onConflict: 'owner_uid', ignoreDuplicates: false }
+                )
+                .select()
+                .single();
+              biz = newBiz;
+            }
 
             if (biz) {
               await supabase.from('users').upsert(
