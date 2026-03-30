@@ -1,29 +1,36 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import { supabase } from '../supabase/client';
-import { COLLECTION_TO_TABLE, rowToCamel, fieldToColumn } from '../supabase/tableMap';
-import { useData } from '../context/DataContext';
+import { COLLECTION_TO_TABLE, rowToCamel } from '../supabase/tableMap';
+import { BusinessContext } from '../context/BusinessContext';
 
 /**
  * Hook que reemplaza useCollection (Firebase) con Supabase.
  * Mantiene la misma API: { data, loading, error }
  *
- * @param {string} tableName  - nombre de la tabla en Supabase (snake_case)
- * @param {Array}  filters    - array de objetos { field, op, value } (opcional)
- * @param {Object} orderBy    - objeto { column: string, ascending: boolean } (opcional)
+ * Lee businessId desde BusinessContext (contexto ligero separado de DataContext)
+ * para evitar dependencia circular cuando se usa dentro del propio DataProvider.
+ *
+ * Firma compatible con componentes externos:
+ *   useSupabaseCollection(table, filters?, orderBy?)
+ *
+ * @param {string} tableNameInput  - tabla Supabase o alias colección Firestore
+ * @param {Array}  filters         - [{ field, op, value }] (opcional)
+ * @param {Object} orderBy         - { column, ascending } (opcional)
  */
 export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = null) => {
-  const [data, setData] = useState(null);
+  const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const channelRef = useRef(null);
+  const [error, setError]     = useState(null);
+  const channelRef            = useRef(null);
 
-  const { businessId } = useData();
-
-  const tableName = COLLECTION_TO_TABLE[tableNameInput] || tableNameInput;
+  // BusinessContext: contexto ligero que solo expone businessId
+  // Se usa aquí para evitar importar DataContext (que causaría dependencia circular)
+  const businessCtx  = useContext(BusinessContext);
+  const businessId   = businessCtx?.businessId ?? null;
+  const tableName    = COLLECTION_TO_TABLE[tableNameInput] || tableNameInput;
 
   useEffect(() => {
     if (!businessId) {
-      // Sin business_id no podemos filtrar, esperar
       setLoading(false);
       setData([]);
       return;
@@ -39,7 +46,6 @@ export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = nu
           .select('*')
           .eq('business_id', businessId);
 
-        // Apply filters: array de objetos { field, op, value }
         if (Array.isArray(filters)) {
           filters.forEach(f => {
             if (f.field && f.op && f.value !== undefined) {
@@ -48,7 +54,6 @@ export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = nu
           });
         }
 
-        // Orden: usar orderBy personalizado o fallback a created_at DESC
         if (orderBy?.column) {
           query = query.order(orderBy.column, { ascending: orderBy.ascending ?? true });
         } else {
@@ -56,11 +61,8 @@ export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = nu
         }
 
         const { data: rows, error: err } = await query;
-
         if (!isMounted) return;
         if (err) throw err;
-
-        // Convertir snake_case → camelCase para compatibilidad con componentes
         setData((rows || []).map(rowToCamel));
         setError(null);
       } catch (err) {
@@ -74,22 +76,12 @@ export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = nu
 
     fetchData();
 
-    // Real-time via Supabase Realtime
     channelRef.current = supabase
       .channel(`realtime:${tableName}:${businessId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: tableName,
-          filter: `business_id=eq.${businessId}`,
-        },
-        () => {
-          // Refetch al recibir cualquier cambio
-          fetchData();
-        }
-      )
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: tableName,
+        filter: `business_id=eq.${businessId}`,
+      }, () => fetchData())
       .subscribe();
 
     return () => {

@@ -1,6 +1,7 @@
 // ===== src/context/DataContext.jsx — Firebase Auth + Supabase writes =====
 import React, { createContext, useContext, useMemo } from 'react';
 import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
+import { BusinessContext } from './BusinessContext';
 import { auth } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 import { supabase } from '../supabase/client';
@@ -107,6 +108,7 @@ export const DataProvider = ({ children }) => {
   }, []);
 
   // ── Colecciones Supabase ─────────────────────────────────────────
+  // useSupabaseCollection lee businessId desde BusinessContext (proveído abajo)
   const { data: clients,            loading: loadingClients }     = useSupabaseCollection('clients');
   const { data: collaborators,      loading: loadingCollabs }     = useSupabaseCollection('collaborators', [], { column: 'display_order', ascending: true });
   const { data: services,           loading: loadingServices }    = useSupabaseCollection('services');
@@ -145,9 +147,11 @@ export const DataProvider = ({ children }) => {
   ]);
 
   return (
-    <DataContext.Provider value={value}>
-      {children}
-    </DataContext.Provider>
+    <BusinessContext.Provider value={{ businessId }}>
+      <DataContext.Provider value={value}>
+        {children}
+      </DataContext.Provider>
+    </BusinessContext.Provider>
   );
 };
 
