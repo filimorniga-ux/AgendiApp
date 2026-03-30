@@ -1,10 +1,16 @@
-// ===== INICIO: src/pages/InventarioTecnicoPage.jsx (FINAL) =====
+// ===== INICIO: src/pages/InventarioTecnicoPage.jsx =====
 import React, { useMemo, useEffect, useState } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
 import TechProductModal from '../components/modals/TechProductModal';
 import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
+import { BarcodeScanner } from '../components/barcode/BarcodeScanner';
+import { BarcodeScannerButton } from '../components/barcode/BarcodeScannerButton';
+import { StockEntryModal } from '../components/inventory/StockEntryModal';
+import { StockExitModal } from '../components/inventory/StockExitModal';
+import { QuickCreateProductModal } from '../components/inventory/QuickCreateProductModal';
+import { useBarcodeLookup } from '../hooks/useBarcodeLookup';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -18,6 +24,32 @@ const InventarioTecnicoPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { technicalInventory: techInventory, isLoading: loading } = useData();
   const error = null;
+
+  // ── Barcode scanner ─────────────────────────────────────────────────────
+  const [scannerActive, setScannerActive] = useState(false);
+  const [scanMode, setScanMode] = useState('entry');
+  const [barcodeProduct, setBarcodeProduct] = useState(null);
+  const [barcodeInvType, setBarcodeInvType] = useState(null);
+  const [showEntryModal, setShowEntryModal] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
+  const [showQuickCreate, setShowQuickCreate] = useState(false);
+  const [lastBarcode, setLastBarcode] = useState('');
+  const { lookup, loading: lookupLoading } = useBarcodeLookup();
+
+  const handleBarcodeScan = async (code) => {
+    if (lookupLoading) return;
+    setLastBarcode(code);
+    const { product, inventoryType, found } = await lookup(code);
+    if (found) {
+      setBarcodeProduct(product);
+      setBarcodeInvType(inventoryType);
+      if (scanMode === 'entry') setShowEntryModal(true);
+      else setShowExitModal(true);
+    } else {
+      toast('Código no encontrado — crear producto', { icon: '🔍' });
+      setShowQuickCreate(true);
+    }
+  };
 
   const items = useMemo(() => {
     if (!techInventory) return [];
@@ -89,11 +121,28 @@ const InventarioTecnicoPage = () => {
           <h2 className="text-3xl font-bold text-white">Inventario Técnico</h2>
           <p className="text-text-main/70">Gestiona los productos de uso interno (costos).</p>
         </div>
-        <button onClick={handleOpenCreateModal} className="btn-golden flex items-center">
-          <i data-feather="plus" className="mr-2 h-5 w-5"></i>
-          <span>Agregar Producto</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {scannerActive && (
+            <div className="flex rounded-md bg-bg-main/50 p-1 border border-border-main">
+              <button onClick={() => setScanMode('entry')}
+                className={`px-3 py-1 text-xs font-semibold rounded transition-colors ${scanMode === 'entry' ? 'bg-green-600 text-white' : 'text-text-muted hover:text-text-main'}`}
+              >📦 Entrada</button>
+              <button onClick={() => setScanMode('exit')}
+                className={`px-3 py-1 text-xs font-semibold rounded transition-colors ${scanMode === 'exit' ? 'bg-orange-600 text-white' : 'text-text-muted hover:text-text-main'}`}
+              >📤 Salida</button>
+            </div>
+          )}
+          <BarcodeScannerButton active={scannerActive} onToggle={() => setScannerActive(v => !v)} />
+          <button onClick={handleOpenCreateModal} className="btn-golden flex items-center">
+            <i data-feather="plus" className="mr-2 h-5 w-5"></i>
+            <span>Agregar Producto</span>
+          </button>
+        </div>
       </div>
+
+      {scannerActive && (
+        <BarcodeScanner active={scannerActive} onScan={handleBarcodeScan} onClose={() => setScannerActive(false)} mode="keyboard" />
+      )}
       <div className="flex flex-wrap gap-4 mb-6 bg-secondary p-4 rounded-lg border border-border-main">
         <input 
           type="search" 
@@ -160,8 +209,39 @@ const InventarioTecnicoPage = () => {
         onClose={() => setIsModalOpen(false)}
         productToEdit={productToEdit}
       />
+
+      {/* Barcode modals */}
+      {showEntryModal && barcodeProduct && (
+        <StockEntryModal
+          product={barcodeProduct}
+          inventoryType={barcodeInvType}
+          onClose={() => { setShowEntryModal(false); setBarcodeProduct(null); }}
+          onSuccess={({ newStock }) => toast.success(`✅ Stock actualizado → ${newStock}`)}
+        />
+      )}
+      {showExitModal && barcodeProduct && (
+        <StockExitModal
+          product={barcodeProduct}
+          inventoryType={barcodeInvType}
+          onClose={() => { setShowExitModal(false); setBarcodeProduct(null); }}
+          onSuccess={({ newStock }) => toast.success(`📤 Salida registrada → stock: ${newStock}`)}
+        />
+      )}
+      {showQuickCreate && (
+        <QuickCreateProductModal
+          barcode={lastBarcode}
+          onClose={() => setShowQuickCreate(false)}
+          onCreated={({ product, inventoryType }) => {
+            toast.success(`✅ Producto creado: ${product.name}`);
+            setBarcodeProduct(product);
+            setBarcodeInvType(inventoryType);
+            if (scanMode === 'entry') setShowEntryModal(true);
+            else setShowExitModal(true);
+          }}
+        />
+      )}
     </div>
   );
 };
 export default InventarioTecnicoPage;
-// ===== FIN: src/pages/InventarioTecnicoPage.jsx (FINAL) =====
+// ===== FIN: src/pages/InventarioTecnicoPage.jsx =====

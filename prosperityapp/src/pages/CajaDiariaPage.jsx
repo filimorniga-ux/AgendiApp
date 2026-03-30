@@ -1,5 +1,5 @@
-// ===== INICIO: src/pages/CajaDiariaPage.jsx (Sprint 90) =====
-import React, { useMemo, useEffect, useState, useRef } from 'react';
+// ===== INICIO: src/pages/CajaDiariaPage.jsx =====
+import React, { useMemo, useEffect, useState, useRef, useCallback } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
 import MovementModal from '../components/modals/MovementModal';
@@ -9,6 +9,10 @@ import { useReactToPrint } from 'react-to-print';
 import DailyReportTemplate from '../components/reports/DailyReportTemplate';
 import PrintPreviewModal from '../components/modals/PrintPreviewModal';
 import { parseDate } from '../lib/dateUtils';
+import { BarcodeScanner } from '../components/barcode/BarcodeScanner';
+import { BarcodeScannerButton } from '../components/barcode/BarcodeScannerButton';
+import { QuickCreateProductModal } from '../components/inventory/QuickCreateProductModal';
+import { useBarcodeLookup } from '../hooks/useBarcodeLookup';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -66,10 +70,39 @@ const CajaDiariaPage = () => {
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [itemToEdit, setItemToEdit] = useState(null);
   const [preselectedCollab, setPreselectedCollab] = useState(null);
-  const [sortBy, setSortBy] = useState('custom'); // 'custom' | 'alphabetical'
+  const [sortBy, setSortBy] = useState('custom');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { movements, collaborators, isLoading, config, user } = useData();
   const componentRef = useRef();
+
+  // ── Barcode scanner (POS) ─────────────────────────────────────────────
+  const [scannerActive, setScannerActive] = useState(false);
+  const [scannedProduct, setScannedProduct] = useState(null);
+  const [showQuickCreate, setShowQuickCreate] = useState(false);
+  const [lastBarcode, setLastBarcode] = useState('');
+  const { lookup, loading: lookupLoading } = useBarcodeLookup();
+
+  const handleBarcodeScanPOS = useCallback(async (code) => {
+    if (lookupLoading) return;
+    setLastBarcode(code);
+    const { product, inventoryType, found } = await lookup(code);
+    if (found && inventoryType === 'retail') {
+      // Pre-llenar el modal de movimiento con el producto escaneado
+      setScannedProduct(product);
+      setItemToEdit(null);
+      setPreselectedCollab(null);
+      setIsMovementModalOpen(true);
+    } else if (found && inventoryType === 'technical') {
+      import('react-hot-toast').then(({ default: toast }) =>
+        toast(`⚠️ ${product.name} es producto técnico — no disponible en caja`, { icon: '🔒' })
+      );
+    } else {
+      import('react-hot-toast').then(({ default: toast }) =>
+        toast(`Código no encontrado: ${code}`, { icon: '🔍' })
+      );
+      setShowQuickCreate(true);
+    }
+  }, [lookup, lookupLoading]);
 
   const todayStr = new Date().toISOString().split('T')[0];
   // Usar la clave de idioma para el formato de fecha (es-CL / en-US)
@@ -173,7 +206,13 @@ const CajaDiariaPage = () => {
           <h2 className="text-3xl font-bold text-text-main">{t('dailyCash.title')}</h2>
           <p className="text-text-muted">{todayFormatted}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
+          {/* Barcode Scanner POS */}
+          <BarcodeScannerButton
+            active={scannerActive}
+            onToggle={() => setScannerActive(v => !v)}
+            label="Escanear producto"
+          />
           {/* Botón de Imprimir Cierre */}
           <button
             onClick={handlePrint}
@@ -201,6 +240,16 @@ const CajaDiariaPage = () => {
           </button>
         </div>
       </div>
+
+      {/* Indicador de scanner activo en POS */}
+      {scannerActive && (
+        <BarcodeScanner
+          active={scannerActive}
+          onScan={handleBarcodeScanPOS}
+          onClose={() => setScannerActive(false)}
+          mode="keyboard"
+        />
+      )}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <SummaryCard title={t('dailyCash.cashInBox')} value={summary.efectivoEnCaja} icon="archive" colorClass="text-green-400" />
         <SummaryCard title={t('dailyCash.cards.services')} value={summary.totalServicios} icon="scissors" />
@@ -238,10 +287,25 @@ const CajaDiariaPage = () => {
       </div>
       <MovementModal
         isOpen={isMovementModalOpen}
-        onClose={handleCloseMovementModal}
+        onClose={() => { handleCloseMovementModal(); setScannedProduct(null); }}
         movementToEdit={itemToEdit}
         preselectedCollab={preselectedCollab}
+        scannedProduct={scannedProduct}
       />
+      {showQuickCreate && (
+        <QuickCreateProductModal
+          barcode={lastBarcode}
+          onClose={() => setShowQuickCreate(false)}
+          onCreated={({ product }) => {
+            import('react-hot-toast').then(({ default: toast }) =>
+              toast.success(`✅ Producto creado: ${product.name}`)
+            );
+            setScannedProduct(product);
+            setIsMovementModalOpen(true);
+          }}
+        />
+      )}
+
       <PinModal
         isOpen={isPinModalOpen}
         onClose={() => setIsPinModalOpen(false)}

@@ -73,7 +73,10 @@ export default defineConfig({
             },
           },
         ],
+        // Permite cachear el bundle principal de ~2.3 MB (límite subido a 4 MiB)
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
+
       devOptions: {
         enabled: false, // Solo activo en build de producción
       },

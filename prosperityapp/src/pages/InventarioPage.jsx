@@ -1,4 +1,4 @@
-// ===== INICIO: src/pages/InventarioPage.jsx (Sprint 96 - Fix Auditoría) =====
+// ===== INICIO: src/pages/InventarioPage.jsx =====
 import React, { useState, useMemo, useEffect } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
@@ -9,6 +9,12 @@ import { sbDelete, sbUpdate, sbCreate } from '../supabase/db';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { BarcodeScanner } from '../components/barcode/BarcodeScanner';
+import { BarcodeScannerButton } from '../components/barcode/BarcodeScannerButton';
+import { StockEntryModal } from '../components/inventory/StockEntryModal';
+import { StockExitModal } from '../components/inventory/StockExitModal';
+import { QuickCreateProductModal } from '../components/inventory/QuickCreateProductModal';
+import { useBarcodeLookup } from '../hooks/useBarcodeLookup';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -334,6 +340,32 @@ const InventarioPage = () => {
   const [collectionName, setCollectionName] = useState('technicalInventory');
   const { isLoading, businessId } = useData();
 
+  // ── Barcode scanner state ─────────────────────────────────────────────────
+  const [scannerActive, setScannerActive] = useState(false);
+  const [scanMode, setScanMode] = useState('entry'); // 'entry' | 'exit'
+  const [barcodeProduct, setBarcodeProduct] = useState(null);
+  const [barcodeInvType, setBarcodeInvType] = useState(null);
+  const [showEntryModal, setShowEntryModal] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
+  const [showQuickCreate, setShowQuickCreate] = useState(false);
+  const [lastBarcode, setLastBarcode] = useState('');
+  const { lookup, loading: lookupLoading } = useBarcodeLookup();
+
+  const handleBarcodeScan = async (code) => {
+    if (lookupLoading) return;
+    setLastBarcode(code);
+    const { product, inventoryType, found } = await lookup(code);
+    if (found) {
+      setBarcodeProduct(product);
+      setBarcodeInvType(inventoryType);
+      if (scanMode === 'entry') setShowEntryModal(true);
+      else setShowExitModal(true);
+    } else {
+      toast('Código no encontrado — crear producto', { icon: '🔍' });
+      setShowQuickCreate(true);
+    }
+  };
+
   useEffect(() => {
     if (!isLoading) feather.replace();
   }, [activeTab, isLoading]);
@@ -346,8 +378,8 @@ const InventarioPage = () => {
   };
 
   const handleSaveStockMovement = async (product, amount, reason, newStock) => {
-    const stockField = collectionName === 'technicalInventory' ? 'stockCurrent' : 'stockCurrent';
-    const tableName = collectionName; // ya está mapeado en tableMap.js
+    const stockField = 'stockCurrent';
+    const tableName = collectionName;
     await Promise.all([
       sbUpdate(tableName, product.id, { [stockField]: newStock }),
       sbCreate('stockMovements', {
@@ -365,13 +397,47 @@ const InventarioPage = () => {
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-text-main">{t('inventory.title')}</h2>
-        <Link
-          to="/app/inventario/auditoria"
-          className="btn-golden bg-bg-tertiary text-text-main text-sm py-2 px-3 flex items-center gap-2 border border-border-main rounded-md hover:bg-bg-main/50" // <-- FIX BOTON AUDITORIA
-        >
-          <i data-feather="archive" className="w-4 h-4"></i> {t('inventory.auditBtn')}
-        </Link>
+        <div className="flex items-center gap-2">
+          {/* Modo de escaneo */}
+          {scannerActive && (
+            <div className="flex rounded-md bg-bg-main/50 p-1 border border-border-main">
+              <button
+                onClick={() => setScanMode('entry')}
+                className={`px-3 py-1 text-xs font-semibold rounded transition-colors ${
+                  scanMode === 'entry' ? 'bg-green-600 text-white' : 'text-text-muted hover:text-text-main'
+                }`}
+              >📦 Entrada</button>
+              <button
+                onClick={() => setScanMode('exit')}
+                className={`px-3 py-1 text-xs font-semibold rounded transition-colors ${
+                  scanMode === 'exit' ? 'bg-orange-600 text-white' : 'text-text-muted hover:text-text-main'
+                }`}
+              >📤 Salida</button>
+            </div>
+          )}
+          <BarcodeScannerButton
+            active={scannerActive}
+            onToggle={() => setScannerActive(v => !v)}
+          />
+          <Link
+            to="/app/inventario/auditoria"
+            className="btn-golden bg-bg-tertiary text-text-main text-sm py-2 px-3 flex items-center gap-2 border border-border-main rounded-md hover:bg-bg-main/50"
+          >
+            <i data-feather="archive" className="w-4 h-4"></i> {t('inventory.auditBtn')}
+          </Link>
+        </div>
       </div>
+
+      {/* Scanner activo: barra indicadora */}
+      {scannerActive && (
+        <BarcodeScanner
+          active={scannerActive}
+          onScan={handleBarcodeScan}
+          onClose={() => setScannerActive(false)}
+          mode="keyboard"
+        />
+      )}
+
       <div className="flex flex-wrap gap-4 mb-6 bg-bg-secondary p-4 rounded-lg border border-border-main">
         <div className="flex rounded-md bg-bg-main/50 p-1">
           <button
@@ -393,6 +459,7 @@ const InventarioPage = () => {
         {activeTab === 'retail' && <TabInventarioRetail handleOpenStockModal={handleOpenStockModal} />}
       </div>
 
+      {/* Legacy stock modal */}
       <StockMovementModal
         isOpen={isStockModalOpen}
         onClose={() => setIsStockModalOpen(false)}
@@ -400,6 +467,37 @@ const InventarioPage = () => {
         movementType={movementType}
         onSave={handleSaveStockMovement}
       />
+
+      {/* Barcode modals */}
+      {showEntryModal && barcodeProduct && (
+        <StockEntryModal
+          product={barcodeProduct}
+          inventoryType={barcodeInvType}
+          onClose={() => { setShowEntryModal(false); setBarcodeProduct(null); }}
+          onSuccess={({ newStock }) => toast.success(`✅ Stock actualizado → ${newStock}`)}
+        />
+      )}
+      {showExitModal && barcodeProduct && (
+        <StockExitModal
+          product={barcodeProduct}
+          inventoryType={barcodeInvType}
+          onClose={() => { setShowExitModal(false); setBarcodeProduct(null); }}
+          onSuccess={({ newStock }) => toast.success(`📤 Salida registrada → stock: ${newStock}`)}
+        />
+      )}
+      {showQuickCreate && (
+        <QuickCreateProductModal
+          barcode={lastBarcode}
+          onClose={() => setShowQuickCreate(false)}
+          onCreated={({ product, inventoryType }) => {
+            toast.success(`✅ Producto creado: ${product.name}`);
+            setBarcodeProduct(product);
+            setBarcodeInvType(inventoryType);
+            if (scanMode === 'entry') setShowEntryModal(true);
+            else setShowExitModal(true);
+          }}
+        />
+      )}
     </div>
   );
 };
