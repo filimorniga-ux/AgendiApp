@@ -297,7 +297,8 @@
       "redemptionReceipt": "Subir evidencia de canje",
       "viewDocuments": "Ver documentos subidos"
     },
-    "noRecords": "No se encontraron Gift Cards."
+    "noRecords": "No se encontraron Gift Cards.",
+    "noData": "No hay gift cards registradas."
   },
   "payroll": {
     "subtitle": "Selecciona los días para calcular la nómina.",
