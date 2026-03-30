@@ -10,6 +10,7 @@ import ReactCalendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import TimeClockModal from '../modals/TimeClockModal';
 import TechCalculatorModal from '../modals/TechCalculatorModal';
+import { parseDate } from '../../lib/dateUtils';
 
 // Helper para formatear hora
 const formatTime = (dateObj) => {
@@ -130,13 +131,13 @@ const AgendaCalendario = () => {
     return appointments
       .filter(apt => {
         // Manejo seguro de Timestamp de Firestore
-        const aptDate = apt.start?.toDate ? apt.start.toDate() : new Date(apt.start);
+        const aptDate = parseDate(apt.startsAt ?? apt.starts_at ?? apt.start);
         return aptDate >= startOfDay && aptDate <= endOfDay;
       })
       .map(apt => ({
         ...apt,
-        start: apt.start?.toDate ? apt.start.toDate() : new Date(apt.start),
-        end: apt.end?.toDate ? apt.end.toDate() : new Date(apt.end)
+        start: parseDate(apt.startsAt ?? apt.starts_at ?? apt.start),
+        end: parseDate(apt.endsAt ?? apt.ends_at ?? apt.end)
       }));
   }, [appointments, date]);
 
