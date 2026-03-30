@@ -1,6 +1,11 @@
 /**
- * Capa de escritura para Supabase — reemplaza las operaciones directas
- * de Firestore (addDoc, setDoc, updateDoc, deleteDoc) en los componentes.
+ * db.js — Capa de escritura para Supabase con soporte Offline-First.
+ *
+ * Cuando hay red   → escribe directamente en Supabase (comportamiento anterior).
+ * Cuando no hay red → encola la operación en IndexedDB (offlineQueue).
+ *                     Al reconectar, syncOfflineQueue() la ejecuta automáticamente.
+ *
+ * También llama a syncOfflineQueue() al detectar reconexión a internet.
  *
  * Uso:
  *   import { sbCreate, sbUpdate, sbDelete } from '../supabase/db';
@@ -9,39 +14,74 @@
  *   await sbDelete('clients', id);
  */
 
-import { supabase } from './client';
+import { supabase }      from './client';
 import { COLLECTION_TO_TABLE, objToSnake } from './tableMap';
+import { enqueueWrite, syncOfflineQueue }  from '../lib/offlineQueue';
 
 function getTable(collectionName) {
   return COLLECTION_TO_TABLE[collectionName] || collectionName;
 }
 
+// ── Auto-sync al reconectar ──────────────────────────────────────────────────
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', async () => {
+    console.info('[db] 🌐 Conexión restaurada — sincronizando cola offline...');
+    await syncOfflineQueue();
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 /**
  * Crea un documento en Supabase.
- * @returns {Promise<{data, error}>}
+ * Si no hay red, encola la operación para ejecutarla al reconectar.
+ *
+ * @returns {Promise<{data, error, queued?}>}
  */
 export async function sbCreate(collectionName, payload, businessId) {
-  const table = getTable(collectionName);
+  const table       = getTable(collectionName);
   const snakePayload = objToSnake({ ...payload, businessId });
+
+  if (!navigator.onLine) {
+    await enqueueWrite('insert', table, snakePayload);
+    return { data: { ...snakePayload, id: `offline_${Date.now()}` }, error: null, queued: true };
+  }
+
   return supabase.from(table).insert(snakePayload).select().single();
 }
 
 /**
  * Actualiza un documento en Supabase por ID.
- * @returns {Promise<{data, error}>}
+ * Si no hay red, encola la operación.
+ *
+ * @returns {Promise<{data, error, queued?}>}
  */
 export async function sbUpdate(collectionName, id, payload) {
-  const table = getTable(collectionName);
+  const table        = getTable(collectionName);
   const snakePayload = objToSnake({ ...payload, updatedAt: new Date().toISOString() });
+
+  if (!navigator.onLine) {
+    await enqueueWrite('update', table, snakePayload, id);
+    return { data: { id, ...snakePayload }, error: null, queued: true };
+  }
+
   return supabase.from(table).update(snakePayload).eq('id', id).select().single();
 }
 
 /**
  * Elimina un documento en Supabase por ID.
- * @returns {Promise<{error}>}
+ * Si no hay red, encola la operación.
+ *
+ * @returns {Promise<{error, queued?}>}
  */
 export async function sbDelete(collectionName, id) {
   const table = getTable(collectionName);
+
+  if (!navigator.onLine) {
+    await enqueueWrite('delete', table, {}, id);
+    return { error: null, queued: true };
+  }
+
   return supabase.from(table).delete().eq('id', id);
 }
 

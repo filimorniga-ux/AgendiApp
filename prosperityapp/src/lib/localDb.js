@@ -1,0 +1,77 @@
+/**
+ * localDb.js — Base de datos IndexedDB local para AgendiApp
+ *
+ * Usa Dexie.js como wrapper moderno sobre IndexedDB.
+ * Espeja las mismas tablas de Supabase para funcionar offline.
+ *
+ * Estrategia:
+ *  - Al hacer fetch online  → se cachean los resultados aquí
+ *  - Al detectar offline    → se leen los datos desde aquí
+ *  - Las escrituras offline → van a la tabla `offline_queue`
+ *  - Al reconectar          → `syncOfflineQueue()` las ejecuta en Supabase
+ */
+
+import Dexie from 'dexie';
+
+export const localDb = new Dexie('AgendiAppDB');
+
+// ── Schema v1 ────────────────────────────────────────────────────────────────
+// Los campos indexados (++ primary key, &unique, etc.) van en el schema.
+// El resto de columnas se almacenan automáticamente sin declarar.
+localDb.version(1).stores({
+  clients:              '++_localId, id, business_id, firebaseId',
+  collaborators:        '++_localId, id, business_id, firebaseId',
+  services:             '++_localId, id, business_id, firebaseId',
+  technical_inventory:  '++_localId, id, business_id, firebaseId',
+  retail_inventory:     '++_localId, id, business_id, firebaseId',
+  config:               '++_localId, id, business_id',
+  movements:            '++_localId, id, business_id, firebaseId',
+  appointments:         '++_localId, id, business_id, firebaseId',
+  // Cola de operaciones offline pendientes de sincronizar
+  offline_queue:        '++id, table, operation, status, createdAt',
+});
+
+/**
+ * Guarda (o reemplaza) un array entero de rows para una tabla y businessId.
+ * Se usa después de un fetch exitoso de Supabase para poblar el caché.
+ *
+ * @param {string} tableName   - Nombre de tabla en localDb
+ * @param {string} businessId  - ID del negocio actual
+ * @param {Array}  rows        - Array de objetos ya transformados a camelCase
+ */
+export async function cacheRows(tableName, businessId, rows) {
+  const table = localDb.table(tableName);
+  if (!table) return;
+
+  try {
+    // Eliminar los registros anteriores de este business
+    await table.where('business_id').equals(businessId).delete();
+    // Insertar los nuevos
+    if (rows && rows.length > 0) {
+      await table.bulkAdd(rows.map(r => ({ ...r })));
+    }
+  } catch (err) {
+    console.warn(`[localDb] Error cacheando ${tableName}:`, err);
+  }
+}
+
+/**
+ * Lee todos los rows de una tabla para un businessId desde IndexedDB.
+ *
+ * @param {string} tableName
+ * @param {string} businessId
+ * @returns {Promise<Array>}
+ */
+export async function readCachedRows(tableName, businessId) {
+  const table = localDb.table(tableName);
+  if (!table) return [];
+
+  try {
+    return await table.where('business_id').equals(businessId).toArray();
+  } catch (err) {
+    console.warn(`[localDb] Error leyendo ${tableName} offline:`, err);
+    return [];
+  }
+}
+
+export default localDb;

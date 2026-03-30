@@ -6,6 +6,7 @@ import { BusinessProvider } from './context/BusinessContext';
 import { DataProvider } from './context/DataContext';
 import { Toaster } from 'react-hot-toast';
 import PWAInstallBanner from './components/PWAInstallBanner';
+import OfflineIndicator from './components/OfflineIndicator';
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -52,6 +53,7 @@ function App() {
             }}
           />
           <PWAInstallBanner />
+          <OfflineIndicator />
           <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <Routes>
               <Route path="/" element={<Navigate to="/app" replace />} />

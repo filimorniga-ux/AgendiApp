@@ -1,0 +1,32 @@
+/**
+ * useOnlineStatus.js — Hook para detectar estado de red en tiempo real
+ *
+ * Retorna `true` si hay conexión, `false` si el dispositivo está offline.
+ * Escucha los eventos nativos `online` / `offline` del navegador.
+ *
+ * Uso:
+ *   const isOnline = useOnlineStatus();
+ */
+
+import { useState, useEffect } from 'react';
+
+export function useOnlineStatus() {
+  const [isOnline, setIsOnline] = useState(
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
+
+  useEffect(() => {
+    const goOnline  = () => setIsOnline(true);
+    const goOffline = () => setIsOnline(false);
+
+    window.addEventListener('online',  goOnline);
+    window.addEventListener('offline', goOffline);
+
+    return () => {
+      window.removeEventListener('online',  goOnline);
+      window.removeEventListener('offline', goOffline);
+    };
+  }, []);
+
+  return isOnline;
+}
