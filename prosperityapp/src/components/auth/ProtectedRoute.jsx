@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useData } from '../../context/DataContext';
+import { useBusiness } from '../../context/BusinessContext';
 import { auth } from '../../firebase/config';
 import {
   signInWithEmailAndPassword,
@@ -16,7 +16,8 @@ const ProtectedRoute = ({ children }) => {
   // Si el bypass está activo entramos directo — sin login
   if (DEV_BYPASS) return children;
 
-  const { user, loadingAuth } = useData();
+  const { user, loadingAuth } = useBusiness();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

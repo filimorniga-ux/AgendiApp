@@ -2,6 +2,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { BusinessProvider } from './context/BusinessContext';
 import { DataProvider } from './context/DataContext';
 import { Toaster } from 'react-hot-toast';
 
@@ -37,49 +38,51 @@ const PlaceholderPage = ({ title }) => (
 function App() {
   return (
     <ThemeProvider>
-      <DataProvider>
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: '#2d3748',
-              color: '#e2e8f0',
-              border: '1px solid #4a5568',
-            },
-          }}
-        />
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <Routes>
-            <Route path="/" element={<Navigate to="/app" replace />} />
+      <BusinessProvider>
+        <DataProvider>
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              style: {
+                background: '#2d3748',
+                color: '#e2e8f0',
+                border: '1px solid #4a5568',
+              },
+            }}
+          />
+          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <Routes>
+              <Route path="/" element={<Navigate to="/app" replace />} />
 
-            <Route path="/app" element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<AgendaCalendario />} />
-              <Route path="dashboard" element={<DashboardPage />} />
-              <Route path="caja" element={<CajaDiariaPage />} />
-              <Route path="pedidos" element={<PedidosPage />} />
-              <Route path="clientes" element={<ClientesPage />} />
-              <Route path="clientes/:id" element={<ClientDetailPage />} />
-              <Route path="colaboradores" element={<ColaboradoresPage />} />
-              <Route path="nomina" element={<NominasPage />} />
-              <Route path="nomina/historial" element={<PayrollHistoryPage />} />
-              <Route path="nomina/historial/:id" element={<PayrollDetailPage />} />
-              <Route path="cierres" element={<CierresMensualesPage />} />
-              <Route path="precios" element={<PreciosPage />} />
-              <Route path="inventario" element={<InventarioPage />} />
-              <Route path="inventario/auditoria" element={<StockMovementsPage />} />
-              <Route path="giftcards" element={<GiftCardPage />} />
-              <Route path="configuracion" element={<ConfiguracionPage />} />
-              <Route path="reportes" element={<ReportsPage />} />
-              <Route path="migration" element={<MigrationPage />} />
-              <Route path="*" element={<PlaceholderPage title="404: Página no encontrada" />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </DataProvider>
+              <Route path="/app" element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<AgendaCalendario />} />
+                <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="caja" element={<CajaDiariaPage />} />
+                <Route path="pedidos" element={<PedidosPage />} />
+                <Route path="clientes" element={<ClientesPage />} />
+                <Route path="clientes/:id" element={<ClientDetailPage />} />
+                <Route path="colaboradores" element={<ColaboradoresPage />} />
+                <Route path="nomina" element={<NominasPage />} />
+                <Route path="nomina/historial" element={<PayrollHistoryPage />} />
+                <Route path="nomina/historial/:id" element={<PayrollDetailPage />} />
+                <Route path="cierres" element={<CierresMensualesPage />} />
+                <Route path="precios" element={<PreciosPage />} />
+                <Route path="inventario" element={<InventarioPage />} />
+                <Route path="inventario/auditoria" element={<StockMovementsPage />} />
+                <Route path="giftcards" element={<GiftCardPage />} />
+                <Route path="configuracion" element={<ConfiguracionPage />} />
+                <Route path="reportes" element={<ReportsPage />} />
+                <Route path="migration" element={<MigrationPage />} />
+                <Route path="*" element={<PlaceholderPage title="404: Página no encontrada" />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </DataProvider>
+      </BusinessProvider>
     </ThemeProvider>
   );
 }
