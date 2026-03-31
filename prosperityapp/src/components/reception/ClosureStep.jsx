@@ -22,7 +22,7 @@ const STATUS_OPTIONS = [
 
 export default function ClosureStep({ sessionData, onFinished }) {
   const { supplier: supplierData, supplierId, mode: supplierMode,
-          items, extraItems, extraDecisions, priceDecisions,
+          items, extraItems, extraDecisions, extraTypes, linkedProducts, priceDecisions,
           invoice } = sessionData;
   const { businessId } = useBusiness();
 
@@ -95,6 +95,61 @@ export default function ClosureStep({ sessionData, onFinished }) {
       const receptionId = reception.id;
 
       // ── 3. Insertar líneas ────────────────────────────────────────
+      // ── 3. Crear nuevos productos en inventario ANTES de las líneas de recepción ──
+      for (const it of newProducts) {
+        if (!it.inventoryType) continue;
+        const table = it.inventoryType === 'technical' ? 'technical_inventory' : 'retail_inventory';
+        const { data: newProd, error: invErr } = await supabase.from(table).insert({
+          business_id:    businessId,
+          nombre:         it.description,
+          barcode:        it.barcode        || null,
+          sku_proveedor:  it.skuProveedor   || null,
+          costo:          it.unitCost,
+          stock:          0, // Inicializar en 0, el stock se ajustará con el movimiento de stock
+        }).select('id').single();
+
+        if (invErr) {
+          console.warn('[ClosureStep] Error creando producto:', it.description, invErr.message);
+        } else {
+          it.inventoryId = newProd.id;
+        }
+      }
+
+      // Crear productos extra o vincularlos a existentes ANTES de las líneas de recepción
+      if (extraItems && extraItems.length > 0) {
+        for (let i = 0; i < extraItems.length; i++) {
+          const decision = extraDecisions?.[i] || 'ignore';
+          const ex = extraItems[i];
+
+          if (decision === 'create') {
+            const invType = extraTypes?.[i] || 'retail';
+            const table = invType === 'technical' ? 'technical_inventory' : 'retail_inventory';
+
+            const { data: newExtraProd, error: exInvErr } = await supabase.from(table).insert({
+              business_id:    businessId,
+              nombre:         ex.description,
+              barcode:        ex.barcode || null,
+              costo:          0, // Inicializar en 0, se puede editar luego en inventario
+              stock:          0, // Inicializar en 0, el stock se ajustará con el movimiento de stock
+            }).select('id').single();
+
+            if (exInvErr) {
+              console.warn('[ClosureStep] Error creando producto extra:', ex.description, exInvErr.message);
+            } else {
+              ex.inventoryId = newExtraProd.id;
+              ex.inventoryType = invType;
+            }
+          } else if (decision === 'link') {
+            const linkedProd = linkedProducts?.[i];
+            if (linkedProd) {
+              ex.inventoryId = linkedProd.id;
+              ex.inventoryType = linkedProd.inventoryType;
+            }
+          }
+        }
+      }
+
+      // ── 4. Insertar líneas ────────────────────────────────────────
       const receptionItemsData = items.map(it => ({
         reception_id:       receptionId,
         business_id:        businessId,
@@ -112,23 +167,35 @@ export default function ClosureStep({ sessionData, onFinished }) {
         is_new_product:     it.isNewProduct || false,
         observations:       it.observations || null,
       }));
+
+      // Agregar extraItems a reception_items
+      if (extraItems && extraItems.length > 0) {
+        extraItems.forEach((ex, i) => {
+          const decision = extraDecisions?.[i] || 'ignore';
+          if (decision === 'ignore') return;
+
+          receptionItemsData.push({
+            reception_id:       receptionId,
+            business_id:        businessId,
+            inventory_id:       ex.inventoryId || null,
+            inventory_type:     ex.inventoryType || null,
+            description:        ex.description,
+            barcode:            ex.barcode || null,
+            sku_proveedor:      null,
+            quantity_invoiced:  0,
+            quantity_received:  ex.qty,
+            unit_cost:          0,
+            total_cost:         0,
+            iva_pct:            19,
+            status:             decision === 'return' ? 'returned' : 'extra',
+            is_new_product:     decision === 'create',
+            observations:       `Ítem extra no facturado (${decision})`,
+          });
+        });
+      }
+
       const { error: itemsErr } = await supabase.from('reception_items').insert(receptionItemsData);
       if (itemsErr) throw itemsErr;
-
-      // ── 4. Crear nuevos productos en inventario ───────────────────
-      for (const it of newProducts) {
-        if (!it.inventoryType) continue;
-        const table = it.inventoryType === 'technical' ? 'technical_inventory' : 'retail_inventory';
-        const { error: invErr } = await supabase.from(table).insert({
-          business_id:    businessId,
-          nombre:         it.description,
-          barcode:        it.barcode        || null,
-          sku_proveedor:  it.skuProveedor   || null,
-          costo:          it.unitCost,
-          stock:          it.quantityReceived ?? it.quantityInvoiced,
-        });
-        if (invErr) console.warn('[ClosureStep] Error creando producto:', it.description, invErr.message);
-      }
 
       // ── 5. Actualizar precios si se confirmó ──────────────────────
       for (const it of items.filter(i => i.priceChanged && i.inventoryId)) {
@@ -150,6 +217,24 @@ export default function ClosureStep({ sessionData, onFinished }) {
           reason:         `Recepción pedido #${invoice?.folio || receptionId.slice(0, 8)}`,
           reference_id:   receptionId,
         }));
+
+      if (extraItems && extraItems.length > 0) {
+        extraItems.forEach((ex, i) => {
+          const decision = extraDecisions?.[i] || 'ignore';
+          if ((decision === 'create' || decision === 'link') && ex.inventoryId) {
+            movements.push({
+              business_id:    businessId,
+              inventory_id:   ex.inventoryId,
+              inventory_type: ex.inventoryType,
+              type:           'entrada',
+              quantity:       ex.qty,
+              reason:         `Recepción pedido #${invoice?.folio || receptionId.slice(0, 8)} (Ítem extra)`,
+              reference_id:   receptionId,
+            });
+          }
+        });
+      }
+
       if (movements.length > 0) {
         await supabase.from('stock_movements').insert(movements);
       }
