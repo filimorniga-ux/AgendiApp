@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import feather from 'feather-icons';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +25,8 @@ export default function CashSessionsHistoryTab() {
       'Observaciones': s.observations || ''
     }));
   }, [sessions]);
+
+  useEffect(() => { feather.replace(); }, [sessions]);
 
   if (loading) {
     return <div className="p-8 text-center text-text-muted">Cargando historial...</div>;

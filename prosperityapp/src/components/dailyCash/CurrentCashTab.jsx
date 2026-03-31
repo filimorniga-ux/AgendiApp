@@ -77,7 +77,7 @@ export default function CurrentCashTab({ onArqueoClick }) {
   const [lastBarcode, setLastBarcode] = useState('');
   const { lookup, loading: lookupLoading } = useBarcodeLookup();
 
-  useEffect(() => { feather.replace(); });
+  useEffect(() => { feather.replace(); }, [movements, collaborators, scannerActive]);
 
   const handleBarcodeScanPOS = useCallback(async (code) => {
     if (lookupLoading) return;

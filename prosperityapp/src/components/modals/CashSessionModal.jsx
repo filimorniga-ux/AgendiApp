@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import feather from 'feather-icons';
-import { fetchBusinessId } from '../../supabase/client';
 import { useSupabaseCollection } from '../../hooks/useSupabaseCollection';
 import { supabase } from '../../supabase/client';
+import { BusinessContext } from '../../context/BusinessContext';
 
 const formatCurrency = (val) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(val || 0);
 
 export default function CashSessionModal({ isOpen, onClose, summaryData, sessionType }) {
   const { t } = useTranslation();
+  const { businessId } = useContext(BusinessContext);
   const [actualCash, setActualCash] = useState(0);
   const [observations, setObservations] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,10 +33,8 @@ export default function CashSessionModal({ isOpen, onClose, summaryData, session
     setIsSubmitting(true);
 
     try {
-      const bId = await fetchBusinessId();
-      
       const payload = {
-        business_id: bId,
+        business_id: businessId,
         type: sessionType, // 'arqueo' or 'cierre'
         expected_cash: expectedCash,
         actual_cash: actualCash,

@@ -17,8 +17,6 @@ export default function TransactionsHistoryTab() {
   });
   const [selectedType, setSelectedType] = useState('Todos');
 
-  useEffect(() => { feather.replace(); });
-
   const filteredMovements = useMemo(() => {
     if (!movements) return [];
     
@@ -48,6 +46,8 @@ export default function TransactionsHistoryTab() {
       };
     });
   }, [filteredMovements, collaborators]);
+
+  useEffect(() => { feather.replace(); }, [filteredMovements]);
 
   const handleExportExcel = () => {
     if (formattedData.length === 0) return;

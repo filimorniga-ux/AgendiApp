@@ -27,8 +27,6 @@ export default function TechnicalConsumptionTab() {
   
   const { data: stockMovements, loading } = useSupabaseCollection('stockMovements', filters);
 
-  useEffect(() => { feather.replace(); });
-
   const filteredMovements = useMemo(() => {
     if (!stockMovements) return [];
     
@@ -63,6 +61,8 @@ export default function TechnicalConsumptionTab() {
       };
     });
   }, [filteredMovements, technicalInventory]);
+
+  useEffect(() => { feather.replace(); }, [filteredMovements]);
 
   const handleExportExcel = () => {
     if (formattedData.length === 0) return;
