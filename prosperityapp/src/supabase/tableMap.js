@@ -23,6 +23,7 @@ export const COLLECTION_TO_TABLE = {
   suppliers:            'suppliers',
   invoices:             'invoices',
   debts:                'debts',
+  cashSessions:         'cash_sessions',
 };
 
 /**
