@@ -28,57 +28,82 @@ export function calculatePayroll(data, steps) {
     totalPropinas     = 0,
     commissionPercent = 0,
     taxPercent        = 19,
-  } = data;
+  } = data || {};
+
+  // Utilidad para asegurar valores numéricos seguros y evitar propagación de NaN
+  const safeNum = (val, fallback = 0) => {
+    if (val === null || val === undefined || val === '') return fallback;
+    const num = Number(val);
+    return Number.isNaN(num) || !Number.isFinite(num) ? fallback : num;
+  };
+
+  const safeCommissionPct = safeNum(commissionPercent, 0);
+  const safeTaxPct = safeNum(taxPercent, 19);
 
   // Registros disponibles por fuente
   const sources = {
-    gross:       totalServices,
-    tech_cost:   totalTechCost,
-    advances:    totalAdvances,
-    commissions: totalSalesCommissions,
-    tips:        totalPropinas,
+    gross:       safeNum(totalServices),
+    tech_cost:   safeNum(totalTechCost),
+    advances:    safeNum(totalAdvances),
+    commissions: safeNum(totalSalesCommissions),
+    tips:        safeNum(totalPropinas),
   };
 
   let accumulator = 0;      // resultado corriendo
   let netBase     = 0;      // guardamos la "base neta" para referencia posterior
   const rows      = [];
 
+  if (!Array.isArray(steps)) {
+    return { rows, finalPayment: accumulator, netBase };
+  }
+
   for (const step of steps) {
-    if (!step.enabled) continue;
+    if (!step || !step.enabled) continue;
 
-    // Valor base del paso
     let raw = 0;
-    if (step.source === 'fixed') {
-      raw = Number(step.value) || 0;
-    } else if (step.source === 'result') {
-      raw = accumulator;
-    } else if (step.source === 'commission_pct') {
-      // Participación = % del accumulator actual
-      raw = accumulator * ((Number(step.value) || commissionPercent) / 100);
-    } else if (step.source === 'tax_pct') {
-      // Impuesto = % de la referencia (gross o result)
-      const base = step.reference === 'gross' ? sources.gross : accumulator;
-      raw = base * ((Number(step.value) || taxPercent) / 100);
+
+    // Resolviendo la base para porcentajes
+    const getBase = (reference) => {
+      if (reference === 'gross') return sources.gross;
+      if (reference === 'net_base') return netBase;
+      return accumulator; // result es el default
+    };
+
+    const isPctOperator = step.operator === 'percent_add' || step.operator === 'percent_subtract';
+    const isPctSource = step.source === 'commission_pct' || step.source === 'tax_pct';
+
+    if (isPctOperator || isPctSource) {
+      // Determinamos el porcentaje a aplicar
+      let pctVal = step.value;
+      if (pctVal === null || pctVal === undefined || pctVal === '') {
+        if (step.source === 'commission_pct') pctVal = safeCommissionPct;
+        else if (step.source === 'tax_pct') pctVal = safeTaxPct;
+        else pctVal = 0;
+      }
+
+      const pct = safeNum(pctVal);
+      const base = getBase(step.reference);
+      raw = base * (pct / 100);
     } else {
-      raw = sources[step.source] ?? 0;
+      if (step.source === 'fixed') {
+        raw = safeNum(step.value);
+      } else if (step.source === 'result') {
+        raw = accumulator;
+      } else {
+        // En caso de que no haya coincidencia con source, intentar operator
+        raw = sources[step.source] !== undefined ? sources[step.source] : 0;
+      }
     }
 
-    // Porcentaje genérico sobre referencia
-    if (step.operator === 'percent_add' || step.operator === 'percent_subtract') {
-      const base = step.reference === 'gross'
-        ? sources.gross
-        : step.reference === 'net_base'
-          ? netBase
-          : accumulator;
-      raw = base * ((Number(step.value) || 0) / 100);
-    }
+    // Asegurar que raw sea un número finito válido antes de aplicar operador
+    raw = safeNum(raw);
 
     // Aplicar operador al acumulador
     let delta = 0;
     switch (step.operator) {
       case 'add':
       case 'percent_add':
-        delta = +raw;
+        delta = raw;
         accumulator += raw;
         break;
       case 'subtract':
@@ -91,7 +116,7 @@ export function calculatePayroll(data, steps) {
         accumulator = raw;
         break;
       default:
-        delta = +raw;
+        delta = raw;
         accumulator += raw;
     }
 
@@ -102,10 +127,10 @@ export function calculatePayroll(data, steps) {
 
     rows.push({
       id:         step.id,
-      label:      step.label,
+      label:      step.label || 'Sin etiqueta',
       value:      Math.abs(delta),
       display:    delta,          // con signo para mostrar
-      isSubtotal: step.isSubtotal || false,
+      isSubtotal: Boolean(step.isSubtotal),
       color:      step.color || 'neutral',
       runningTotal: accumulator,
     });
