@@ -14,24 +14,29 @@ import { extractFromText } from './invoiceExtractor.js';
  * @returns {{ supplier, invoice, items, raw_source, confidence }}
  */
 export async function parseOCR(file, countryCode = 'CL', onProgress = null) {
-  // Determinar idioma Tesseract
-  const lang = countryCode === 'CL' || countryCode === 'CO' ? 'spa' : 'spa+eng';
+  try {
+    // Determinar idioma Tesseract
+    const lang = countryCode === 'CL' || countryCode === 'CO' ? 'spa' : 'spa+eng';
 
-  const { data } = await Tesseract.recognize(
-    file,
-    lang,
-    {
-      logger: (m) => {
-        if (m.status === 'recognizing text' && onProgress) {
-          onProgress(Math.round(m.progress * 100));
-        }
-      },
-    }
-  );
+    const { data } = await Tesseract.recognize(
+      file,
+      lang,
+      {
+        logger: (m) => {
+          if (m.status === 'recognizing text' && onProgress) {
+            onProgress(Math.round(m.progress * 100));
+          }
+        },
+      }
+    );
 
-  const confidence = Math.round(data.confidence);
-  const text = data.text;
+    const confidence = Math.round(data.confidence);
+    const text = data.text;
 
-  const result = extractFromText(text, countryCode);
-  return { ...result, raw_source: 'image_ocr', confidence };
+    const result = extractFromText(text, countryCode);
+    return { ...result, raw_source: 'image_ocr', confidence };
+  } catch (error) {
+    console.warn('[parseOCR] Error in OCR processing:', error);
+    throw new Error('No se pudo procesar la imagen/documento (OCR). Verifica que el archivo no esté dañado o sea ilegible.');
+  }
 }

@@ -192,17 +192,33 @@ function extractItemsSimple(lines) {
 function parseTextNum(str) {
   if (!str) return 0;
   // Elimina símbolo $, espacios
-  const clean = str.replace(/\$|\s/g, '');
-  // Si tiene coma como decimal (1.234,56) → swap
-  if (/\d\.\d{3},/.test(clean)) {
+  let clean = str.replace(/\$|\s/g, '');
+
+  // Format: 1.234,56 or 1234,56 -> 1234.56
+  if (/^(\d{1,3}(\.\d{3})*|\d+),\d{1,2}$/.test(clean)) {
     return parseFloat(clean.replace(/\./g, '').replace(',', '.')) || 0;
   }
-  // Si tiene punto como decimal (1,234.56)
-  if (/\d,\d{3}\./.test(clean)) {
+  // Format: 1,234.56 or 1234.56 -> 1234.56
+  if (/^(\d{1,3}(,\d{3})*|\d+)\.\d{1,2}$/.test(clean)) {
     return parseFloat(clean.replace(/,/g, '')) || 0;
   }
-  // Puntos como separadores de miles
-  return parseFloat(clean.replace(/\./g, '').replace(',', '.')) || 0;
+  // Format: 1.234.567 -> 1234567 (only dots, thousands separator)
+  if (/^\d{1,3}(\.\d{3})+$/.test(clean)) {
+    return parseFloat(clean.replace(/\./g, '')) || 0;
+  }
+  // Format: 1,234,567 -> 1234567 (only commas, thousands separator)
+  if (/^\d{1,3}(,\d{3})+$/.test(clean)) {
+    return parseFloat(clean.replace(/,/g, '')) || 0;
+  }
+
+  // Fallback for messy OCR strings
+  clean = clean.replace(/,/g, '.');
+  const parts = clean.split('.');
+  if (parts.length > 2) {
+    const dec = parts.pop();
+    clean = parts.join('') + '.' + dec;
+  }
+  return parseFloat(clean) || 0;
 }
 
 function normalizeDate(str) {

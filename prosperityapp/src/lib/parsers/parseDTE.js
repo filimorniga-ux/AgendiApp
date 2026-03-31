@@ -23,7 +23,7 @@ export function parseDTE(xmlString) {
     rut: formatRut(get(emisor, 'RUTEmisor')),
     razonSocial: get(emisor, 'RznSoc'),
     nombreFantasia: get(emisor, 'GiroEmis') || get(emisor, 'GiroEmisor'),
-    direccion: get(emisor, 'DirOrigen'),
+    direccion: get(emisor, 'DirOrigen') || get(emisor, 'DirEmisor'),
     telefono: get(emisor, 'Telefono') || get(emisor, 'Fono'),
     email: get(emisor, 'CorreoEmisor') || get(emisor, 'Email'),
     country_code: 'CL',
@@ -71,7 +71,14 @@ export function parseDTE(xmlString) {
 
 function parseNum(str) {
   if (!str) return 0;
-  return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
+  const s = str.trim();
+  // If it matches a standard float format with dots (e.g. 15000, 10.5, -5.2)
+  if (/^-?\d+(\.\d+)?$/.test(s)) {
+    return parseFloat(s);
+  }
+  // If it contains a comma and is probably European/South American format
+  // Convert dots to nothing, and commas to dots
+  return parseFloat(s.replace(/\./g, '').replace(',', '.')) || 0;
 }
 
 function formatRut(rut) {
