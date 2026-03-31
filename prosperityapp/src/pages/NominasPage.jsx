@@ -72,34 +72,11 @@ const PayrollRow = ({ label, value, color = 'neutral', isSubtotal = false, isCli
 };
 
 // ─── Tarjeta de colaborador (usa motor dinámico) ──────────────────────────────
-const CollaboratorCard = ({ col, filteredMovements, activeSteps, config, onShowDetail, formatCurrency }) => {
-  const collaboratorMovements  = filteredMovements.filter(m => m.collaboratorId === col.id);
-  const serviceItems           = collaboratorMovements.filter(m => m.type === 'Servicio');
-  const techCostItems          = serviceItems.filter(m => (m.technicalCost || 0) > 0).map(m => ({
-    id: m.id, description: `Costo de: ${m.description}`, amount: -(m.technicalCost || 0), date: m.date,
-  }));
-  const advanceItems           = collaboratorMovements.filter(m => m.type === 'Adelanto');
-  const salesCommissionItems   = collaboratorMovements.filter(m => m.type === 'ComisionVenta');
-  const propinaItems           = collaboratorMovements.filter(m => m.type === 'ComisionPropina');
-
-  const defaultSettings = { taxGeneral: 19, taxOverrides: {} };
-  const foundSettings   = config?.find(c => c.id === 'settings');
-  const settings        = { ...defaultSettings, ...foundSettings };
-
-  const colData = {
-    totalServices:        serviceItems.reduce((s, m) => s + (m.amount || 0), 0),
-    totalTechCost:        techCostItems.reduce((s, m) => s + Math.abs(m.amount || 0), 0),
-    totalAdvances:        advanceItems.reduce((s, m) => s + (m.amount || 0), 0),
-    totalSalesCommissions: salesCommissionItems.reduce((s, m) => s + (m.amount || 0), 0),
-    totalPropinas:        propinaItems.reduce((s, m) => s + (m.amount || 0), 0),
-    commissionPercent:    col.commissionPercent || 0,
-    taxPercent:           settings.taxOverrides?.[col.id] || settings.taxGeneral,
-  };
-
-  const { rows, finalPayment } = useMemo(
-    () => calculatePayroll(colData, activeSteps.filter(s => s.enabled)),
-    [activeSteps, colData.totalServices, colData.totalTechCost]
-  );
+const CollaboratorCard = ({ card, onShowDetail, formatCurrency }) => {
+  const {
+    id, name, finalPayment, rows,
+    serviceItems, techCostItems, advanceItems, salesCommissionItems, propinaItems
+  } = card;
 
   const detailMap = {
     gross:       serviceItems,
@@ -112,7 +89,7 @@ const CollaboratorCard = ({ col, filteredMovements, activeSteps, config, onShowD
   return (
     <div className="bg-bg-secondary rounded-lg border border-border-main shadow-lg flex flex-col">
       <div className="p-4 border-b border-border-main">
-        <h3 className="font-bold text-xl text-text-main">{col.name}</h3>
+        <h3 className="font-bold text-xl text-text-main">{name}</h3>
       </div>
       <div className="p-4 space-y-0.5 flex-grow">
         {rows.map(row => (
@@ -123,7 +100,7 @@ const CollaboratorCard = ({ col, filteredMovements, activeSteps, config, onShowD
             color={row.color}
             isSubtotal={row.isSubtotal}
             isClickable={!!detailMap[row.id]?.length}
-            onClick={() => detailMap[row.id] && onShowDetail(`${row.label}: ${col.name}`, detailMap[row.id])}
+            onClick={() => detailMap[row.id] && onShowDetail(`${row.label}: ${name}`, detailMap[row.id])}
             formatCurrency={formatCurrency}
           />
         ))}
@@ -204,9 +181,8 @@ const NominasPage = () => {
 
   // Summary para ClosePeriodo / Export (cálculo rápido con motor)
   const payrollCards = useMemo(() => {
-    if (!activeTemplate) return [];
     return activeCollabs.map(col => {
-      const steps = activeTemplate.overrides?.[col.id] || activeTemplate.globalSteps;
+      const steps = activeTemplate?.overrides?.[col.id] || activeTemplate?.globalSteps || DEFAULT_TEMPLATE_STEPS;
       const collaboratorMovements = filteredMovements.filter(m => m.collaboratorId === col.id);
       const serviceItems          = collaboratorMovements.filter(m => m.type === 'Servicio');
       const techCostItems         = serviceItems.filter(m => (m.technicalCost || 0) > 0).map(m => ({
@@ -215,9 +191,11 @@ const NominasPage = () => {
       const advanceItems          = collaboratorMovements.filter(m => m.type === 'Adelanto');
       const salesCommissionItems  = collaboratorMovements.filter(m => m.type === 'ComisionVenta');
       const propinaItems          = collaboratorMovements.filter(m => m.type === 'ComisionPropina');
+
       const defaultSettings       = { taxGeneral: 19, taxOverrides: {} };
       const foundSettings         = config?.find(c => c.id === 'settings');
       const settings              = { ...defaultSettings, ...foundSettings };
+
       const colData = {
         totalServices:         serviceItems.reduce((s, m) => s + (m.amount || 0), 0),
         totalTechCost:         techCostItems.reduce((s, m) => s + Math.abs(m.amount || 0), 0),
@@ -227,10 +205,12 @@ const NominasPage = () => {
         commissionPercent:     col.commissionPercent || 0,
         taxPercent:            settings.taxOverrides?.[col.id] || settings.taxGeneral,
       };
-      const { finalPayment } = calculatePayroll(colData, steps.filter(s => s.enabled));
+
+      const { rows, finalPayment } = calculatePayroll(colData, steps.filter(s => s.enabled));
+
       return {
-        id: col.id, name: col.name, finalPayment,
-        serviceItems, advanceItems, salesCommissionItems, propinaItems,
+        id: col.id, name: col.name, finalPayment, rows,
+        serviceItems, techCostItems, advanceItems, salesCommissionItems, propinaItems,
         ...colData,
       };
     });
@@ -375,13 +355,10 @@ const NominasPage = () => {
 
           {/* Tarjetas */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {activeCollabs.map(col => (
+            {payrollCards.map(card => (
               <CollaboratorCard
-                key={col.id}
-                col={col}
-                filteredMovements={filteredMovements}
-                activeSteps={activeTemplate?.overrides?.[col.id] || activeTemplate?.globalSteps || DEFAULT_TEMPLATE_STEPS}
-                config={config}
+                key={card.id}
+                card={card}
                 onShowDetail={handleShowDetails}
                 formatCurrency={formatCurrency}
               />
