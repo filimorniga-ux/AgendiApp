@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../supabase/client';
 import { useData } from '../../context/DataContext';
 import { DEFAULT_TEMPLATE_STEPS } from '../../lib/payrollEngine';
@@ -15,9 +15,16 @@ async function setDevBypassConfig(businessId) {
 
 // ── Sección override por colaborador ─────────────────────────────────────────
 const CollaboratorOverrideCard = ({ collab, override, defaultSteps, businessId, onSaved }) => {
+  const isMounted = useRef(true);
   const [isOpen,  setIsOpen]  = useState(false);
   const [steps,   setSteps]   = useState(null);
   const [saving,  setSaving]  = useState(false);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const initSteps = () => {
     setSteps(override?.steps?.length ? [...override.steps] : [...defaultSteps]);
@@ -29,35 +36,51 @@ const CollaboratorOverrideCard = ({ collab, override, defaultSteps, businessId, 
     try {
       await setDevBypassConfig(businessId);
       if (override?.id) {
-        await supabase.from('collaborator_template_overrides')
+        const { error } = await supabase.from('collaborator_template_overrides')
           .update({ steps, updated_at: new Date().toISOString() })
-          .eq('id', override.id);
+          .eq('id', override.id)
+          .eq('business_id', businessId);
+        if (error) throw error;
       } else {
-        await supabase.from('collaborator_template_overrides').insert({
+        const { error } = await supabase.from('collaborator_template_overrides').insert({
           business_id: businessId,
           collaborator_id: collab.id,
           steps,
         });
+        if (error) throw error;
       }
-      toast.success(`Override guardado para ${collab.name}`);
-      onSaved();
-      setIsOpen(false);
+      if (isMounted.current) {
+        toast.success(`Override guardado para ${collab.name}`);
+        onSaved();
+        setIsOpen(false);
+      }
     } catch (e) {
       console.error(e);
-      toast.error('Error al guardar override');
+      if (isMounted.current) toast.error('Error al guardar override');
     } finally {
-      setSaving(false);
+      if (isMounted.current) setSaving(false);
     }
   };
 
   const handleRemoveOverride = async () => {
     if (!override?.id) return;
     if (!window.confirm(`¿Eliminar configuración especial de ${collab.name}? Volverá a usar la plantilla global.`)) return;
-    await setDevBypassConfig(businessId);
-    await supabase.from('collaborator_template_overrides').delete().eq('id', override.id);
-    toast.success('Override eliminado');
-    onSaved();
-    setIsOpen(false);
+    try {
+      await setDevBypassConfig(businessId);
+      const { error } = await supabase.from('collaborator_template_overrides')
+        .delete()
+        .eq('id', override.id)
+        .eq('business_id', businessId);
+      if (error) throw error;
+      if (isMounted.current) {
+        toast.success('Override eliminado');
+        onSaved();
+        setIsOpen(false);
+      }
+    } catch (e) {
+      console.error(e);
+      if (isMounted.current) toast.error('Error al eliminar override');
+    }
   };
 
   return (
@@ -121,6 +144,7 @@ const CollaboratorOverrideCard = ({ collab, override, defaultSteps, businessId, 
 
 // ── Componente Principal ──────────────────────────────────────────────────────
 const TemplatesTab = () => {
+  const isMounted = useRef(true);
   const { collaborators, businessId } = useData();
 
   const [templates,   setTemplates]   = useState([]);
@@ -133,23 +157,38 @@ const TemplatesTab = () => {
   const [editSteps,      setEditSteps]      = useState([]);
   const [saving,         setSaving]         = useState(false);
 
-  const load = async () => {
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  const load = useCallback(async () => {
     if (!businessId) return;
     setLoading(true);
     try {
       await setDevBypassConfig(businessId);
-      const [{ data: tmpl }, { data: ovr }] = await Promise.all([
+      const [tmplRes, ovrRes] = await Promise.all([
         supabase.from('payroll_templates').select('*').eq('business_id', businessId).order('created_at'),
         supabase.from('collaborator_template_overrides').select('*').eq('business_id', businessId),
       ]);
-      setTemplates(tmpl || []);
-      setOverrides(ovr || []);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => { load(); }, [businessId]);
+      if (tmplRes.error) throw tmplRes.error;
+      if (ovrRes.error) throw ovrRes.error;
+
+      if (isMounted.current) {
+        setTemplates(tmplRes.data || []);
+        setOverrides(ovrRes.data || []);
+      }
+    } catch (e) {
+      console.error(e);
+      if (isMounted.current) toast.error('Error al cargar datos');
+    } finally {
+      if (isMounted.current) setLoading(false);
+    }
+  }, [businessId]);
+
+  useEffect(() => { load(); }, [load]);
 
   const openTemplate = (tmpl) => {
     setActiveTemplate(tmpl);
@@ -170,44 +209,78 @@ const TemplatesTab = () => {
     try {
       await setDevBypassConfig(businessId);
       if (activeTemplate.id) {
-        await supabase.from('payroll_templates')
+        const { error } = await supabase.from('payroll_templates')
           .update({ name: editName, steps: editSteps, updated_at: new Date().toISOString() })
-          .eq('id', activeTemplate.id);
-        toast.success('Plantilla actualizada ✓');
+          .eq('id', activeTemplate.id)
+          .eq('business_id', businessId);
+        if (error) throw error;
+        if (isMounted.current) toast.success('Plantilla actualizada ✓');
       } else {
-        await supabase.from('payroll_templates').insert({
+        const { error } = await supabase.from('payroll_templates').insert({
           business_id: businessId,
           name: editName,
           steps: editSteps,
           is_default: templates.length === 0,
         });
-        toast.success('Plantilla creada ✓');
+        if (error) throw error;
+        if (isMounted.current) toast.success('Plantilla creada ✓');
       }
-      setActiveTemplate(null);
-      load();
+      if (isMounted.current) {
+        setActiveTemplate(null);
+        load();
+      }
     } catch (e) {
-      console.error(e); toast.error('Error al guardar');
+      console.error(e);
+      if (isMounted.current) toast.error('Error al guardar');
     } finally {
-      setSaving(false);
+      if (isMounted.current) setSaving(false);
     }
   };
 
   const handleSetDefault = async (id) => {
-    await setDevBypassConfig(businessId);
-    // Quitar default de todas
-    await supabase.from('payroll_templates').update({ is_default: false }).eq('business_id', businessId);
-    await supabase.from('payroll_templates').update({ is_default: true }).eq('id', id);
-    toast.success('Plantilla establecida como predeterminada');
-    load();
+    try {
+      await setDevBypassConfig(businessId);
+      // Quitar default de todas
+      const { error: err1 } = await supabase.from('payroll_templates')
+        .update({ is_default: false })
+        .eq('business_id', businessId);
+      if (err1) throw err1;
+
+      const { error: err2 } = await supabase.from('payroll_templates')
+        .update({ is_default: true })
+        .eq('id', id)
+        .eq('business_id', businessId);
+      if (err2) throw err2;
+
+      if (isMounted.current) {
+        toast.success('Plantilla establecida como predeterminada');
+        load();
+      }
+    } catch (e) {
+      console.error(e);
+      if (isMounted.current) toast.error('Error al establecer predeterminada');
+    }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('¿Eliminar esta plantilla?')) return;
-    await setDevBypassConfig(businessId);
-    await supabase.from('payroll_templates').delete().eq('id', id);
-    toast.success('Plantilla eliminada');
-    if (activeTemplate?.id === id) setActiveTemplate(null);
-    load();
+    try {
+      await setDevBypassConfig(businessId);
+      const { error } = await supabase.from('payroll_templates')
+        .delete()
+        .eq('id', id)
+        .eq('business_id', businessId);
+      if (error) throw error;
+
+      if (isMounted.current) {
+        toast.success('Plantilla eliminada');
+        if (activeTemplate?.id === id) setActiveTemplate(null);
+        load();
+      }
+    } catch (e) {
+      console.error(e);
+      if (isMounted.current) toast.error('Error al eliminar plantilla');
+    }
   };
 
   const activeCollabs = (collaborators || []).filter(c => c.status === 'active');
@@ -350,18 +423,24 @@ const TemplatesTab = () => {
           </p>
         </div>
         <div className="space-y-3">
-          {activeCollabs.map(collab => (
-            <CollaboratorOverrideCard
-              key={collab.id}
-              collab={collab}
-              override={overrides.find(o => o.collaborator_id === collab.id) || null}
-              defaultSteps={defaultSteps}
-              businessId={businessId}
-              onSaved={load}
-            />
-          ))}
-          {activeCollabs.length === 0 && (
-            <p className="text-sm text-text-muted/60 text-center py-6">No hay colaboradores activos.</p>
+          {loading ? (
+            <div className="text-center py-6 text-text-muted">Cargando configuración…</div>
+          ) : (
+            <>
+              {activeCollabs.map(collab => (
+                <CollaboratorOverrideCard
+                  key={collab.id}
+                  collab={collab}
+                  override={overrides.find(o => o.collaborator_id === collab.id) || null}
+                  defaultSteps={defaultSteps}
+                  businessId={businessId}
+                  onSaved={load}
+                />
+              ))}
+              {activeCollabs.length === 0 && (
+                <p className="text-sm text-text-muted/60 text-center py-6">No hay colaboradores activos.</p>
+              )}
+            </>
           )}
         </div>
       </div>
