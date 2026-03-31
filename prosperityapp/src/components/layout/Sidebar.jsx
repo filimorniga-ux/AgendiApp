@@ -46,6 +46,7 @@ const Sidebar = () => {
     { to: "/app/cierres", icon: "book-open", tKey: "sidebar.monthlyClosing" },
     { to: "/app/precios", icon: "tag", tKey: "sidebar.prices" },
     { to: "/app/inventario", icon: "archive", tKey: "sidebar.inventory" },
+    { to: "/app/recepcion", icon: "package", tKey: "sidebar.reception" },
     { to: "/app/giftcards", icon: "credit-card", tKey: "sidebar.giftcards" },
     { to: "/app/reportes", icon: "file-text", tKey: "reports.title" },
   ];

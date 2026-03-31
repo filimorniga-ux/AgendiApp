@@ -31,6 +31,7 @@ import ConfiguracionPage from './pages/ConfiguracionPage';
 import PedidosPage from './pages/PedidosPage';
 import ReportsPage from './pages/ReportsPage';
 import MigrationPage from './pages/MigrationPage';
+import RecepcionPage from './pages/RecepcionPage.jsx';
 import WebsiteApp from './pages/Website/App';
 
 const PlaceholderPage = ({ title }) => (
@@ -77,6 +78,7 @@ function App() {
                 <Route path="precios" element={<PreciosPage />} />
                 <Route path="inventario" element={<InventarioPage />} />
                 <Route path="inventario/auditoria" element={<StockMovementsPage />} />
+                <Route path="recepcion" element={<RecepcionPage />} />
                 <Route path="giftcards" element={<GiftCardPage />} />
                 <Route path="configuracion" element={<ConfiguracionPage />} />
                 <Route path="reportes" element={<ReportsPage />} />
