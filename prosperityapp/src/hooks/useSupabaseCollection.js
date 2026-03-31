@@ -36,6 +36,8 @@ export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = nu
       return;
     }
 
+    const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
+
     let isMounted = true;
     setLoading(true);
 
@@ -44,6 +46,16 @@ export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = nu
     // ── FETCH ONLINE ────────────────────────────────────────────────────────
     const fetchFromSupabase = async () => {
       try {
+        // En modo DEV_BYPASS, setear app.business_id para que la política RLS
+        // lo reconozca via current_setting('app.business_id')
+        if (DEV_BYPASS) {
+          await supabase.rpc('set_config', {
+            setting: 'app.business_id',
+            value: businessId,
+            is_local: false,
+          });
+        }
+
         let query = supabase
           .from(tableName)
           .select('*')
