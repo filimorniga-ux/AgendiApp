@@ -137,7 +137,12 @@ const AgendaCalendario = () => {
       .map(apt => ({
         ...apt,
         start: parseDate(apt.startsAt ?? apt.starts_at ?? apt.start),
-        end: parseDate(apt.endsAt ?? apt.ends_at ?? apt.end)
+        end:   parseDate(apt.endsAt   ?? apt.ends_at   ?? apt.end),
+        // alias de compatibilidad: el kanban usa stylistId pero BD es collaboratorId
+        stylistId:   apt.collaboratorId   ?? apt.stylistId,
+        stylistName: apt.collaboratorName ?? apt.stylistName,
+        clientName:  apt.clientName  ?? apt.client_name,
+        serviceName: apt.serviceName ?? apt.service_name,
       }));
   }, [appointments, date]);
 
@@ -218,19 +223,17 @@ const AgendaCalendario = () => {
     const technicalCost = techProducts.reduce((sum, p) => sum + (p.costPerGram * p.gramsUsed || 0), 0);
 
     const appointmentData = {
-      clientId: formData.client.id,
-      clientName: formData.client.name,
-      stylistId: formData.stylist.id,
-      stylistName: formData.stylist.name,
-      serviceId: formData.service.id,
-      serviceName: formData.service.name,
-      start: startTime,
-      end: endTime,
-      status: formData.status,
-      notes: formData.notes,
-      productsUsed: techProducts, // Guardar productos en la cita
-      technicalCost: technicalCost, // Guardar costo calculado
-      updatedAt: serverTimestamp()
+      client_id:         formData.client.id,
+      client_name:       formData.client.name,
+      collaborator_id:   formData.stylist.id,
+      collaborator_name: formData.stylist.name,
+      service_id:        formData.service.id,
+      service_name:      formData.service.name,
+      starts_at:         startTime.toISOString(),
+      ends_at:           endTime.toISOString(),
+      status:            formData.status,
+      notes:             formData.notes,
+      updated_at:        new Date().toISOString(),
     };
 
     try {
