@@ -22,7 +22,7 @@ const STATUS_OPTIONS = [
 
 export default function ClosureStep({ sessionData, onFinished }) {
   const { supplier: supplierData, supplierId, mode: supplierMode,
-          items, extraItems, extraDecisions, priceDecisions,
+          items, extraItems, extraDecisions, extraTypes, linkedProducts, priceDecisions,
           invoice } = sessionData;
   const { businessId } = useBusiness();
 
@@ -60,22 +60,58 @@ export default function ClosureStep({ sessionData, onFinished }) {
         p_total_invoiced: totalInvoiced,
         p_total_received: totalReceived,
 
-        p_items: items.map(it => ({
-          inventoryId: it.inventoryId || '',
-          inventoryType: it.inventoryType,
-          description: it.description,
-          barcode: it.barcode,
-          skuProveedor: it.skuProveedor,
-          quantityInvoiced: it.quantityInvoiced,
-          quantityReceived: it.quantityReceived,
-          unitCost: it.unitCost,
-          totalCost: it.totalCost,
-          ivaPct: it.ivaPct,
-          status: it.status,
-          isNewProduct: !!it.isNewProduct,
-          updatePrice: !!(it.priceChanged && priceDecisions?.[it.description] === 'update'),
-          observations: it.observations
-        }))
+        p_items: [
+          ...items.map(it => ({
+            inventoryId: it.inventoryId || '',
+            inventoryType: it.inventoryType,
+            description: it.description,
+            barcode: it.barcode,
+            skuProveedor: it.skuProveedor,
+            quantityInvoiced: it.quantityInvoiced,
+            quantityReceived: it.quantityReceived,
+            unitCost: it.unitCost,
+            totalCost: it.totalCost,
+            ivaPct: it.ivaPct,
+            status: it.status,
+            isNewProduct: !!it.isNewProduct,
+            updatePrice: !!(it.priceChanged && priceDecisions?.[it.description] === 'update'),
+            observations: it.observations
+          })),
+          ...(extraItems || []).map((ex, i) => {
+            const decision = extraDecisions?.[i] || 'ignore';
+            if (decision === 'ignore') return null;
+
+            let invId = ex.inventoryId || '';
+            let invType = ex.inventoryType || 'retail';
+
+            if (decision === 'link') {
+              const linked = linkedProducts?.[i];
+              if (linked) {
+                invId = linked.id;
+                invType = linked.inventoryType;
+              }
+            } else if (decision === 'create') {
+              invType = extraTypes?.[i] || 'retail';
+            }
+
+            return {
+              inventoryId: invId,
+              inventoryType: invType,
+              description: ex.description,
+              barcode: ex.barcode || '',
+              skuProveedor: '',
+              quantityInvoiced: 0,
+              quantityReceived: ex.qty,
+              unitCost: 0,
+              totalCost: 0,
+              ivaPct: 19,
+              status: decision === 'return' ? 'returned' : 'extra',
+              isNewProduct: decision === 'create',
+              updatePrice: false,
+              observations: `Ítem extra no facturado (${decision})`
+            };
+          }).filter(Boolean)
+        ]
       };
 
       const { data: receptionId, error: rpcErr } = await supabase.rpc('process_reception_transaction', rpcPayload);

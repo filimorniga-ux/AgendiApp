@@ -5,24 +5,39 @@
  * - Ítems extra (no en factura) → crear producto nuevo O marcar para devolución
  * - Alerta de cambio de precio → confirmar o rechazar actualización
  */
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import SearchableDropdown from '../ui/SearchableDropdown.jsx';
+import { useData } from '../../context/DataContext.jsx';
 
 export default function DiscrepancyStep({ items, extraItems, onNext }) {
+  const { retailInventory, technicalInventory } = useData();
   const discrepant = items.filter(it => ['partial', 'missing', 'damaged'].includes(it.status));
   const priceChanged = items.filter(it => it.priceChanged);
 
   const [extraDecisions, setExtraDecisions] = useState(
     (extraItems || []).reduce((acc, ex, i) => ({ ...acc, [i]: 'return' }), {})
   );
+  const [extraTypes, setExtraTypes] = useState(
+    (extraItems || []).reduce((acc, ex, i) => ({ ...acc, [i]: 'retail' }), {})
+  );
+  const [linkedProducts, setLinkedProducts] = useState({});
   const [priceDecisions, setPriceDecisions] = useState(
     priceChanged.reduce((acc, it) => ({ ...acc, [it.description]: 'update' }), {})
   );
+
+  const allProducts = useMemo(() => {
+    const retail = (retailInventory || []).map(p => ({ ...p, inventoryType: 'retail', name: `🛍️ ${p.nombre}` }));
+    const tech = (technicalInventory || []).map(p => ({ ...p, inventoryType: 'technical', name: `🔧 ${p.nombre}` }));
+    return [...retail, ...tech];
+  }, [retailInventory, technicalInventory]);
 
   const hasAnything = discrepant.length > 0 || (extraItems?.length || 0) > 0 || priceChanged.length > 0;
 
   const handleNext = () => {
     onNext({
-      extraDecisions,   // { idx: 'create' | 'return' | 'ignore' }
+      extraDecisions,   // { idx: 'create' | 'link' | 'return' | 'ignore' }
+      extraTypes,       // { idx: 'retail' | 'technical' }
+      linkedProducts,   // { idx: { id, inventoryType, name, ... } }
       priceDecisions,   // { description: 'update' | 'keep' }
     });
   };
@@ -125,8 +140,8 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
                   <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{ex.description}</span>
                   <div style={{ fontSize: '0.8rem', color: '#a855f7' }}>Cantidad: {ex.qty}</div>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  {[['create', '➕ Crear en inventario'], ['return', '🔁 Marcar para devolución'], ['ignore', '✖️ Ignorar']].map(([val, label]) => (
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {[['create', '➕ Crear'], ['link', '🔗 Vincular'], ['return', '🔁 Devolver'], ['ignore', '✖️ Ignorar']].map(([val, label]) => (
                     <button
                       key={val}
                       onClick={() => setExtraDecisions(p => ({ ...p, [i]: val }))}
@@ -139,6 +154,31 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
                       {label}
                     </button>
                   ))}
+
+                  {extraDecisions[i] === 'create' && (
+                    <select
+                      value={extraTypes[i]}
+                      onChange={e => setExtraTypes(p => ({ ...p, [i]: e.target.value }))}
+                      style={{
+                        padding: '4px 8px', borderRadius: '6px', fontSize: '0.78rem',
+                        background: 'var(--bg-secondary)', border: '1px solid var(--border-main)', color: 'var(--text-main)'
+                      }}
+                    >
+                      <option value="retail">🛍️ Retail</option>
+                      <option value="technical">🔧 Técnico</option>
+                    </select>
+                  )}
+
+                  {extraDecisions[i] === 'link' && (
+                    <div style={{ width: '250px' }}>
+                      <SearchableDropdown
+                        items={allProducts}
+                        placeholder="Buscar producto existente..."
+                        onSelect={item => setLinkedProducts(p => ({ ...p, [i]: item }))}
+                        initialValue={linkedProducts[i]}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
