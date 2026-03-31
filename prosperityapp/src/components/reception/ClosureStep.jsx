@@ -43,116 +43,44 @@ export default function ClosureStep({ sessionData, onFinished }) {
     setError('');
 
     try {
-      // ── 1. Proveedor ──────────────────────────────────────────────
-      let resolvedSupplierId = supplierId;
+      // Preparar payload para el RPC (transacción atómica)
+      const rpcPayload = {
+        p_business_id: businessId,
+        p_supplier_mode: supplierMode,
+        p_supplier_id: supplierId,
+        p_supplier_data: supplierData,
+        p_invoice_data: {
+          invoiceNumber: invoice?.invoiceNumber || '',
+          invoiceDate: invoice?.invoiceDate || '',
+          folio: invoice?.folio || '',
+          raw_source: sessionData.raw_source || 'manual'
+        },
+        p_reception_status: receptionStatus,
+        p_observations: observations,
+        p_total_invoiced: totalInvoiced,
+        p_total_received: totalReceived,
 
-      if (supplierMode === 'new') {
-        const { data: newSupplier, error: supErr } = await supabase
-          .from('suppliers')
-          .insert({
-            business_id:      businessId,
-            nombre:           supplierData.razonSocial,
-            nombre_fantasia:  supplierData.nombreFantasia,
-            rut:              supplierData.rut,
-            email:            supplierData.email,
-            telefono:         supplierData.telefono,
-            direccion:        supplierData.direccion,
-            country_code:     supplierData.country_code || 'CL',
-          })
-          .select('id')
-          .single();
-        if (supErr) throw supErr;
-        resolvedSupplierId = newSupplier.id;
-      } else if (supplierMode === 'update' && supplierId) {
-        await supabase.from('suppliers').update({
-          nombre:           supplierData.razonSocial,
-          nombre_fantasia:  supplierData.nombreFantasia,
-          rut:              supplierData.rut,
-          email:            supplierData.email,
-          telefono:         supplierData.telefono,
-          direccion:        supplierData.direccion,
-        }).eq('id', supplierId);
-      }
+        p_items: items.map(it => ({
+          inventoryId: it.inventoryId || '',
+          inventoryType: it.inventoryType,
+          description: it.description,
+          barcode: it.barcode,
+          skuProveedor: it.skuProveedor,
+          quantityInvoiced: it.quantityInvoiced,
+          quantityReceived: it.quantityReceived,
+          unitCost: it.unitCost,
+          totalCost: it.totalCost,
+          ivaPct: it.ivaPct,
+          status: it.status,
+          isNewProduct: !!it.isNewProduct,
+          updatePrice: !!(it.priceChanged && priceDecisions?.[it.description] === 'update'),
+          observations: it.observations
+        }))
+      };
 
-      // ── 2. Crear recepción ────────────────────────────────────────
-      const { data: reception, error: recErr } = await supabase
-        .from('invoice_receptions')
-        .insert({
-          business_id:     businessId,
-          supplier_id:     resolvedSupplierId,
-          invoice_number:  invoice?.invoiceNumber || '',
-          invoice_date:    invoice?.invoiceDate   || null,
-          folio:           invoice?.folio         || '',
-          raw_source:      sessionData.raw_source || 'manual',
-          status:          receptionStatus,
-          observations,
-          total_invoiced:  totalInvoiced,
-          total_received:  totalReceived,
-        })
-        .select('id')
-        .single();
-      if (recErr) throw recErr;
-      const receptionId = reception.id;
+      const { data: receptionId, error: rpcErr } = await supabase.rpc('process_reception_transaction', rpcPayload);
 
-      // ── 3. Insertar líneas ────────────────────────────────────────
-      const receptionItemsData = items.map(it => ({
-        reception_id:       receptionId,
-        business_id:        businessId,
-        inventory_id:       it.inventoryId   || null,
-        inventory_type:     it.inventoryType || null,
-        description:        it.description,
-        barcode:            it.barcode        || null,
-        sku_proveedor:      it.skuProveedor   || null,
-        quantity_invoiced:  it.quantityInvoiced,
-        quantity_received:  it.quantityReceived ?? it.quantityInvoiced,
-        unit_cost:          it.unitCost,
-        total_cost:         it.totalCost || it.unitCost * it.quantityInvoiced,
-        iva_pct:            it.ivaPct || 19,
-        status:             it.status || 'received',
-        is_new_product:     it.isNewProduct || false,
-        observations:       it.observations || null,
-      }));
-      const { error: itemsErr } = await supabase.from('reception_items').insert(receptionItemsData);
-      if (itemsErr) throw itemsErr;
-
-      // ── 4. Crear nuevos productos en inventario ───────────────────
-      for (const it of newProducts) {
-        if (!it.inventoryType) continue;
-        const table = it.inventoryType === 'technical' ? 'technical_inventory' : 'retail_inventory';
-        const { error: invErr } = await supabase.from(table).insert({
-          business_id:    businessId,
-          nombre:         it.description,
-          barcode:        it.barcode        || null,
-          sku_proveedor:  it.skuProveedor   || null,
-          costo:          it.unitCost,
-          stock:          it.quantityReceived ?? it.quantityInvoiced,
-        });
-        if (invErr) console.warn('[ClosureStep] Error creando producto:', it.description, invErr.message);
-      }
-
-      // ── 5. Actualizar precios si se confirmó ──────────────────────
-      for (const it of items.filter(i => i.priceChanged && i.inventoryId)) {
-        const decision = priceDecisions?.[it.description];
-        if (decision !== 'update') continue;
-        const table = it.inventoryType === 'technical' ? 'technical_inventory' : 'retail_inventory';
-        await supabase.from(table).update({ costo: it.unitCost }).eq('id', it.inventoryId);
-      }
-
-      // ── 6. Movimientos de stock ───────────────────────────────────
-      const movements = items
-        .filter(it => it.inventoryId && (it.quantityReceived ?? it.quantityInvoiced) > 0)
-        .map(it => ({
-          business_id:    businessId,
-          inventory_id:   it.inventoryId,
-          inventory_type: it.inventoryType,
-          type:           'entrada',
-          quantity:       it.quantityReceived ?? it.quantityInvoiced,
-          reason:         `Recepción pedido #${invoice?.folio || receptionId.slice(0, 8)}`,
-          reference_id:   receptionId,
-        }));
-      if (movements.length > 0) {
-        await supabase.from('stock_movements').insert(movements);
-      }
+      if (rpcErr) throw rpcErr;
 
       onFinished(receptionId);
     } catch (err) {
