@@ -41,7 +41,14 @@ export const BusinessProvider = ({ children }) => {
           const id = data?.[0]?.id ?? null;
           if (id) {
             setBusinessId(id);
-            // set_config RPC no existe en este proyecto — se omite intencionalmente
+            // Establecer app.business_id para que RLS pueda validar sin sesión de Auth
+            await supabase.rpc('set_config', {
+              setting: 'app.business_id',
+              value: id,
+              is_local: false,
+            }).then(({ error }) => {
+              if (error) console.warn('[BusinessProvider Dev Bypass] set_config error:', error);
+            });
           }
           setLoadingAuth(false);
         });

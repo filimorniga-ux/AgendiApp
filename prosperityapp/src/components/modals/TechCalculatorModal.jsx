@@ -142,7 +142,7 @@ const TechCalculatorModal = ({ isOpen, onClose, onSubmit, serviceName, initialPr
 
           <div className="text-center">
             <button type="button" onClick={() => setShowManualEntry(s => !s)} className="text-xs text-accent hover:underline">
-              {t('modals.buttons.addManualItem')}
+              {t('modals.forms.addManualItem', '+ Ingresar costo manual')}
             </button>
           </div>
 

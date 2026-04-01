@@ -46,40 +46,46 @@ export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = nu
     // ── FETCH ONLINE ────────────────────────────────────────────────────────
     const fetchFromSupabase = async () => {
       try {
-        // En modo DEV_BYPASS, setear app.business_id para que la política RLS
-        // lo reconozca via current_setting('app.business_id')
+        let rows;
+
         if (DEV_BYPASS) {
-          await supabase.rpc('set_config', {
-            setting: 'app.business_id',
-            value: businessId,
-            is_local: false,
-          });
-        }
-
-        let query = supabase
-          .from(tableName)
-          .select('*')
-          .eq('business_id', businessId);
-
-        if (Array.isArray(filters)) {
-          filters.forEach(f => {
-            if (f.field && f.op && f.value !== undefined) {
-              query = query.filter(f.field, f.op, f.value);
-            }
-          });
-        }
-
-        if (orderBy?.column) {
-          query = query.order(orderBy.column, { ascending: orderBy.ascending ?? true });
+          // En DEV_BYPASS: usar RPC que combina set_config + SELECT en una sola
+          // transacción para evitar el problema del connection pooler de Supabase
+          const { data: rpcData, error: rpcErr } = await supabase.rpc(
+            'fetch_table_with_business_id',
+            { p_table: tableName, p_business_id: businessId }
+          );
+          if (rpcErr) throw rpcErr;
+          rows = rpcData || [];
         } else {
-          query = query.order('created_at', { ascending: false });
+          // Flujo normal (producción con Supabase Auth)
+          let query = supabase
+            .from(tableName)
+            .select('*')
+            .eq('business_id', businessId);
+
+          if (Array.isArray(filters)) {
+            filters.forEach(f => {
+              if (f.field && f.op && f.value !== undefined) {
+                query = query.filter(f.field, f.op, f.value);
+              }
+            });
+          }
+
+          if (orderBy?.column) {
+            query = query.order(orderBy.column, { ascending: orderBy.ascending ?? true });
+          } else {
+            query = query.order('created_at', { ascending: false });
+          }
+
+          const { data: qRows, error: err } = await query;
+          if (err) throw err;
+          rows = qRows || [];
         }
 
-        const { data: rows, error: err } = await query;
         if (!isMounted) return;
-        if (err) throw err;
 
-        const transformed = (rows || []).map(r => xform(r));
+        const transformed = rows.map(r => xform(r));
 
         // ── Guardar en IndexedDB ──────────────────────────────────────────
         await cacheRows(tableName, businessId, transformed);

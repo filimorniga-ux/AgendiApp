@@ -5,7 +5,7 @@ import { useData } from '../../context/DataContext';
 import { supabase } from '../../supabase/client';
 import { sbCreate, sbDelete } from '../../supabase/db';
 import { batchEnqueueWrite, optimisticWrite } from '../../lib/offlineQueue';
-import SearchableDropdown from '../ui/SearchableDropdown';
+import ScrollableSelector from '../ui/ScrollableSelector';
 import toast from 'react-hot-toast';
 import TechCalculatorModal from './TechCalculatorModal';
 import SalesCommissionModal from './SalesCommissionModal';
@@ -110,12 +110,12 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
   const [showManualService, setShowManualService] = useState(false);
   const [showManualProduct, setShowManualProduct] = useState(false);
 
-  // Form States
-  const [rapidoServicio, setRapidoServicio] = useState({ collab: '', desc: '', monto: '' });
+  // Form States — colaboradores stored as objects (or null) for SearchableDropdown compatibility
+  const [rapidoServicio, setRapidoServicio] = useState({ collab: null, desc: '', monto: '' });
   const [gasto, setGasto] = useState({ desc: '', monto: '' });
-  const [adelanto, setAdelanto] = useState({ collab: '', monto: '' });
+  const [adelanto, setAdelanto] = useState({ collab: null, monto: '' });
   const [propina, setPropina] = useState({
-    collab: '',
+    collab: null,
     monto: '',
     desc: '',
     paymentMethod: 'Efectivo',
@@ -125,7 +125,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
   const [pagoGiftCard, setPagoGiftCard] = useState({ code: '', amount: '' });
   const [searchServicio, setSearchServicio] = useState({ collab: null, service: null });
   const [searchProducto, setSearchProducto] = useState({ collab: null, product: null, cant: 1 });
-  const [rapidoVenta, setRapidoVenta] = useState({ collab: 'salon', desc: '', monto: '', cant: 1 });
+  const [rapidoVenta, setRapidoVenta] = useState({ collab: null, desc: '', monto: '', cant: 1 });
 
   const settings = useMemo(() => {
     return (config && config.find(c => c.id === 'settings')) || { salesCommissionGeneral: 10 };
@@ -138,17 +138,15 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       setCart([]);
       setSelectedClient(null);
       setPaymentMethod('multi');
-      setRapidoServicio({ collab: '', desc: '', monto: '' });
+      setRapidoServicio({ collab: null, desc: '', monto: '' });
       setGasto({ desc: '', monto: '' });
-      setAdelanto({ collab: '', monto: '' });
-      // Usamos t() aquí, pero ojo: t() podría no estar listo en el primer render. 
-      // Mejor usar un string vacío o default y dejar el placeholder en el input.
-      setPropina({ collab: '', monto: '', desc: '', paymentMethod: 'Efectivo', destination: 'nomina' });
+      setAdelanto({ collab: null, monto: '' });
+      setPropina({ collab: null, monto: '', desc: '', paymentMethod: 'Efectivo', destination: 'nomina' });
       setGiftCard({ code: '', amount: '', clientName: '', contact: '', paymentMethod: 'Efectivo' });
       setPagoGiftCard({ code: '', amount: '' });
       setSearchServicio({ collab: null, service: null });
       setSearchProducto({ collab: null, product: null, cant: 1 });
-      setRapidoVenta({ collab: 'salon', desc: '', monto: '', cant: 1 });
+      setRapidoVenta({ collab: null, desc: '', monto: '', cant: 1 });
       setShowManualService(false);
       setShowManualProduct(false);
 
@@ -169,8 +167,8 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
         const collab = collaborators.find(c => c.id === preselectedCollab.id);
         if (collab) {
           setSearchServicio(prev => ({ ...prev, collab }));
-          setRapidoServicio(prev => ({ ...prev, collab: collab.id }));
-          setPropina(prev => ({ ...prev, collab: collab.id }));
+          setRapidoServicio(prev => ({ ...prev, collab }));
+          setPropina(prev => ({ ...prev, collab }));
         }
       }
     }
@@ -201,7 +199,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
   // --- LÓGICA DE BOTONES RESTAURADA ---
 
   const addRapidoServicio = () => {
-    const collab = collaborators.find(c => c.id === rapidoServicio.collab);
+    const collab = rapidoServicio.collab;
     if (!collab || !rapidoServicio.desc || !rapidoServicio.monto) { toast.error(t('modals.errors.completeFields')); return; }
     setCart(prev => [...prev, {
       cartId: Date.now(),
@@ -214,7 +212,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       technicalCost: 0,
       productsUsed: []
     }]);
-    setRapidoServicio({ ...rapidoServicio, desc: '', monto: '' });
+    setRapidoServicio(prev => ({ ...prev, desc: '', monto: '' }));
   };
 
   const addSearchServicio = () => {
@@ -277,7 +275,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
   };
 
   const addRapidoVenta = () => {
-    const collab = collaborators.find(c => c.id === rapidoVenta.collab);
+    const collab = rapidoVenta.collab?.id === 'salon' ? null : rapidoVenta.collab;
     if (!rapidoVenta.desc || !rapidoVenta.monto || !rapidoVenta.cant) { toast.error(t('modals.errors.completeFields')); return; }
 
     const collaboratorName = collab ? collab.name : t('modals.forms.salon');
@@ -319,7 +317,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
   };
 
   const addAdelanto = () => {
-    const collab = collaborators.find(c => c.id === adelanto.collab);
+    const collab = adelanto.collab;
     if (!collab || !adelanto.monto) { toast.error(t('modals.errors.selectCollabAndAmount')); return; }
     setCart(prev => [...prev, {
       cartId: Date.now(),
@@ -334,7 +332,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
   };
 
   const addPropina = () => {
-    const collab = collaborators.find(c => c.id === propina.collab);
+    const collab = propina.collab;
     // Permitir descripción vacía y poner default
     const descripcion = propina.desc || t('modals.forms.tipsTitle');
 
@@ -565,13 +563,47 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
           if (gcResult?.error) throw new Error(gcResult.error);
         }
 
-        // 5. Descuento de stock (Venta con productId)
+        // 5. Descuento de stock retail (Venta con productId)
         if (item.type === 'Venta' && item.productId) {
           await supabase.rpc('decrement_retail_stock', {
             p_product_id: item.productId,
             p_business_id: businessId,
             p_quantity: item.quantity || 1
           });
+        }
+
+        // 5b. Descuento de stock técnico (Servicio con productos completos)
+        if (item.type === 'Servicio' && item.productsUsed && item.productsUsed.length > 0) {
+          for (const techProd of item.productsUsed) {
+            if (techProd.id && techProd.sellMode === 'whole' && techProd.quantity > 0) {
+              const { data: currentItem, error: fetchErr } = await supabase
+                .from('technical_inventory')
+                .select('stock_current, name, barcode')
+                .eq('id', techProd.id)
+                .single();
+
+              if (!fetchErr && currentItem) {
+                const newStock = Math.max(0, (currentItem.stock_current || 0) - techProd.quantity);
+                await supabase
+                  .from('technical_inventory')
+                  .update({ stock_current: newStock, updated_at: new Date().toISOString() })
+                  .eq('id', techProd.id);
+
+                await supabase.from('stock_movements').insert({
+                  business_id: businessId,
+                  product_id: techProd.id,
+                  product_name: currentItem.name,
+                  amount: -techProd.quantity,
+                  new_stock: newStock,
+                  movement_type: 'exit',
+                  inventory_type: 'technical',
+                  barcode: currentItem.barcode || null,
+                  reason: 'Consumo Técnico (Caja)',
+                  notes: `Transacción ${transactionId}`
+                });
+              }
+            }
+          }
         }
 
         // 6. Comisión de Venta
@@ -709,7 +741,13 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
           <div className="flex flex-grow overflow-hidden">
             <fieldset disabled={isSaving} className="w-2/5 border-r border-border-main flex flex-col">
               <div className="p-4 flex-shrink-0 relative z-50">
-                <SearchableDropdown items={clients || []} placeholder={t('modals.forms.clientSearch')} onSelect={(client) => setSelectedClient(client)} initialValue={selectedClient} />
+                <ScrollableSelector 
+                  items={clients || []} 
+                  placeholder={t('modals.forms.clientSearch')} 
+                  onSelect={(client) => setSelectedClient(client)} 
+                  initialValue={selectedClient} 
+                  displayMode="grid" 
+                />
               </div>
 
               <div className="p-4 overflow-y-auto flex-grow space-y-4 pb-64">
@@ -720,17 +758,19 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                   </summary>
                   <div className="p-3 border-t border-border-main space-y-4">
                     <div className="space-y-3">
-                      <SearchableDropdown
+                      <ScrollableSelector
                         items={activeCollaborators}
                         placeholder={t('modals.forms.collabSearch')}
                         onSelect={(c) => setSearchServicio(p => ({ ...p, collab: c }))}
                         initialValue={searchServicio.collab}
+                        displayMode="horizontal"
                       />
-                      <SearchableDropdown
+                      <ScrollableSelector
                         items={services || []}
                         placeholder="Buscar servicio..."
                         onSelect={(s) => setSearchServicio(p => ({ ...p, service: s }))}
                         initialValue={searchServicio.service}
+                        displayMode="grid"
                       />
                       <button onClick={addSearchServicio} className="w-full btn-golden py-2">{t('modals.forms.addServiceSearch')}</button>
 
@@ -744,14 +784,13 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                     <div className={`space-y-3 ${showManualService ? '' : 'hidden'}`}>
                       <hr className="border-border-main/50" />
                       <h4 className="font-semibold text-text-main text-sm">{t('modals.forms.registerManual')}</h4>
-                      <select
-                        value={rapidoServicio.collab}
-                        onChange={(e) => setRapidoServicio(p => ({ ...p, collab: e.target.value }))}
-                        className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main"
-                      >
-                        <option value="" disabled>{t('modals.forms.selectCollab')}</option>
-                        {activeCollaborators.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                      </select>
+                      <ScrollableSelector
+                        items={activeCollaborators}
+                        placeholder={t('modals.forms.selectCollab')}
+                        onSelect={(c) => setRapidoServicio(p => ({ ...p, collab: c }))}
+                        initialValue={rapidoServicio.collab}
+                        displayMode="horizontal"
+                      />
                       <input type="text" placeholder={t('modals.forms.itemDesc')} value={rapidoServicio.desc} onChange={(e) => setRapidoServicio(p => ({ ...p, desc: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
                       <CurrencyInput placeholder={t('modals.forms.itemAmount')} value={rapidoServicio.monto} onChange={(e) => setRapidoServicio(p => ({ ...p, monto: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
                       <button onClick={addRapidoServicio} className="w-full btn-golden py-2 bg-bg-tertiary/50 text-text-muted">{t('modals.forms.addServiceManual')}</button>
@@ -780,8 +819,20 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                     )}
 
                     <div className="space-y-3">
-                      <SearchableDropdown items={retailInventory || []} placeholder={t('modals.forms.productSearch')} onSelect={(p) => setSearchProducto(s => ({ ...s, product: p }))} initialValue={searchProducto.product} />
-                      <SearchableDropdown items={activeCollaborators} placeholder={t('modals.forms.collabSearch')} onSelect={(c) => setSearchProducto(s => ({ ...s, collab: c }))} initialValue={searchProducto.collab} />
+                      <ScrollableSelector 
+                        items={retailInventory || []} 
+                        placeholder={t('modals.forms.productSearch')} 
+                        onSelect={(p) => setSearchProducto(s => ({ ...s, product: p }))} 
+                        initialValue={searchProducto.product} 
+                        displayMode="grid" 
+                      />
+                      <ScrollableSelector 
+                        items={activeCollaborators} 
+                        placeholder={t('modals.forms.collabSearch')} 
+                        onSelect={(c) => setSearchProducto(s => ({ ...s, collab: c }))} 
+                        initialValue={searchProducto.collab} 
+                        displayMode="horizontal" 
+                      />
                       <input type="number" value={searchProducto.cant} min="1" onChange={e => setSearchProducto(s => ({ ...s, cant: parseInt(e.target.value) }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" placeholder={t('modals.forms.itemQuantity')} />
                       <button onClick={addSearchProducto} className="w-full btn-golden py-2">{t('modals.forms.addSalesSearch')}</button>
 
@@ -795,9 +846,13 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                     <div className={`space-y-3 ${showManualProduct ? '' : 'hidden'}`}>
                       <hr className="border-border-main/50" />
                       <h4 className="font-semibold text-text-main text-sm">{t('modals.forms.manualSaleTitle')}</h4>
-                      <select value={rapidoVenta.collab} onChange={(e) => setRapidoVenta(p => ({ ...p, collab: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2">
-                        {salonOption.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                      </select>
+                      <ScrollableSelector
+                        items={salonOption}
+                        placeholder={t('modals.forms.selectCollab')}
+                        onSelect={(c) => setRapidoVenta(p => ({ ...p, collab: c }))}
+                        initialValue={rapidoVenta.collab}
+                        displayMode="horizontal"
+                      />
                       <input type="text" placeholder={t('modals.forms.itemDesc')} value={rapidoVenta.desc} onChange={(e) => setRapidoVenta(p => ({ ...p, desc: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
                       <div className="flex gap-2">
                         <CurrencyInput placeholder={t('modals.forms.priceTotal')} value={rapidoVenta.monto} onChange={(e) => setRapidoVenta(p => ({ ...p, monto: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
@@ -820,12 +875,13 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                     {/* Cliente: SearchableDropdown o nombre manual */}
                     <div>
                       <label className="text-xs text-text-muted block mb-1">Cliente (seleccionar o escribir nuevo)</label>
-                      <SearchableDropdown
+                      <ScrollableSelector
                         items={clients || []}
                         placeholder={t('modals.forms.gcBuyer')}
                         onSelect={(client) => setGiftCard(p => ({ ...p, clientName: client.name, gcClientId: client.id, contact: client.phone || '' }))}
                         allowManual={true}
                         onManualInput={(name) => setGiftCard(p => ({ ...p, clientName: name, gcClientId: null }))}
+                        displayMode="grid"
                       />
                     </div>
 
@@ -907,33 +963,35 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                   </div>
                 </details>
 
-                <details className="bg-bg-main/40 rounded-lg overflow-hidden">
-                  <summary className="p-3 font-semibold text-text-main cursor-pointer hover:bg-bg-main/60 flex justify-between">
+                <details className="bg-bg-main/40 rounded-lg" style={{ overflow: 'visible' }}>
+                  <summary className="p-3 font-semibold text-text-main cursor-pointer hover:bg-bg-main/60 flex justify-between rounded-lg">
                     💰 {t('modals.accordions.advances')} <i data-feather="chevron-down" className="w-5 h-5"></i>
                   </summary>
                   <div className="p-3 border-t border-border-main space-y-3">
-                    <select value={adelanto.collab} onChange={(e) => setAdelanto(p => ({ ...p, collab: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2">
-                      <option value="" disabled>{t('modals.forms.selectCollab')}</option>
-                      {activeCollaborators.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
+                    <ScrollableSelector
+                      items={activeCollaborators}
+                      placeholder={t('modals.forms.selectCollab')}
+                      onSelect={(c) => setAdelanto(p => ({ ...p, collab: c }))}
+                      initialValue={adelanto.collab}
+                      displayMode="horizontal"
+                    />
                     <CurrencyInput placeholder={t('modals.forms.itemAmount')} value={adelanto.monto} onChange={(e) => setAdelanto(p => ({ ...p, monto: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
                     <button onClick={addAdelanto} className="w-full btn-golden py-2">{t('modals.forms.addAdvance')}</button>
                   </div>
                 </details>
 
-                <details className="bg-bg-main/40 rounded-lg overflow-hidden">
-                  <summary className="p-3 font-semibold text-text-main cursor-pointer hover:bg-bg-main/60 flex justify-between">
+                <details className="bg-bg-main/40 rounded-lg" style={{ overflow: 'visible' }}>
+                  <summary className="p-3 font-semibold text-text-main cursor-pointer hover:bg-bg-main/60 flex justify-between rounded-lg">
                     🪙 {t('modals.accordions.tips')} <i data-feather="chevron-down" className="w-5 h-5"></i>
                   </summary>
                   <div className="p-3 border-t border-border-main space-y-3">
-                    <select
-                      value={propina.collab}
-                      onChange={(e) => setPropina(p => ({ ...p, collab: e.target.value }))}
-                      className="w-full bg-bg-input border border-border-input rounded p-2"
-                    >
-                      <option value="" disabled>{t('modals.forms.selectCollab')}</option>
-                      {activeCollaborators.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
+                    <ScrollableSelector
+                      items={activeCollaborators}
+                      placeholder={t('modals.forms.selectCollab')}
+                      onSelect={(c) => setPropina(p => ({ ...p, collab: c }))}
+                      initialValue={propina.collab}
+                      displayMode="horizontal"
+                    />
                     <input
                       type="text"
                       placeholder={t('modals.forms.tipsDesc')}
