@@ -1,0 +1,229 @@
+/* BottomNavigationBar.css */
+
+/* ── Bottom Nav Bar ─────────────────────────────────────────── */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 64px;
+  background: rgba(19, 19, 23, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(212, 168, 83, 0.10);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.bottom-nav__items {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  height: 64px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bottom-nav__item-wrap {
+  flex: 1;
+  display: flex;
+}
+
+.bottom-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
+  cursor: pointer;
+  border-radius: 0;
+  padding: 6px 8px;
+  transition: color 0.15s ease, background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  text-decoration: none;
+  color: #6B6B7A;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  position: relative;
+}
+
+.bottom-nav__item:active {
+  background: rgba(212, 168, 83, 0.06);
+}
+
+.bottom-nav__item.active {
+  color: #D4A853;
+}
+
+/* Active gold top indicator */
+.bottom-nav__item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(90deg, #E8C070, #D4A853);
+}
+
+.bottom-nav__icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.bottom-nav__item.active .bottom-nav__icon {
+  transform: scale(1.08);
+}
+
+.bottom-nav__label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 56px;
+  text-align: center;
+}
+
+/* ── "Más" Overlay Drawer ────────────────────────────────────── */
+.mas-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  animation: fadeIn 0.2s ease;
+}
+
+.mas-drawer {
+  background: #1A1A22;
+  border-radius: 20px 20px 0 0;
+  border-top: 1px solid rgba(212, 168, 83, 0.12);
+  padding: 12px 0 calc(16px + env(safe-area-inset-bottom, 0px));
+  max-height: 75vh;
+  overflow-y: auto;
+  animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mas-drawer__handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 auto 16px;
+}
+
+.mas-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 8px;
+}
+
+.mas-drawer__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #E4E1E7;
+  letter-spacing: -0.01em;
+}
+
+.mas-drawer__close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  color: #8A8A9A;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.mas-drawer__close:active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.mas-drawer__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 12px;
+}
+
+.mas-drawer__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 12px;
+  border-radius: 12px;
+  background: transparent;
+  border: none;
+  color: #D2C5B2;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 52px;
+}
+
+.mas-drawer__item:active {
+  background: rgba(212, 168, 83, 0.08);
+  color: #D4A853;
+}
+
+.mas-drawer__item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #D4A853;
+}
+
+.mas-drawer__item-label {
+  flex: 1;
+  font-weight: 400;
+}
+
+/* ── Animations ──────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* ── Show on mobile only ─────────────────────────────────────── */
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+}
