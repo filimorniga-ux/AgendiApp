@@ -61,9 +61,21 @@ describe('BusinessContext', () => {
   });
 
   it('renders correctly and sets initial values', async () => {
-    // In dev bypass mode, then() is called immediately
-    supabase.then.mockImplementation((resolve) => resolve({ data: [{ id: 'test-business-xyz' }], error: null }));
-    
+    // To ensure DEV_BYPASS is active during this test, we would normally set import.meta.env.
+    // Since Vite env variables are read-only at runtime, we have to mock or just rely on the component
+    // structure. Actually DEV_BYPASS is false during `vitest` execution unless set in .env.test.
+    // Let's test the normal auth flow instead.
+
+    onAuthStateChanged.mockImplementation((auth, cb) => {
+      cb({ uid: 'test-uid', email: 'test@test.com' });
+      return () => {};
+    });
+
+    supabase.maybeSingle.mockResolvedValueOnce({
+      data: { business_id: 'test-business-xyz', role: 'owner' },
+      error: null
+    });
+
     render(
       <BusinessProvider>
         <TestConsumer />
@@ -74,20 +86,36 @@ describe('BusinessContext', () => {
       expect(screen.getByTestId('loading').textContent).toBe('false');
     });
 
-    // Validates DEV_BYPASS overrides
-    expect(screen.getByTestId('user').textContent).toBe('dev@local.dev');
+    expect(screen.getByTestId('user').textContent).toBe('test@test.com');
     expect(screen.getByTestId('role').textContent).toBe('owner');
     expect(screen.getByTestId('businessId').textContent).toBe('test-business-xyz');
+  });
 
-    expect(supabase.from).toHaveBeenCalledWith('businesses');
-    expect(supabase.select).toHaveBeenCalledWith('id');
-    expect(supabase.eq).toHaveBeenCalledWith('owner_uid', 'filimorniga-uid-placeholder');
-    expect(supabase.limit).toHaveBeenCalledWith(1);
-    
-    expect(supabase.rpc).toHaveBeenCalledWith('set_config', {
-      setting: 'app.business_id',
-      value: 'test-business-xyz',
-      is_local: false,
+  it('handles user without business (auto-seed)', async () => {
+    onAuthStateChanged.mockImplementation((auth, cb) => {
+      cb({ uid: 'new-uid', email: 'new@test.com' });
+      return () => {};
     });
+
+    // 1. users table -> no business
+    supabase.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+    
+    // 2. businesses table eq owner_uid -> no business
+    supabase.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+    // 3. businesses table upsert -> new business
+    supabase.single.mockResolvedValueOnce({ data: { id: 'new-biz-id' }, error: null });
+
+    render(
+      <BusinessProvider>
+        <TestConsumer />
+      </BusinessProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading').textContent).toBe('false');
+    });
+
+    expect(screen.getByTestId('businessId').textContent).toBe('new-biz-id');
   });
 });

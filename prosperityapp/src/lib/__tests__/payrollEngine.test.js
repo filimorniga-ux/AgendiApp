@@ -42,6 +42,26 @@ describe('payrollEngine', () => {
       expect(rows.length).toBe(DEFAULT_TEMPLATE_STEPS.length);
     });
 
+    it('should handle NaN and undefined edge cases safely', () => {
+      const data = {
+        totalServices: NaN,
+        totalTechCost: undefined,
+        taxPercent: '',
+        commissionPercent: null,
+        totalSalesCommissions: 'invalid',
+        totalPropinas: NaN,
+        totalAdvances: undefined,
+      };
+
+      const { finalPayment, netBase, rows } = calculatePayroll(data, DEFAULT_TEMPLATE_STEPS);
+      expect(netBase).toBe(0);
+      expect(finalPayment).toBe(0);
+      expect(rows.length).toBe(DEFAULT_TEMPLATE_STEPS.length);
+      rows.forEach(row => {
+        expect(Number.isNaN(row.calculatedValue)).toBe(false);
+      });
+    });
+
     it('should skip disabled steps', () => {
       const steps = [
         { id: 'gross', operator: 'add', source: 'gross', enabled: true },

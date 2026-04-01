@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '../../test/utils';
+import { render, screen, fireEvent, waitFor } from '../../test/utils';
 import { describe, it, expect, vi } from 'vitest';
 import SearchableDropdown from './SearchableDropdown';
 
@@ -60,5 +60,23 @@ describe('SearchableDropdown Component', () => {
     
     expect(handleManualInput).toHaveBeenCalledWith('Nuevo Usuario');
     expect(screen.getByText('Usar "Nuevo Usuario" como nuevo')).toBeInTheDocument();
+  });
+
+  it('closes the dropdown via document click outside', async () => {
+    const handleSelect = vi.fn();
+    render(
+      <div>
+        <div data-testid="outside">Outside</div>
+        <SearchableDropdown items={dummyItems} placeholder="Buscar..." onSelect={handleSelect} />
+      </div>
+    );
+
+    const input = screen.getByPlaceholderText('Buscar...');
+    fireEvent.focus(input);
+    expect(screen.getByText('Miguel Perdomo')).toBeInTheDocument();
+
+    fireEvent.mouseDown(screen.getByTestId('outside'));
+
+    expect(screen.queryByText('Miguel Perdomo')).not.toBeInTheDocument();
   });
 });

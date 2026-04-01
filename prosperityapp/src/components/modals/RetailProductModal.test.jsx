@@ -162,6 +162,8 @@ describe('RetailProductModal', () => {
   });
 
   it('no debería cerrar si hay error en Supabase', async () => {
+    // Suppress console.error for this expected error test
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const user = userEvent.setup();
     db.sbCreate.mockResolvedValue({ data: null, error: new Error('DB Error') });
 
@@ -177,5 +179,29 @@ describe('RetailProductModal', () => {
       // OnClose shouldn't be called because throwing error blocks it
       expect(mockOnClose).not.toHaveBeenCalled();
     });
+
+    consoleSpy.mockRestore();
+  });
+
+  it('closes modal when cancel button is clicked', () => {
+    render(
+      <RetailProductModal isOpen={true} onClose={mockOnClose} productToEdit={null} />
+    );
+
+    const cancelButton = screen.getByRole('button', { name: /common.cancel|modals.forms.cancel/i });
+    fireEvent.click(cancelButton);
+
+    expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  it('closes modal on close icon click', () => {
+    render(
+      <RetailProductModal isOpen={true} onClose={mockOnClose} productToEdit={null} />
+    );
+
+    const closeIcon = screen.getByText('×');
+    fireEvent.click(closeIcon);
+
+    expect(mockOnClose).toHaveBeenCalled();
   });
 });

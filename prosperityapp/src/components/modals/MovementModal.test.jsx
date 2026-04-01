@@ -76,4 +76,27 @@ describe('MovementModal', () => {
     expect(screen.getByText(/modals.accordions.services/i)).toBeInTheDocument();
     expect(screen.getByText(/modals.accordions.products/i)).toBeInTheDocument();
   });
+
+  it('closes modal on close icon click', () => {
+    render(
+      <MovementModal isOpen={true} onClose={mockOnClose} preselectedCollab={null} />
+    );
+
+    // MovementModal actually does not have a cancel button at the bottom because it's massive.
+    // Instead it only has the X top-right button.
+    const closeIcon = screen.getByText('×');
+    fireEvent.click(closeIcon);
+
+    expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  it('closes modal on escape key press', () => {
+    render(
+      <MovementModal isOpen={true} onClose={mockOnClose} preselectedCollab={null} />
+    );
+
+    fireEvent.keyDown(document, { key: 'Escape', code: 'Escape' });
+
+    expect(mockOnClose).toHaveBeenCalled();
+  });
 });

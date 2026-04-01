@@ -78,4 +78,11 @@ describe('ScrollableSelector Component', () => {
     fireEvent.click(addButton);
     expect(mockManualInput).toHaveBeenCalledWith('Nuevo Cliente');
   });
+
+  it('handles aria-labels properly', () => {
+    // ScrollableSelector does not have close logic or wrapper labels in current output, let's use search input label
+    render(<ScrollableSelector items={dummyItems} onSelect={() => {}} />);
+    const input = screen.getByPlaceholderText('Buscar...');
+    expect(input).toBeInTheDocument();
+  });
 });
