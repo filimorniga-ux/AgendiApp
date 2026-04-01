@@ -127,40 +127,38 @@ export default function ClosureStep({ sessionData, onFinished }) {
     }
   };
 
-  const statusInfo = STATUS_OPTIONS.find(s => s.value === receptionStatus) || STATUS_OPTIONS[0];
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div className="recepcion-step-body" style={{ gap: '1.5rem' }}>
       {/* Resumen de la recepción */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+      <div className="recepcion-closure-grid">
         {[
           { label: 'Total facturado',   val: `$${totalInvoiced.toLocaleString()}`,  color: '#3b82f6' },
           { label: 'Total recibido',    val: `$${totalReceived.toLocaleString()}`,   color: '#22c55e' },
           { label: 'Productos nuevos',  val: newProducts.length,                     color: '#f59e0b' },
           { label: 'Con discrepancias', val: discrepant.length,                      color: '#ef4444' },
         ].map(s => (
-          <div key={s.label} style={{ padding: '1rem', borderRadius: '10px', background: 'var(--bg-secondary)', textAlign: 'center', border: `1px solid ${s.color}33` }}>
-            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: s.color }}>{s.val}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{s.label}</div>
+          <div key={s.label} className="recepcion-closure-card" style={{ borderColor: s.color + '33' }}>
+            <div className="recepcion-closure-val" style={{ color: s.color }}>{s.val}</div>
+            <div className="recepcion-closure-label">{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Estado del pedido */}
       <div>
-        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>
+        <label className="recepcion-field-label" style={{ display: 'block', marginBottom: '0.5rem' }}>
           Estado del pedido
         </label>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div className="recepcion-status-selector">
           {STATUS_OPTIONS.map(opt => (
             <button
               key={opt.value}
               onClick={() => setReceptionStatus(opt.value)}
+              className="recepcion-status-btn"
               style={{
-                padding: '6px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, border: 'none',
-                background: receptionStatus === opt.value ? opt.color : opt.color + '22',
+                background: receptionStatus === opt.value ? opt.color : opt.color + '18',
                 color: receptionStatus === opt.value ? '#fff' : opt.color,
-                border: `1px solid ${opt.color}55`,
+                border: `1px solid ${opt.color}44`,
               }}
             >
               {opt.label}
@@ -171,31 +169,31 @@ export default function ClosureStep({ sessionData, onFinished }) {
 
       {/* Observaciones */}
       <div>
-        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>
+        <label className="recepcion-field-label" style={{ display: 'block', marginBottom: '0.5rem' }}>
           Observaciones generales
         </label>
         <textarea
+          className="recepcion-textarea"
           value={observations}
           onChange={e => setObservations(e.target.value)}
           placeholder="Ej: Caja llegó abierta. Faltaron 3 unidades que el transportista confirmó quedarán en próximo envío."
           rows={3}
-          style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-main)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.9rem', resize: 'vertical', boxSizing: 'border-box' }}
         />
       </div>
 
       {error && (
-        <div style={{ padding: '0.75rem 1rem', background: '#ef444422', border: '1px solid #ef444444', borderRadius: '8px', color: '#ef4444', fontSize: '0.85rem' }}>
+        <div className="recepcion-error">
           ⚠️ {error}
         </div>
       )}
 
       {/* Botón guardar */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div className="recepcion-actions">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="btn-primary"
-          style={{ padding: '12px 36px', borderRadius: '8px', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: saving ? 0.7 : 1 }}
+          className="recepcion-btn-primary"
+          style={{ padding: '12px 36px', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: saving ? 0.7 : 1 }}
         >
           {saving ? '⏳ Guardando…' : '💾 Confirmar recepción'}
         </button>

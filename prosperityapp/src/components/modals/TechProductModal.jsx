@@ -22,7 +22,8 @@ const TechProductModal = ({ isOpen, onClose, productToEdit }) => {
           name: '', brand: '', category: '',
           unitSize: '', unitOfMeasure: 'g',
           facturaCost: '', collabCost: '',
-          stockUnits: 0, minStock: 3
+          stockUnits: 0, minStock: 3,
+          sellMode: 'fractional'
         });
       }
     }
@@ -37,17 +38,18 @@ const TechProductModal = ({ isOpen, onClose, productToEdit }) => {
     e.preventDefault();
     setIsSaving(true);
     try {
+      const isWhole = formData.sellMode === 'whole';
       const dataToSave = {
         name:       formData.name,
         brand:      formData.brand || null,
         category:   formData.category || null,
-        unitSize:   parseFloat(formData.unitSize) || 0,
-        unit:       formData.unitOfMeasure || 'g',
+        unitSize:   isWhole ? 1 : (parseFloat(formData.unitSize) || 0),
+        unit:       isWhole ? 'unidad' : (formData.unitOfMeasure || 'g'),
         stockCurrent: parseFloat(formData.stockUnits) || 0,
         stockMin:   parseFloat(formData.minStock) || 3,
         costPerUnit: parseFloat(formData.facturaCost) || 0,
-        // campos extras no estándar guardados como-está
         collabCost:  parseFloat(formData.collabCost) || 0,
+        sellMode:   formData.sellMode || 'fractional',
       };
       if (isEditMode) {
         const { error } = await sbUpdate('technicalInventory', productToEdit.id, dataToSave);
@@ -90,6 +92,32 @@ const TechProductModal = ({ isOpen, onClose, productToEdit }) => {
             </div>
           </div>
 
+          {/* ── Modo de Venta ── */}
+          <div>
+            <label className="block text-sm font-medium text-text-muted mb-2">Modo de Venta</label>
+            <div className="flex rounded-lg bg-bg-main border border-border-main p-1 gap-1">
+              <button type="button" onClick={() => setFormData(prev => ({ ...prev, sellMode: 'fractional' }))}
+                className={`flex-1 py-2 px-3 rounded-md text-sm font-semibold transition-all ${
+                  formData.sellMode !== 'whole'
+                    ? 'bg-accent text-accent-text shadow-sm'
+                    : 'text-text-muted hover:text-text-main'
+                }`}
+              >⚗️ Fraccionado (g/ml)</button>
+              <button type="button" onClick={() => setFormData(prev => ({ ...prev, sellMode: 'whole' }))}
+                className={`flex-1 py-2 px-3 rounded-md text-sm font-semibold transition-all ${
+                  formData.sellMode === 'whole'
+                    ? 'bg-accent text-accent-text shadow-sm'
+                    : 'text-text-muted hover:text-text-main'
+                }`}
+              >📦 Completo (unidad)</button>
+            </div>
+            <p className="text-xs text-text-muted mt-1">
+              {formData.sellMode === 'whole'
+                ? 'El costo se cobra completo y el stock se descuenta por unidad.'
+                : 'El costo se calcula por gramo/ml usado.'}
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-text-muted">{t('modals.techProduct.category')}</label>
@@ -98,18 +126,20 @@ const TechProductModal = ({ isOpen, onClose, productToEdit }) => {
                 <option value="Tinte" /><option value="Decolorante" /><option value="Oxigenta" /><option value="Tratamiento" />
               </datalist>
             </div>
-            <div className="flex gap-2">
-              <div className="flex-grow">
-                <label className="block text-sm font-medium text-text-muted">{t('modals.techProduct.size')}</label>
-                <input type="number" name="unitSize" value={formData.unitSize || ''} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" required />
+            {formData.sellMode !== 'whole' && (
+              <div className="flex gap-2">
+                <div className="flex-grow">
+                  <label className="block text-sm font-medium text-text-muted">{t('modals.techProduct.size')}</label>
+                  <input type="number" name="unitSize" value={formData.unitSize || ''} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" required />
+                </div>
+                <div className="w-24">
+                  <label className="block text-sm font-medium text-text-muted">{t('modals.techProduct.measure')}</label>
+                  <select name="unitOfMeasure" value={formData.unitOfMeasure || 'g'} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main">
+                    <option value="g">g</option><option value="ml">ml</option><option value="oz">oz</option><option value="unidad">un</option>
+                  </select>
+                </div>
               </div>
-              <div className="w-24">
-                <label className="block text-sm font-medium text-text-muted">{t('modals.techProduct.measure')}</label>
-                <select name="unitOfMeasure" value={formData.unitOfMeasure || 'g'} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main">
-                  <option value="g">g</option><option value="ml">ml</option><option value="oz">oz</option><option value="unidad">un</option>
-                </select>
-              </div>
-            </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

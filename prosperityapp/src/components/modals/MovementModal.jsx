@@ -1,5 +1,5 @@
 // ===== INICIO: src/components/modals/MovementModal.jsx (Sprint 87 - Lógica Restaurada) =====
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../../context/DataContext';
 import { supabase } from '../../supabase/client';
@@ -16,6 +16,9 @@ import { useReactToPrint } from 'react-to-print';
 import TicketTemplate from '../reports/TicketTemplate';
 import PrintPreviewModal from './PrintPreviewModal';
 import Swal from 'sweetalert2';
+import { BarcodeScanner } from '../barcode/BarcodeScanner';
+import { BarcodeScannerButton } from '../barcode/BarcodeScannerButton';
+import { useBarcodeLookup } from '../../hooks/useBarcodeLookup';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') {
@@ -46,6 +49,47 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
   const [ticketData, setTicketData] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const ticketRef = React.useRef();
+
+  // ── Barcode scanner state ──────────────────────────────────────────────
+  const [scannerActive, setScannerActive] = useState(false);
+  const { lookup, loading: lookupLoading } = useBarcodeLookup();
+
+  const handleBarcodeScan = useCallback(async (code) => {
+    if (lookupLoading) return;
+    const { product, inventoryType, found } = await lookup(code);
+    if (found && inventoryType === 'retail') {
+      // Verificar stock
+      const stockDisponible = product.stock || 0;
+      const enCarrito = cart
+        .filter(item => item.productId === product.id)
+        .reduce((sum, item) => sum + (item.quantity || 0), 0);
+
+      if ((enCarrito + 1) > stockDisponible) {
+        toast.error(`Stock insuficiente. Disponible: ${stockDisponible}, En carrito: ${enCarrito}`);
+        return;
+      }
+
+      // Auto-agregar al carrito con cantidad 1
+      setCart(prev => [...prev, {
+        cartId: Date.now(),
+        type: 'Venta',
+        description: `1x ${product.name}`,
+        amount: product.price || 0,
+        collaboratorId: null,
+        collaboratorName: t('modals.forms.salon'),
+        productId: product.id,
+        quantity: 1,
+        paymentMethod: 'Efectivo',
+        commissionType: 'auto',
+        commissionAmount: 0
+      }]);
+      toast.success(`✅ ${product.name} agregado`);
+    } else if (found && inventoryType === 'technical') {
+      toast(`⚠️ ${product.name} es producto técnico — no disponible en caja`, { icon: '🔒' });
+    } else {
+      toast(`🔍 Código no encontrado: ${code}`, { icon: '❌' });
+    }
+  }, [lookup, lookupLoading, cart, t]);
 
   const handlePrintTicket = useReactToPrint({
     contentRef: ticketRef,
@@ -703,13 +747,13 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                       <select
                         value={rapidoServicio.collab}
                         onChange={(e) => setRapidoServicio(p => ({ ...p, collab: e.target.value }))}
-                        className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main"
+                        className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main"
                       >
                         <option value="" disabled>{t('modals.forms.selectCollab')}</option>
                         {activeCollaborators.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
-                      <input type="text" placeholder={t('modals.forms.itemDesc')} value={rapidoServicio.desc} onChange={(e) => setRapidoServicio(p => ({ ...p, desc: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" />
-                      <CurrencyInput placeholder={t('modals.forms.itemAmount')} value={rapidoServicio.monto} onChange={(e) => setRapidoServicio(p => ({ ...p, monto: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" />
+                      <input type="text" placeholder={t('modals.forms.itemDesc')} value={rapidoServicio.desc} onChange={(e) => setRapidoServicio(p => ({ ...p, desc: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
+                      <CurrencyInput placeholder={t('modals.forms.itemAmount')} value={rapidoServicio.monto} onChange={(e) => setRapidoServicio(p => ({ ...p, monto: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
                       <button onClick={addRapidoServicio} className="w-full btn-golden py-2 bg-bg-tertiary/50 text-text-muted">{t('modals.forms.addServiceManual')}</button>
                     </div>
                   </div>
@@ -720,10 +764,25 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                     🛍️ {t('modals.accordions.products')} <i data-feather="chevron-down" className="w-5 h-5"></i>
                   </summary>
                   <div className="p-3 border-t border-border-main space-y-4">
+                    {/* ── Barcode Scanner ────────────────────── */}
+                    <div className="flex items-center gap-2">
+                      <BarcodeScannerButton
+                        active={scannerActive}
+                        onToggle={() => setScannerActive(v => !v)}
+                        label="Escanear"
+                      />
+                      {scannerActive && (
+                        <span className="text-xs text-green-400 animate-pulse">● Lector activo</span>
+                      )}
+                    </div>
+                    {scannerActive && (
+                      <BarcodeScanner active={scannerActive} onScan={handleBarcodeScan} onClose={() => setScannerActive(false)} mode="keyboard" />
+                    )}
+
                     <div className="space-y-3">
                       <SearchableDropdown items={retailInventory || []} placeholder={t('modals.forms.productSearch')} onSelect={(p) => setSearchProducto(s => ({ ...s, product: p }))} initialValue={searchProducto.product} />
                       <SearchableDropdown items={activeCollaborators} placeholder={t('modals.forms.collabSearch')} onSelect={(c) => setSearchProducto(s => ({ ...s, collab: c }))} initialValue={searchProducto.collab} />
-                      <input type="number" value={searchProducto.cant} min="1" onChange={e => setSearchProducto(s => ({ ...s, cant: parseInt(e.target.value) }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" placeholder={t('modals.forms.itemQuantity')} />
+                      <input type="number" value={searchProducto.cant} min="1" onChange={e => setSearchProducto(s => ({ ...s, cant: parseInt(e.target.value) }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" placeholder={t('modals.forms.itemQuantity')} />
                       <button onClick={addSearchProducto} className="w-full btn-golden py-2">{t('modals.forms.addSalesSearch')}</button>
 
                       <div className="text-center">
@@ -736,13 +795,13 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                     <div className={`space-y-3 ${showManualProduct ? '' : 'hidden'}`}>
                       <hr className="border-border-main/50" />
                       <h4 className="font-semibold text-text-main text-sm">{t('modals.forms.manualSaleTitle')}</h4>
-                      <select value={rapidoVenta.collab} onChange={(e) => setRapidoVenta(p => ({ ...p, collab: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2">
+                      <select value={rapidoVenta.collab} onChange={(e) => setRapidoVenta(p => ({ ...p, collab: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2">
                         {salonOption.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
-                      <input type="text" placeholder={t('modals.forms.itemDesc')} value={rapidoVenta.desc} onChange={(e) => setRapidoVenta(p => ({ ...p, desc: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" />
+                      <input type="text" placeholder={t('modals.forms.itemDesc')} value={rapidoVenta.desc} onChange={(e) => setRapidoVenta(p => ({ ...p, desc: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
                       <div className="flex gap-2">
-                        <CurrencyInput placeholder={t('modals.forms.priceTotal')} value={rapidoVenta.monto} onChange={(e) => setRapidoVenta(p => ({ ...p, monto: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" />
-                        <input type="number" placeholder={t('modals.forms.itemQuantityShort')} value={rapidoVenta.cant} min="1" onChange={(e) => setRapidoVenta(p => ({ ...p, cant: e.target.value }))} className="w-24 bg-bg-tertiary border border-border-main rounded p-2 text-text-main" />
+                        <CurrencyInput placeholder={t('modals.forms.priceTotal')} value={rapidoVenta.monto} onChange={(e) => setRapidoVenta(p => ({ ...p, monto: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
+                        <input type="number" placeholder={t('modals.forms.itemQuantityShort')} value={rapidoVenta.cant} min="1" onChange={(e) => setRapidoVenta(p => ({ ...p, cant: e.target.value }))} className="w-24 bg-bg-input border border-border-input rounded p-2 text-text-main" />
                       </div>
                       <button onClick={addRapidoVenta} className="w-full btn-golden py-2 bg-bg-tertiary/50 text-text-muted">{t('modals.forms.addSalesManual')}</button>
                     </div>
@@ -755,8 +814,8 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                     💳 {t('modals.accordions.gcSell')} <i data-feather="chevron-down" className="w-5 h-5"></i>
                   </summary>
                   <div className="p-3 border-t border-border-main space-y-3">
-                    <input type="text" placeholder={t('modals.forms.gcCode')} value={giftCard.code} onChange={(e) => setGiftCard(p => ({ ...p, code: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" />
-                    <CurrencyInput placeholder={t('modals.forms.gcAmount')} value={giftCard.amount} onChange={(e) => setGiftCard(p => ({ ...p, amount: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" />
+                    <input type="text" placeholder={t('modals.forms.gcCode')} value={giftCard.code} onChange={(e) => setGiftCard(p => ({ ...p, code: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
+                    <CurrencyInput placeholder={t('modals.forms.gcAmount')} value={giftCard.amount} onChange={(e) => setGiftCard(p => ({ ...p, amount: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
 
                     {/* Cliente: SearchableDropdown o nombre manual */}
                     <div>
@@ -770,11 +829,11 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                       />
                     </div>
 
-                    <input type="text" placeholder={t('modals.forms.gcContact')} value={giftCard.contact} onChange={(e) => setGiftCard(p => ({ ...p, contact: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" />
+                    <input type="text" placeholder={t('modals.forms.gcContact')} value={giftCard.contact} onChange={(e) => setGiftCard(p => ({ ...p, contact: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
                     <select
                       value={giftCard.paymentMethod}
                       onChange={(e) => setGiftCard(p => ({ ...p, paymentMethod: e.target.value }))}
-                      className="w-full bg-bg-tertiary border border-border-main rounded p-2"
+                      className="w-full bg-bg-input border border-border-input rounded p-2"
                     >
                       <option value="Efectivo">{t('modals.forms.cashPayment')}</option>
                       <option value="Tarjeta">{t('modals.forms.cardPayment')}</option>
@@ -810,8 +869,8 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                     🪙 {t('modals.accordions.gcRedeem')} <i data-feather="chevron-down" className="w-5 h-5"></i>
                   </summary>
                   <div className="p-3 border-t border-border-main space-y-3">
-                    <input type="text" placeholder={t('modals.forms.gcCode')} value={pagoGiftCard.code} onChange={(e) => setPagoGiftCard(p => ({ ...p, code: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" />
-                    <CurrencyInput placeholder={t('modals.forms.gcAmount')} value={pagoGiftCard.amount} onChange={(e) => setPagoGiftCard(p => ({ ...p, amount: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" />
+                    <input type="text" placeholder={t('modals.forms.gcCode')} value={pagoGiftCard.code} onChange={(e) => setPagoGiftCard(p => ({ ...p, code: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
+                    <CurrencyInput placeholder={t('modals.forms.gcAmount')} value={pagoGiftCard.amount} onChange={(e) => setPagoGiftCard(p => ({ ...p, amount: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
 
                     {/* Evidencia de Canje */}
                     <div className="border border-dashed border-border-main p-3 rounded text-center relative">
@@ -842,8 +901,8 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                     💸 {t('modals.accordions.expenses')} <i data-feather="chevron-down" className="w-5 h-5"></i>
                   </summary>
                   <div className="p-3 border-t border-border-main space-y-3">
-                    <input type="text" placeholder={t('modals.forms.itemDesc')} value={gasto.desc} onChange={(e) => setGasto(p => ({ ...p, desc: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" />
-                    <CurrencyInput placeholder={t('modals.forms.itemAmount')} value={gasto.monto} onChange={(e) => setGasto(p => ({ ...p, monto: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" />
+                    <input type="text" placeholder={t('modals.forms.itemDesc')} value={gasto.desc} onChange={(e) => setGasto(p => ({ ...p, desc: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
+                    <CurrencyInput placeholder={t('modals.forms.itemAmount')} value={gasto.monto} onChange={(e) => setGasto(p => ({ ...p, monto: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
                     <button onClick={addGasto} className="w-full btn-golden py-2">{t('modals.forms.addExpense')}</button>
                   </div>
                 </details>
@@ -853,11 +912,11 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                     💰 {t('modals.accordions.advances')} <i data-feather="chevron-down" className="w-5 h-5"></i>
                   </summary>
                   <div className="p-3 border-t border-border-main space-y-3">
-                    <select value={adelanto.collab} onChange={(e) => setAdelanto(p => ({ ...p, collab: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2">
+                    <select value={adelanto.collab} onChange={(e) => setAdelanto(p => ({ ...p, collab: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2">
                       <option value="" disabled>{t('modals.forms.selectCollab')}</option>
                       {activeCollaborators.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
-                    <CurrencyInput placeholder={t('modals.forms.itemAmount')} value={adelanto.monto} onChange={(e) => setAdelanto(p => ({ ...p, monto: e.target.value }))} className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main" />
+                    <CurrencyInput placeholder={t('modals.forms.itemAmount')} value={adelanto.monto} onChange={(e) => setAdelanto(p => ({ ...p, monto: e.target.value }))} className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main" />
                     <button onClick={addAdelanto} className="w-full btn-golden py-2">{t('modals.forms.addAdvance')}</button>
                   </div>
                 </details>
@@ -870,7 +929,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                     <select
                       value={propina.collab}
                       onChange={(e) => setPropina(p => ({ ...p, collab: e.target.value }))}
-                      className="w-full bg-bg-tertiary border border-border-main rounded p-2"
+                      className="w-full bg-bg-input border border-border-input rounded p-2"
                     >
                       <option value="" disabled>{t('modals.forms.selectCollab')}</option>
                       {activeCollaborators.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -880,18 +939,18 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                       placeholder={t('modals.forms.tipsDesc')}
                       value={propina.desc}
                       onChange={(e) => setPropina(p => ({ ...p, desc: e.target.value }))}
-                      className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main"
+                      className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main"
                     />
                     <CurrencyInput
                       placeholder={t('modals.forms.itemAmount')}
                       value={propina.monto}
                       onChange={(e) => setPropina(p => ({ ...p, monto: e.target.value }))}
-                      className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main"
+                      className="w-full bg-bg-input border border-border-input rounded p-2 text-text-main"
                     />
                     <select
                       value={propina.paymentMethod}
                       onChange={(e) => setPropina(p => ({ ...p, paymentMethod: e.target.value }))}
-                      className="w-full bg-bg-tertiary border border-border-main rounded p-2"
+                      className="w-full bg-bg-input border border-border-input rounded p-2"
                     >
                       <option value="Efectivo">{t('modals.forms.cashPayment')}</option>
                       <option value="Tarjeta">{t('modals.forms.cardPayment')}</option>
@@ -900,7 +959,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                     <select
                       value={propina.destination}
                       onChange={(e) => setPropina(p => ({ ...p, destination: e.target.value }))}
-                      className="w-full bg-bg-tertiary border border-border-main rounded p-2"
+                      className="w-full bg-bg-input border border-border-input rounded p-2"
                     >
                       <option value="nomina">{t('modals.forms.tipNomina')}</option>
                       <option value="instantanea">{t('modals.forms.tipInstant')}</option>
@@ -990,7 +1049,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full bg-bg-tertiary border border-border-main rounded p-2"
+                  className="w-full bg-bg-input border border-border-input rounded p-2"
                   disabled={isSaving}
                 >
                   <option value="multi">{t('modals.forms.multiplePayments')}</option>

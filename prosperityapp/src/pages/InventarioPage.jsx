@@ -54,7 +54,7 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
       const minStock = item.minStock || 3;
       return {
         ...item, stockUnits, facturaCost, collabCost, minStock,
-        costPerGram: collabCost / unitSize,
+        costPerGram: item.sellMode === 'whole' ? collabCost : (collabCost / unitSize),
         ganancia: collabCost - facturaCost,
         totalFacturaValue: stockUnits * facturaCost,
         totalCollabValue: stockUnits * collabCost,
@@ -129,9 +129,10 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
               <th className="p-3 font-semibold text-center">{t('inventory.table.stock')}</th>
               <th className="p-3 font-semibold text-right">{t('inventory.table.minStock')}</th>
               <th className="p-3 font-semibold text-right">{t('inventory.table.size')}</th>
+              <th className="p-3 font-semibold text-center">Modo</th>
               <th className="p-3 font-semibold text-right">{t('inventory.table.invoiceCost')}</th>
               <th className="p-3 font-semibold text-right">{t('inventory.table.collabCost')}</th>
-              <th className="p-3 font-semibold text-right">{t('inventory.table.costPerGram')}</th>
+              <th className="p-3 font-semibold text-right">Costo Unitario</th>
               <th className="p-3 font-semibold">{t('inventory.table.created')}</th>
               <th className="p-3 font-semibold text-right">{t('inventory.table.actions')}</th>
             </tr>
@@ -154,10 +155,24 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
                     </div>
                   </td>
                   <td className="p-3 text-right text-text-muted">{p.minStock || 3}</td>
-                  <td className="p-3 text-right text-text-main">{p.unitSize} {p.unitOfMeasure}</td>
+                  <td className="p-3 text-right text-text-main">{p.sellMode === 'whole' ? 'Unidad' : `${p.unitSize} ${p.unitOfMeasure}`}</td>
+                  <td className="p-3 text-center">
+                    <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                      p.sellMode === 'whole'
+                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                        : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    }`}>
+                      {p.sellMode === 'whole' ? '📦 Completo' : '⚗️ Fraccionado'}
+                    </span>
+                  </td>
                   <td className="p-3 text-right font-medium text-yellow-700 dark:text-yellow-400">{formatCurrency(p.facturaCost)}</td>
                   <td className="p-3 text-right font-medium text-blue-700 dark:text-cyan-400">{formatCurrency(p.collabCost)}</td>
-                  <td className="p-3 text-right font-bold text-text-main">{formatCurrency(p.costPerGram)}</td>
+                  <td className="p-3 text-right font-bold text-text-main">
+                    {p.sellMode === 'whole'
+                      ? formatCurrency(p.collabCost)
+                      : `${formatCurrency(p.costPerGram)}/${p.unitOfMeasure || 'g'}`
+                    }
+                  </td>
                   <td className="p-3 text-text-muted text-xs">{formatDate(p.createdAt)}</td>
                   <td className="p-3 text-right">
                     <button onClick={() => handleOpenEditModal(p)} className="p-1 text-text-muted hover:text-accent">

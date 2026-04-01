@@ -24,11 +24,10 @@ const Icon = ({ name, className }) => {
 
 const Sidebar = () => {
   const location = useLocation();
-  const { toggleTheme, theme } = useContext(ThemeContext);
+  const { toggleTheme, theme, isDark } = useContext(ThemeContext);
   const { t, i18n } = useTranslation();
   const { userRole, config, user } = useData();
   const navigate = useNavigate();
-  const isDarkMode = theme === 'dark';
 
   // Extraer logo y nombre de la configuración global
   const settings = config?.find(c => c.id === 'settings') || {};
@@ -69,7 +68,7 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="w-64 bg-bg-secondary p-4 flex flex-col justify-between h-full overflow-y-auto border-r border-border-main">
+    <aside className="w-64 bg-bg-secondary p-4 flex flex-col justify-between h-full overflow-y-auto border-r border-border-main sidebar-glow">
       <div>
         <header className="mb-8 flex items-center gap-3">
           <img
@@ -136,7 +135,7 @@ const Sidebar = () => {
             className="p-1.5 rounded-full hover:bg-bg-main transition-colors"
             title={t('sidebar.theme')}
           >
-            <Icon name={isDarkMode ? 'sun' : 'moon'} className="w-4 h-4 text-text-muted" />
+            <Icon name={isDark ? 'sun' : 'moon'} className="w-4 h-4 text-text-muted" />
           </button>
         </div>
 

@@ -71,45 +71,32 @@ export default function InvoiceImporter({ onParsed, countryCode = 'CL' }) {
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.75rem',
-          border: `2px dashed ${dragging ? 'var(--accent)' : 'var(--border-main)'}`,
-          borderRadius: '1rem',
-          padding: '2.5rem 1.5rem',
-          cursor: loading ? 'default' : 'pointer',
-          background: dragging ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : 'var(--bg-secondary)',
-          transition: 'all 0.2s',
-          minHeight: '180px',
-        }}
+        className={`recepcion-dropzone ${dragging ? 'dragging' : ''}`}
       >
         {loading ? (
           <>
-            <span style={{ fontSize: '2rem' }}>⏳</span>
-            <p style={{ color: 'var(--text-muted)', margin: 0 }}>
+            <span className="recepcion-dropzone-icon">⏳</span>
+            <p className="recepcion-dropzone-text muted">
               {progress > 0 ? `Leyendo imagen… ${progress}%` : 'Procesando factura…'}
             </p>
             {progress > 0 && (
-              <div style={{ width: '200px', height: '6px', background: 'var(--bg-tertiary)', borderRadius: '3px', overflow: 'hidden' }}>
-                <div style={{ width: `${progress}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.3s' }} />
+              <div className="recepcion-progress-track">
+                <div className="recepcion-progress-bar" style={{ width: `${progress}%` }} />
               </div>
             )}
           </>
         ) : (
           <>
-            <span style={{ fontSize: '2.5rem' }}>📂</span>
-            <p style={{ color: 'var(--text-main)', fontWeight: 600, margin: 0, textAlign: 'center' }}>
+            <span className="recepcion-dropzone-icon">📂</span>
+            <p className="recepcion-dropzone-text">
               Arrastra tu factura aquí o haz clic para seleccionar
             </p>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: 0, textAlign: 'center' }}>
+            <p className="recepcion-dropzone-text muted small">
               Soporta: XML DTE (SII) · PDF · JPG · PNG
             </p>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.25rem' }}>
+            <div className="recepcion-badge-row">
               {Object.values(SOURCE_LABELS).map((s) => (
-                <span key={s.label} style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '999px', background: s.color + '22', color: s.color, border: `1px solid ${s.color}44` }}>
+                <span key={s.label} className="recepcion-format-badge" style={{ '--badge-color': s.color }}>
                   {s.icon} {s.label}
                 </span>
               ))}
@@ -128,16 +115,16 @@ export default function InvoiceImporter({ onParsed, countryCode = 'CL' }) {
       />
 
       {sourceBadge && (
-        <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Formato detectado:</span>
-          <span style={{ fontSize: '0.8rem', padding: '2px 10px', borderRadius: '999px', background: sourceBadge.color + '22', color: sourceBadge.color, border: `1px solid ${sourceBadge.color}44` }}>
+        <div className="recepcion-detected-format">
+          <span className="recepcion-dropzone-text muted small">Formato detectado:</span>
+          <span className="recepcion-format-badge" style={{ '--badge-color': sourceBadge.color }}>
             {sourceBadge.icon} {sourceBadge.label}
           </span>
         </div>
       )}
 
       {error && (
-        <div style={{ marginTop: '0.75rem', padding: '0.75rem 1rem', background: '#ef444422', border: '1px solid #ef444444', borderRadius: '0.5rem', color: '#ef4444', fontSize: '0.85rem' }}>
+        <div className="recepcion-error">
           ⚠️ {error}
         </div>
       )}

@@ -57,7 +57,7 @@ const SearchableDropdown = ({ items = [], placeholder, onSelect, initialValue, d
       <div className="relative">
          <input
           type="text"
-          className="w-full bg-bg-tertiary border border-border-main rounded p-2 pr-8 text-text-main placeholder-text-muted focus:outline-none focus:border-accent transition-colors disabled:opacity-50"
+          className="w-full bg-bg-input border border-border-input rounded p-2 pr-8 text-text-main placeholder-text-muted focus:outline-none focus:border-accent transition-colors disabled:opacity-50"
           placeholder={placeholder}
           value={searchTerm}
           onChange={handleInputChange}

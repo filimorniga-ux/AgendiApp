@@ -8,6 +8,7 @@ import CurrencyInput from '../ui/CurrencyInput';
 import { useCurrencyFormat } from '../../hooks/useCurrencyFormat';
 
 const calculateCostPerUnit = (item) => {
+  if (item.sellMode === 'whole') return item.collabCost || 0;
   const collabCost = item.collabCost || 0;
   const unitSize = item.unitSize || 1;
   return collabCost / unitSize;
@@ -67,7 +68,8 @@ const TechCalculatorModal = ({ isOpen, onClose, onSubmit, serviceName, initialPr
         id: selectedProduct.id,
         name: selectedProduct.name,
         unit: selectedProduct.unitOfMeasure,
-        quantity: parseFloat(quantity)
+        quantity: selectedProduct.sellMode === 'whole' ? Math.round(parseFloat(quantity)) : parseFloat(quantity),
+        sellMode: selectedProduct.sellMode || 'fractional'
       }]);
     }
     setSelectedProduct(null);
@@ -124,9 +126,13 @@ const TechCalculatorModal = ({ isOpen, onClose, onSubmit, serviceName, initialPr
             </div>
             <input
               type="number"
-              placeholder={selectedProduct ? selectedProduct.unitOfMeasure : 'g/ml'}
+              placeholder={selectedProduct
+                ? (selectedProduct.sellMode === 'whole' ? 'Unidades' : selectedProduct.unitOfMeasure)
+                : 'g/ml'}
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
+              min={selectedProduct?.sellMode === 'whole' ? 1 : undefined}
+              step={selectedProduct?.sellMode === 'whole' ? 1 : 'any'}
               className="w-24 bg-bg-tertiary border border-border-main rounded p-2 text-text-main"
             />
             <button onClick={handleAddProduct} className="bg-bg-tertiary px-3 py-2 rounded hover:bg-bg-main/50 text-text-main">
@@ -168,7 +174,12 @@ const TechCalculatorModal = ({ isOpen, onClose, onSubmit, serviceName, initialPr
             {usedProducts.map((p, index) => (
               <div key={index} className="flex justify-between items-center">
                 <span>
-                  {p.id ? `${t('common.separator')} ${p.quantity}${p.unit} ${p.name}` : `${t('common.separator')} ${p.name} (${formatCurrency(p.cost)})`}
+                  {p.id
+                    ? (p.sellMode === 'whole'
+                        ? `${t('common.separator')} ${p.quantity} unid. ${p.name}`
+                        : `${t('common.separator')} ${p.quantity}${p.unit} ${p.name}`)
+                    : `${t('common.separator')} ${p.name} (${formatCurrency(p.cost)})`
+                  }
                 </span>
                 <button onClick={() => handleRemoveProduct(index)} className="text-red-400 hover:text-red-300">
                   <i data-feather="trash-2" className="w-4 h-4"></i>

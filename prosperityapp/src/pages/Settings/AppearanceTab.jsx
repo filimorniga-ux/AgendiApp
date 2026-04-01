@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useData } from '../../context/DataContext';
+import { ThemeContext, THEME_LIST } from '../../context/ThemeContext';
 import { GLOBAL_CURRENCY_DATA } from '../../lib/currencyData';
 import feather from 'feather-icons';
 import toast from 'react-hot-toast';
-import { useStorage } from '../../hooks/useStorage'; // Import hook
+import { useStorage } from '../../hooks/useStorage';
 import { sbUpdate } from '../../supabase/db';
 
 const AppearanceTab = () => {
     const { t, i18n } = useTranslation();
     const { currentLocale, setCurrentCurrency, config, businessId } = useData();
-    const { uploadFile, progress, isUploading } = useStorage(); // Use hook
+    const { theme: currentTheme, setTheme } = useContext(ThemeContext);
+    const { uploadFile, progress, isUploading } = useStorage();
     const [selectedCountryCode, setSelectedCountryCode] = useState('');
     const [logoUrl, setLogoUrl] = useState('');
 
     useEffect(() => {
-        // Find the country matching the current locale
         const currentCountry = GLOBAL_CURRENCY_DATA.find(c => c.locale === currentLocale);
         if (currentCountry) {
             setSelectedCountryCode(currentCountry.code);
         }
-        // Load current logo from config if available
         const settings = config?.find(c => c.id === 'settings');
         if (settings?.logoUrl) {
             setLogoUrl(settings.logoUrl);
@@ -29,7 +29,7 @@ const AppearanceTab = () => {
 
     useEffect(() => {
         feather.replace();
-    }, [logoUrl]);
+    }, [logoUrl, currentTheme]);
 
     const handleCountryChange = (e) => {
         setSelectedCountryCode(e.target.value);
@@ -43,7 +43,6 @@ const AppearanceTab = () => {
             const url = await uploadFile(file, 'branding/logo');
             setLogoUrl(url);
 
-            // Guardar en Supabase
             if (businessId) {
               await sbUpdate('config', businessId, { logoUrl: url });
             }
@@ -52,6 +51,20 @@ const AppearanceTab = () => {
         } catch (err) {
             console.warn("Error uploading logo:", err);
             toast.error("Error al subir logo");
+        }
+    };
+
+    const handleThemeChange = async (themeId) => {
+        setTheme(themeId);
+        toast.success(`Tema "${THEME_LIST.find(t => t.id === themeId)?.label}" aplicado`);
+
+        // Save theme preference to Supabase (as business default)
+        try {
+            if (businessId) {
+                await sbUpdate('config', businessId, { theme: themeId });
+            }
+        } catch (err) {
+            console.warn('Error saving theme to Supabase:', err);
         }
     };
 
@@ -69,6 +82,57 @@ const AppearanceTab = () => {
 
     return (
         <div className="space-y-8 animate-fade-in">
+            {/* ── Theme Selector ── */}
+            <div className="bg-bg-secondary p-6 rounded-lg border border-border-main shadow-sm">
+                <h3 className="text-xl font-bold text-text-main mb-2 pb-2 border-b border-border-main flex items-center gap-2">
+                    🎨 Tema Visual
+                </h3>
+                <p className="text-text-muted text-sm mb-5">
+                    Elige el estilo visual que mejor represente tu negocio. Los cambios se aplican al instante.
+                </p>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {THEME_LIST.map((themeItem) => {
+                        const isActive = currentTheme === themeItem.id;
+                        return (
+                            <button
+                                key={themeItem.id}
+                                onClick={() => handleThemeChange(themeItem.id)}
+                                className={`theme-card text-left ${isActive ? 'theme-card--active' : ''}`}
+                                style={isActive ? { borderColor: themeItem.colors[2] } : {}}
+                            >
+                                {/* Check indicator */}
+                                <div
+                                    className="theme-card__check"
+                                    style={{ background: themeItem.colors[2], color: themeItem.isDark ? '#000' : '#fff' }}
+                                >
+                                    ✓
+                                </div>
+
+                                {/* Color preview bars */}
+                                <div className="theme-card__preview">
+                                    <div className="theme-card__color-bar" style={{ background: themeItem.colors[0] }} />
+                                    <div className="theme-card__color-bar" style={{ background: themeItem.colors[1] }} />
+                                    <div className="theme-card__color-bar" style={{ background: themeItem.colors[2] }} />
+                                    <div className="theme-card__color-bar" style={{ background: themeItem.colors[3] }} />
+                                    <div className="theme-card__color-bar" style={{ background: themeItem.colors[4] }} />
+                                </div>
+
+                                {/* Label */}
+                                <div className="theme-card__label">
+                                    <span>{themeItem.emoji}</span>
+                                    <span>{themeItem.label}</span>
+                                </div>
+                                <p className="text-[0.68rem] text-text-muted mt-1 leading-tight">
+                                    {themeItem.description}
+                                </p>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* ── Branding, Language & Currency ── */}
             <div className="bg-bg-secondary p-6 rounded-lg border border-border-main shadow-sm">
                 <h3 className="text-xl font-bold text-text-main mb-6 pb-2 border-b border-border-main">
                     {t('settings.appearance.title')}
@@ -101,7 +165,7 @@ const AppearanceTab = () => {
                         <label className="font-medium text-text-main">
                             {t('settings.appearance.language')}
                         </label>
-                        <select value={i18n.language} onChange={handleLanguageChange} className="bg-bg-tertiary border border-border-main rounded p-2 text-text-main w-40 focus:border-accent focus:outline-none">
+                        <select value={i18n.language} onChange={handleLanguageChange} className="bg-bg-input border border-border-input rounded p-2 text-text-main w-40 focus:border-accent focus:outline-none">
                             <option value="es">🇪🇸 Español</option>
                             <option value="en">🇬🇧 English</option>
                             <option value="pt">🇧🇷 Português</option>
@@ -119,7 +183,7 @@ const AppearanceTab = () => {
                         <select
                             value={selectedCountryCode}
                             onChange={handleCountryChange}
-                            className="bg-bg-tertiary border border-border-main rounded p-2 text-text-main w-48 focus:border-accent focus:outline-none"
+                            className="bg-bg-input border border-border-input rounded p-2 text-text-main w-48 focus:border-accent focus:outline-none"
                         >
                             <option value="" disabled>Seleccionar País</option>
                             {GLOBAL_CURRENCY_DATA.map((country) => (

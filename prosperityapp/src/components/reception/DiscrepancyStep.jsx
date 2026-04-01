@@ -44,11 +44,11 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
 
   if (!hasAnything) {
     return (
-      <div style={{ textAlign: 'center', padding: '3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-        <div style={{ fontSize: '3rem' }}>🎉</div>
-        <h3 style={{ color: 'var(--text-main)', margin: 0 }}>¡Sin discrepancias!</h3>
-        <p style={{ color: 'var(--text-muted)', margin: 0 }}>El pedido llegó completo y en orden.</p>
-        <button onClick={() => onNext({ extraDecisions: {}, priceDecisions: {} })} className="btn-primary" style={{ padding: '10px 28px', borderRadius: '8px', fontWeight: 600 }}>
+      <div className="recepcion-success-card">
+        <div className="recepcion-success-icon">🎉</div>
+        <h3 className="recepcion-success-title">¡Sin discrepancias!</h3>
+        <p className="recepcion-success-text">El pedido llegó completo y en orden.</p>
+        <button onClick={() => onNext({ extraDecisions: {}, priceDecisions: {} })} className="recepcion-btn-primary">
           Continuar →
         </button>
       </div>
@@ -56,12 +56,12 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div className="recepcion-step-body" style={{ gap: '1.5rem' }}>
 
       {/* Discrepancias de cantidad */}
       {discrepant.length > 0 && (
         <section>
-          <h3 style={{ color: 'var(--text-main)', margin: '0 0 0.75rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 className="recepcion-section-title">
             ⚠️ Ítems con cantidad incorrecta o daño ({discrepant.length})
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -69,23 +69,23 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
               const statusColors = { partial: '#f59e0b', missing: '#ef4444', damaged: '#f97316' };
               const color = statusColors[item.status] || '#f59e0b';
               return (
-                <div key={i} style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: color + '11', border: `1px solid ${color}33`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div key={i} className="recepcion-disc-card" style={{ background: color + '0d', border: `1px solid ${color}33` }}>
                   <div>
-                    <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{item.description}</span>
-                    <div style={{ fontSize: '0.8rem', color }}>
+                    <span className="recepcion-disc-title">{item.description}</span>
+                    <div className="recepcion-disc-detail" style={{ color }}>
                       Facturado: {item.quantityInvoiced} · Recibido: {item.quantityReceived}
                       {item.status === 'damaged' && ' · Dañado'}
                     </div>
-                    {item.observations && <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>📝 {item.observations}</div>}
+                    {item.observations && <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>📝 {item.observations}</div>}
                   </div>
-                  <span style={{ padding: '3px 10px', borderRadius: '999px', fontSize: '0.8rem', background: color + '22', color, border: `1px solid ${color}55`, fontWeight: 600 }}>
+                  <span className="recepcion-status-badge" style={{ background: color + '18', color, border: `1px solid ${color}44` }}>
                     {item.status === 'partial' ? '⚠️ Parcial' : item.status === 'missing' ? '❌ Faltante' : '🛠️ Dañado'}
                   </span>
                 </div>
               );
             })}
           </div>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0.5rem 0 0' }}>
+          <p className="recepcion-section-hint">
             Estos ítems quedarán registrados con su estado real. Puedes usarlos para reclamos al proveedor o transportista.
           </p>
         </section>
@@ -94,15 +94,15 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
       {/* Cambio de precios */}
       {priceChanged.length > 0 && (
         <section>
-          <h3 style={{ color: 'var(--text-main)', margin: '0 0 0.75rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 className="recepcion-section-title">
             💰 Cambio de precio de costo ({priceChanged.length})
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {priceChanged.map((item, i) => (
-              <div key={i} style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: '#f9731611', border: '1px solid #f9731633', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div key={i} className="recepcion-disc-card" style={{ background: 'rgba(249, 115, 22, 0.06)', border: '1px solid rgba(249, 115, 22, 0.2)' }}>
                 <div>
-                  <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{item.description}</span>
-                  <div style={{ fontSize: '0.82rem', color: '#f97316' }}>
+                  <span className="recepcion-disc-title">{item.description}</span>
+                  <div className="recepcion-disc-detail" style={{ color: '#f97316' }}>
                     Precio anterior: <strong>${item.prevCost?.toLocaleString()}</strong> → Nuevo: <strong>${item.unitCost?.toLocaleString()}</strong>
                   </div>
                 </div>
@@ -111,11 +111,7 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
                     <button
                       key={val}
                       onClick={() => setPriceDecisions(p => ({ ...p, [item.description]: val }))}
-                      style={{
-                        padding: '4px 14px', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer', border: 'none', fontWeight: 600,
-                        background: priceDecisions[item.description] === val ? 'var(--accent)' : 'var(--bg-tertiary)',
-                        color: priceDecisions[item.description] === val ? '#fff' : 'var(--text-muted)',
-                      }}
+                      className={`recepcion-decision-btn ${priceDecisions[item.description] === val ? 'active' : ''}`}
                     >
                       {label}
                     </button>
@@ -130,26 +126,22 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
       {/* Ítems extra (no estaban en la factura) */}
       {(extraItems?.length || 0) > 0 && (
         <section>
-          <h3 style={{ color: 'var(--text-main)', margin: '0 0 0.75rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 className="recepcion-section-title">
             🔮 Ítems extra recibidos no incluidos en la factura ({extraItems.length})
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {extraItems.map((ex, i) => (
-              <div key={i} style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: '#a855f711', border: '1px solid #a855f733', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div key={i} className="recepcion-disc-card" style={{ background: 'rgba(168, 85, 247, 0.06)', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
                 <div>
-                  <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{ex.description}</span>
-                  <div style={{ fontSize: '0.8rem', color: '#a855f7' }}>Cantidad: {ex.qty}</div>
+                  <span className="recepcion-disc-title">{ex.description}</span>
+                  <div className="recepcion-disc-detail" style={{ color: '#a855f7' }}>Cantidad: {ex.qty}</div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                   {[['create', '➕ Crear'], ['link', '🔗 Vincular'], ['return', '🔁 Devolver'], ['ignore', '✖️ Ignorar']].map(([val, label]) => (
                     <button
                       key={val}
                       onClick={() => setExtraDecisions(p => ({ ...p, [i]: val }))}
-                      style={{
-                        padding: '4px 12px', borderRadius: '6px', fontSize: '0.78rem', cursor: 'pointer', border: 'none', fontWeight: 600,
-                        background: extraDecisions[i] === val ? 'var(--accent)' : 'var(--bg-tertiary)',
-                        color: extraDecisions[i] === val ? '#fff' : 'var(--text-muted)',
-                      }}
+                      className={`recepcion-decision-btn ${extraDecisions[i] === val ? 'active' : ''}`}
                     >
                       {label}
                     </button>
@@ -157,12 +149,9 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
 
                   {extraDecisions[i] === 'create' && (
                     <select
+                      className="recepcion-select"
                       value={extraTypes[i]}
                       onChange={e => setExtraTypes(p => ({ ...p, [i]: e.target.value }))}
-                      style={{
-                        padding: '4px 8px', borderRadius: '6px', fontSize: '0.78rem',
-                        background: 'var(--bg-secondary)', border: '1px solid var(--border-main)', color: 'var(--text-main)'
-                      }}
                     >
                       <option value="retail">🛍️ Retail</option>
                       <option value="technical">🔧 Técnico</option>
@@ -186,8 +175,8 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
         </section>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button onClick={handleNext} className="btn-primary" style={{ padding: '10px 28px', borderRadius: '8px', fontWeight: 600 }}>
+      <div className="recepcion-actions">
+        <button onClick={handleNext} className="recepcion-btn-primary">
           Siguiente →
         </button>
       </div>

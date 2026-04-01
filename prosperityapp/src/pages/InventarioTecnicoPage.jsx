@@ -61,7 +61,7 @@ const InventarioTecnicoPage = () => {
       return {
         ...item,
         totalStockValue: stockUnits * facturaCost,
-        costPerGram: collabCost / unitSize
+        costPerGram: item.sellMode === 'whole' ? collabCost : (collabCost / unitSize)
       }
     });
     if (selectedCategory !== 'all') {
@@ -169,10 +169,11 @@ const InventarioTecnicoPage = () => {
                 <th className="p-3 font-semibold">Marca</th>
                 <th className="p-3 font-semibold text-right">Unid. Stock</th>
                 <th className="p-3 font-semibold text-right">Tamaño (g/ml)</th>
+                <th className="p-3 font-semibold text-center">Modo</th>
                 <th className="p-3 font-semibold text-right">Costo Factura</th>
                 <th className="p-3 font-semibold text-right">Costo Colab.</th>
                 <th className="p-3 font-semibold text-right">Valor Total (Factura)</th>
-                <th className="p-3 font-semibold text-right">Costo / g(ml) (Colab)</th>
+                <th className="p-3 font-semibold text-right">Costo Unitario (Colab)</th>
                 <th className="p-3 font-semibold text-right">Acciones</th>
               </tr>
             </thead>
@@ -182,11 +183,25 @@ const InventarioTecnicoPage = () => {
                   <td className="p-3 text-white font-semibold">{p.name}</td>
                   <td className="p-3">{p.brand}</td>
                   <td className="p-3 text-right font-bold">{p.stockUnits}</td>
-                  <td className="p-3 text-right">{p.unitSize} {p.unitOfMeasure}</td>
+                  <td className="p-3 text-right">{p.sellMode === 'whole' ? 'Unidad' : `${p.unitSize} ${p.unitOfMeasure}`}</td>
+                  <td className="p-3 text-center">
+                    <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                      p.sellMode === 'whole'
+                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                        : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    }`}>
+                      {p.sellMode === 'whole' ? '📦 Completo' : '⚗️ Fraccionado'}
+                    </span>
+                  </td>
                   <td className="p-3 text-right text-yellow-400">{formatCurrency(p.facturaCost)}</td>
                   <td className="p-3 text-right text-cyan-400">{formatCurrency(p.collabCost)}</td>
                   <td className="p-3 text-right font-semibold text-white">{formatCurrency(p.totalStockValue)}</td>
-                  <td className="p-3 text-right font-semibold text-accent">{formatCurrency(p.costPerGram)}</td>
+                  <td className="p-3 text-right font-semibold text-accent">
+                    {p.sellMode === 'whole'
+                      ? formatCurrency(p.collabCost)
+                      : `${formatCurrency(p.costPerGram)}/${p.unitOfMeasure || 'g'}`
+                    }
+                  </td>
                   <td className="p-3 text-right">
                     <button onClick={() => handleOpenEditModal(p)} className="p-1 text-text-main/70 hover:text-accent">
                       <i data-feather="edit" className="w-4 h-4"></i>

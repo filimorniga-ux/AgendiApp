@@ -42,6 +42,7 @@ const FIELD_ALIASES = {
   unit_of_measure: 'unitOfMeasure',
   factura_cost:    'facturaCost',
   collab_cost:     'collabCost',
+  sell_mode:       'sellMode',
   
   // legacy
   cost_per_unit:   'costPerUnit',
