@@ -133,7 +133,13 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
 
   // Inicializar el modal
   useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
     if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
       // Resetear estados al abrir
       setCart([]);
       setSelectedClient(null);
@@ -166,13 +172,15 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
         // Preseleccionar colaborador en búsquedas
         const collab = collaborators.find(c => c.id === preselectedCollab.id);
         if (collab) {
-          setSearchServicio(prev => ({ ...prev, collab }));
-          setRapidoServicio(prev => ({ ...prev, collab }));
-          setPropina(prev => ({ ...prev, collab }));
+           setSearchServicio(prev => ({ ...prev, collab }));
+           setRapidoServicio(prev => ({ ...prev, collab }));
+           setPropina(prev => ({ ...prev, collab }));
         }
       }
+
+      return () => window.removeEventListener('keydown', handleKeyDown);
     }
-  }, [isOpen, movementToEdit, preselectedCollab, clients, collaborators, movements]);
+  }, [isOpen, movementToEdit, preselectedCollab, clients, collaborators, movements, onClose]);
 
   useEffect(() => {
     feather.replace();

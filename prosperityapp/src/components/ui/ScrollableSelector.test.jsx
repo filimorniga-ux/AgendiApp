@@ -47,4 +47,35 @@ describe('ScrollableSelector Component', () => {
     
     expect(screen.getByText('Andres Felipe')).toBeInTheDocument();
   });
+
+  it('filters items correctly when typing in search input', () => {
+    render(<ScrollableSelector items={dummyItems} onSelect={() => {}} />);
+    
+    const searchInput = screen.getByPlaceholderText('Buscar...');
+    fireEvent.change(searchInput, { target: { value: 'miguel' } });
+
+    expect(screen.getByText('Miguel Perdomo')).toBeInTheDocument();
+    expect(screen.queryByText('Lia Martinez')).not.toBeInTheDocument();
+    expect(screen.queryByText('Andres Felipe')).not.toBeInTheDocument();
+  });
+
+  it('handles manual input correctly when allowManual is true', () => {
+    const mockManualInput = vi.fn();
+    render(<ScrollableSelector 
+             items={dummyItems} 
+             onSelect={() => {}} 
+             allowManual={true}
+             onManualInput={mockManualInput}
+           />);
+    
+    const searchInput = screen.getByPlaceholderText('Buscar...');
+    fireEvent.change(searchInput, { target: { value: 'Nuevo Cliente' } });
+
+    // Should show the manual add button
+    const addButton = screen.getByText('Agregar Cliente');
+    expect(addButton).toBeInTheDocument();
+
+    fireEvent.click(addButton);
+    expect(mockManualInput).toHaveBeenCalledWith('Nuevo Cliente');
+  });
 });
