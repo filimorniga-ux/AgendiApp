@@ -6,12 +6,6 @@ def run_cuj(page):
     page.goto("http://localhost:5173") # default vite port
     page.wait_for_timeout(3000) # wait for load
 
-    # Since it's an app that likely requires login, and we don't have
-    # credentials, we will just try to take a screenshot of whatever loads.
-    # The main issue was a crash when rendering dates. If the app crashes
-    # on load (e.g. if the calendar is the default view or if we can navigate
-    # to it), we would see a blank screen or error.
-
     os.makedirs("/home/jules/verification/screenshots", exist_ok=True)
     os.makedirs("/home/jules/verification/videos", exist_ok=True)
 

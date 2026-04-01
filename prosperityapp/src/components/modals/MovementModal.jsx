@@ -881,6 +881,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                         onSelect={(client) => setGiftCard(p => ({ ...p, clientName: client.name, gcClientId: client.id, contact: client.phone || '' }))}
                         allowManual={true}
                         onManualInput={(name) => setGiftCard(p => ({ ...p, clientName: name, gcClientId: null }))}
+                        initialValue={giftCard.clientName ? { id: giftCard.gcClientId, name: giftCard.clientName } : null}
                         displayMode="grid"
                       />
                     </div>
