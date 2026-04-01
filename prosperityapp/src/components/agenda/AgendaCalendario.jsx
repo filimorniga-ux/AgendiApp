@@ -119,6 +119,7 @@ const AgendaCalendario = () => {
   // Estado para TechCalculatorModal
   const [isTechModalOpen, setIsTechModalOpen] = useState(false);
   const [techProducts, setTechProducts] = useState([]);
+  const [techTotalCost, setTechTotalCost] = useState(0);
 
   // Filtrar citas del día seleccionado
   const dailyAppointments = useMemo(() => {
@@ -188,6 +189,7 @@ const AgendaCalendario = () => {
       productsUsed: []
     });
     setTechProducts([]);
+    setTechTotalCost(0);
     setIsModalOpen(true);
   };
 
@@ -207,6 +209,7 @@ const AgendaCalendario = () => {
       productsUsed: apt.productsUsed || []
     });
     setTechProducts(apt.productsUsed || []);
+    setTechTotalCost(apt.technicalCost || apt.technical_cost || 0);
     setIsModalOpen(true);
   };
 
@@ -219,8 +222,7 @@ const AgendaCalendario = () => {
     const startTime = new Date(formData.start);
     const endTime = new Date(startTime.getTime() + formData.duration * 60000);
 
-    // Calcular costo técnico desde productos usados
-    const technicalCost = techProducts.reduce((sum, p) => sum + (p.costPerGram * p.gramsUsed || 0), 0);
+    const technicalCost = techTotalCost || 0;
 
     const appointmentData = {
       client_id:         formData.client.id,
@@ -233,6 +235,8 @@ const AgendaCalendario = () => {
       ends_at:           endTime.toISOString(),
       status:            formData.status,
       notes:             formData.notes,
+      products_used:     techProducts,
+      technical_cost:    technicalCost,
       updated_at:        new Date().toISOString(),
     };
 
@@ -259,6 +263,41 @@ const AgendaCalendario = () => {
           appointmentData.movementId = mv?.id || null;
           await sbUpdate('appointments', selectedEvent.id, appointmentData);
           paymentRegistered = true;
+
+          // Descuento de stock técnico (Productos completos)
+          if (techProducts && techProducts.length > 0) {
+            const { supabase } = await import('../../supabase/client');
+            for (const techProd of techProducts) {
+              if (techProd.id && techProd.sellMode === 'whole' && techProd.quantity > 0) {
+                const { data: currentItem, error: fetchErr } = await supabase
+                  .from('technical_inventory')
+                  .select('stock_current, name, barcode')
+                  .eq('id', techProd.id)
+                  .single();
+
+                if (!fetchErr && currentItem) {
+                  const newStock = Math.max(0, (currentItem.stock_current || 0) - techProd.quantity);
+                  await supabase
+                    .from('technical_inventory')
+                    .update({ stock_current: newStock, updated_at: new Date().toISOString() })
+                    .eq('id', techProd.id);
+
+                  await supabase.from('stock_movements').insert({
+                    business_id: businessId,
+                    product_id: techProd.id,
+                    product_name: currentItem.name,
+                    amount: -techProd.quantity,
+                    new_stock: newStock,
+                    movement_type: 'exit',
+                    inventory_type: 'technical',
+                    barcode: currentItem.barcode || null,
+                    reason: 'Consumo Técnico (Agenda)',
+                    notes: `Agenda transacción ${transactionId}`
+                  });
+                }
+              }
+            }
+          }
         } else {
           await sbUpdate('appointments', selectedEvent.id, appointmentData);
         }
@@ -282,7 +321,8 @@ const AgendaCalendario = () => {
   };
 
   // Handler para TechCalculatorModal
-  const handleTechSave = (products) => {
+  const handleTechSave = (totalCost, products) => {
+    setTechTotalCost(totalCost);
     setTechProducts(products);
     setIsTechModalOpen(false);
     toast.success(`${products.length} productos agregados`);
@@ -414,7 +454,7 @@ const AgendaCalendario = () => {
       <TechCalculatorModal
         isOpen={isTechModalOpen}
         onClose={() => setIsTechModalOpen(false)}
-        onSave={handleTechSave}
+        onSubmit={handleTechSave}
         initialProducts={techProducts}
       />
       <TimeClockModal isOpen={isTimeClockOpen} onClose={() => setIsTimeClockOpen(false)} />
