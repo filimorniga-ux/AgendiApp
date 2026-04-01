@@ -74,18 +74,18 @@ const RetailProductModal = ({ isOpen, onClose, productToEdit }) => {
         <form onSubmit={handleSave} className="p-6 overflow-y-auto flex-grow space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.name')}</label>
-              <input type="text" name="name" value={formData.name || ''} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" required />
+              <label htmlFor="retail-name" className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.name')}</label>
+              <input id="retail-name" type="text" name="name" value={formData.name || ''} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.brand')}</label>
-              <input type="text" name="brand" value={formData.brand || ''} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" />
+              <label htmlFor="retail-brand" className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.brand')}</label>
+              <input id="retail-brand" type="text" name="brand" value={formData.brand || ''} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.category')}</label>
-            <input type="text" name="category" value={formData.category || ''} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" list="retail-categories" />
+            <label htmlFor="retail-category" className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.category')}</label>
+            <input id="retail-category" type="text" name="category" value={formData.category || ''} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" list="retail-categories" />
             <datalist id="retail-categories">
               <option value="Shampoo" /><option value="Acondicionador" /><option value="Tratamiento" /><option value="Styling" />
             </datalist>
@@ -93,22 +93,22 @@ const RetailProductModal = ({ isOpen, onClose, productToEdit }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.cost')}</label>
-              <CurrencyInput name="cost" value={formData.cost} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" required />
+              <label htmlFor="retail-cost" className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.cost')}</label>
+              <CurrencyInput id="retail-cost" name="cost" value={formData.cost} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.price')}</label>
-              <CurrencyInput name="price" value={formData.price} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" required />
+              <label htmlFor="retail-price" className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.price')}</label>
+              <CurrencyInput id="retail-price" name="price" value={formData.price} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.stock')}</label>
-              <input type="number" name="stock" value={formData.stock || 0} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" />
+              <label htmlFor="retail-stock" className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.stock')}</label>
+              <input id="retail-stock" type="number" name="stock" value={formData.stock || 0} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.minStock')}</label>
-            <input type="number" name="minStock" value={formData.minStock || 3} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" />
+            <label htmlFor="retail-minStock" className="block text-sm font-medium text-text-muted">{t('modals.retailProduct.minStock')}</label>
+            <input id="retail-minStock" type="number" name="minStock" value={formData.minStock || 3} onChange={handleInputChange} className="w-full bg-bg-tertiary border border-border-main rounded p-2 mt-1 text-text-main" />
           </div>
         </form>
 
