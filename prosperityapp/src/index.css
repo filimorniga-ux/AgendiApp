@@ -1479,7 +1479,8 @@
   }
 
   /* Stack the 2-column layout of MovementModal vertically */
-  .modal-content .w-2\/5 {
+  .modal-content [class*="w-2/5"],
+  .modal-content [style*="width: 40"] {
     width: 100% !important;
     border-right: none !important;
     border-bottom: 1px solid var(--color-border-main);
@@ -1487,7 +1488,8 @@
     overflow-y: auto;
   }
 
-  .modal-content .w-3\/5 {
+  .modal-content [class*="w-3/5"],
+  .modal-content [style*="width: 60"] {
     width: 100% !important;
     max-height: 50vh;
     overflow-y: auto;

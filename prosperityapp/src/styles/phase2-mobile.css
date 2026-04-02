@@ -15,8 +15,7 @@
   }
 
   /* Stack de las summary cards: 2 columnas en mobile */
-  .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4,
-  .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3 {
+  [class*="grid-cols-1"][class*="md:"] {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 10px !important;
   }
@@ -65,15 +64,15 @@
     gap: 4px !important;
   }
 
-  /* Cada tab: más compacto */
-  .flex-1.md\\:flex-none.flex.items-center.justify-center.gap-2.px-4.py-2\\.5 {
+  /* Cada tab: más compacto (selector simple sin escapes que rompen lightningcss) */
+  .flex-1[class*="py-2"] {
     padding: 8px 10px !important;
     font-size: 12px !important;
   }
 
   /* Ocultar texto de tab en móvil muy pequeño */
   @media (max-width: 480px) {
-    .flex-1.md\\:flex-none span {
+    .flex-1[class*="md:"] span {
       display: none !important;
     }
   }
@@ -84,8 +83,8 @@
   }
 
   /* Padding content area */
-  .flex-1.overflow-y-auto.px-4.sm\\:px-6.pb-24 {
-    padding-bottom: 80px !important; /* espacio para bottom nav */
+  [class*="overflow-y-auto"][class*="px-"] {
+    padding-bottom: 80px !important;
   }
 }
 
@@ -147,7 +146,7 @@
 
 @media (max-width: 768px) {
   /* Kanban: mostrar columnas más estrechas en carousel horizontal */
-  .min-w-\\[280px\\].w-\\[280px\\] {
+  [class*="min-w-"][class*="280"] {
     min-width: 85vw !important;
     width: 85vw !important;
     margin: 0 6px !important;
@@ -173,13 +172,13 @@
   }
 
   /* Fecha selector más compacto */
-  .px-4.py-2.font-bold.text-text-main.hover\\:text-accent.min-w-\\[200px\\] {
+  [class*="min-w-"][class*="200"] {
     min-width: auto !important;
     font-size: 14px !important;
   }
 
   /* Mini calendario: centrado y full width */
-  .absolute.top-full.left-1\\/2 {
+  .absolute.top-full {
     left: 0 !important;
     transform: none !important;
     width: 100vw !important;
@@ -223,7 +222,7 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .min-w-\\[280px\\].w-\\[280px\\] {
+  [class*="min-w-"][class*="280"] {
     scroll-snap-align: start;
   }
 
