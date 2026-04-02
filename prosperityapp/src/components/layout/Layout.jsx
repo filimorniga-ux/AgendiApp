@@ -1,6 +1,6 @@
-// ===== INICIO: src/components/layout/Layout.jsx =====
+// ===== INICIO: src/components/layout/Layout.jsx (collapsible sidebar) =====
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import BottomNavigationBar from './BottomNavigationBar';
 import { useData } from '../../context/DataContext';
@@ -16,8 +16,24 @@ const GlobalLoader = () => (
 
 const Layout = () => {
   const { isLoading } = useData();
+  const location = useLocation();
+
+  // ── Mobile drawer state ──────────────────────────────────────────────────
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  // ── Desktop collapsed state (persisted in localStorage) ─────────────────
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return localStorage.getItem('sidebar_collapsed') === 'true'; } catch { return false; }
+  });
+
+  const toggleCollapsed = () => {
+    setCollapsed(prev => {
+      const next = !prev;
+      try { localStorage.setItem('sidebar_collapsed', String(next)); } catch {}
+      return next;
+    });
+  };
 
   // Detect mobile breakpoint
   useEffect(() => {
@@ -28,12 +44,12 @@ const Layout = () => {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  // Close sidebar on route change (mobile)
+  // Close mobile drawer on route change
   useEffect(() => {
     setSidebarOpen(false);
   }, [location?.pathname]);
 
-  // Prevent body scroll when sidebar/overlay open on mobile
+  // Prevent body scroll when mobile drawer is open
   useEffect(() => {
     if (isMobile && sidebarOpen) {
       document.body.style.overflow = 'hidden';
@@ -43,15 +59,15 @@ const Layout = () => {
     return () => { document.body.style.overflow = ''; };
   }, [isMobile, sidebarOpen]);
 
+  // Desktop sidebar width: 256px expanded, 72px collapsed (icons only)
+  const desktopSidebarWidth = collapsed ? '72px' : '256px';
+
   return (
     <div
       id="app"
-      className="grid h-screen bg-bg-main text-text-main"
-      style={{
-        gridTemplateColumns: isMobile ? '1fr' : 'auto 1fr',
-      }}
+      className="flex h-screen bg-bg-main text-text-main overflow-hidden"
     >
-      {/* ── Sidebar overlay (mobile) ── */}
+      {/* ── Mobile overlay ──────────────────────────────────────────────── */}
       {isMobile && (
         <div
           className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}
@@ -60,30 +76,49 @@ const Layout = () => {
         />
       )}
 
-      {/* ── Sidebar ── */}
-      <div
-        id="sidebar"
-        className={sidebarOpen ? 'open' : ''}
-        style={isMobile ? {
-          position: 'fixed',
-          top: 0,
-          left: sidebarOpen ? 0 : '-280px',
-          width: '280px',
-          height: '100%',
-          zIndex: 50,
-          transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        } : {}}
-      >
-        <Sidebar onClose={() => setSidebarOpen(false)} isMobile={isMobile} />
-      </div>
+      {/* ── Sidebar ─────────────────────────────────────────────────────── */}
+      {isMobile ? (
+        /* Mobile: slide-in drawer */
+        <div
+          id="sidebar"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: sidebarOpen ? 0 : '-280px',
+            width: '280px',
+            height: '100%',
+            zIndex: 50,
+            transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+        >
+          <Sidebar
+            collapsed={false}
+            onToggleCollapse={() => {}}
+            onClose={() => setSidebarOpen(false)}
+            isMobile={true}
+          />
+        </div>
+      ) : (
+        /* Desktop: collapsible sidebar */
+        <div
+          id="sidebar"
+          style={{
+            width: desktopSidebarWidth,
+            flexShrink: 0,
+            transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+            overflow: 'hidden',
+          }}
+        >
+          <Sidebar
+            collapsed={collapsed}
+            onToggleCollapse={toggleCollapsed}
+            isMobile={false}
+          />
+        </div>
+      )}
 
-      {/* ── Main content ── */}
-      <main
-        className="flex flex-col overflow-hidden"
-        style={{
-          padding: isMobile ? '0' : undefined,
-        }}
-      >
+      {/* ── Main content ────────────────────────────────────────────────── */}
+      <main className="flex flex-col flex-1 overflow-hidden min-w-0">
         {/* Mobile top bar with hamburger */}
         {isMobile && (
           <div className="mobile-topbar">
@@ -92,12 +127,7 @@ const Layout = () => {
               onClick={() => setSidebarOpen(true)}
               aria-label="Abrir menú"
               aria-expanded={sidebarOpen}
-              style={{
-                position: 'relative',
-                top: 'auto',
-                left: 'auto',
-                display: 'flex',
-              }}
+              style={{ position: 'relative', top: 'auto', left: 'auto', display: 'flex' }}
             >
               <Menu size={20} />
             </button>
@@ -108,14 +138,14 @@ const Layout = () => {
           id="main-content"
           className="flex-1 overflow-y-auto"
           style={{
-            padding: isMobile ? '0 16px 16px' : '1.5rem 2rem 2.5rem',
+            padding: isMobile ? '0 16px 80px' : '1.5rem 2rem 2.5rem',
           }}
         >
           {isLoading ? <GlobalLoader /> : <Outlet />}
         </div>
       </main>
 
-      {/* ── Bottom Navigation (mobile only) ── */}
+      {/* ── Bottom Navigation (mobile only) ─────────────────────────────── */}
       <BottomNavigationBar />
     </div>
   );

@@ -25,12 +25,12 @@ const ConfiguracionPage = () => {
   });
   const [pinError, setPinError] = useState('');
 
-  const settings = useMemo(() => (config && config.find(c => c.id === 'settings')) || {
+  const settings = useMemo(() => config?.[0] || {
     taxGeneral: 19,
     partners: [],
     theme: 'dark',
     brandName: 'Gema',
-    logoUrl: 'https://placehold.co/40x40/2d3748/f6e05e?text=G',
+    logoUrl: null,
     taxOverrides: {},
     salesCommissionGeneral: 10,
     securityPin: '1234'
@@ -137,7 +137,8 @@ const ConfiguracionPage = () => {
     }
     try {
       if (!businessId) throw new Error('Business ID no disponible');
-      const { error } = await sbUpdate('config', businessId, dataToSave);
+      const rowId = settings?.id || businessId;
+      const { error } = await sbUpdate('config', rowId, dataToSave);
       if (error) throw error;
       toast.success(t('common.success'));
     } catch (error) {

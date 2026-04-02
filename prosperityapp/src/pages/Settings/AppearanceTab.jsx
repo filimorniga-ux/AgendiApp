@@ -21,7 +21,8 @@ const AppearanceTab = () => {
         if (currentCountry) {
             setSelectedCountryCode(currentCountry.code);
         }
-        const settings = config?.find(c => c.id === 'settings');
+        // config[0] es el único row de settings por business
+        const settings = config?.[0];
         if (settings?.logoUrl) {
             setLogoUrl(settings.logoUrl);
         }
@@ -43,8 +44,10 @@ const AppearanceTab = () => {
             const url = await uploadFile(file, 'branding/logo');
             setLogoUrl(url);
 
-            if (businessId) {
-              await sbUpdate('config', businessId, { logoUrl: url });
+            // Usar el id real del row (que es el businessId UUID)
+            const settingsRowId = config?.[0]?.id || businessId;
+            if (settingsRowId) {
+              await sbUpdate('config', settingsRowId, { logoUrl: url });
             }
 
             toast.success("Logo actualizado correctamente");
