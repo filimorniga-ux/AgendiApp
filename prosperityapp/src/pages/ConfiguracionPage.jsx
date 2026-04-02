@@ -7,6 +7,7 @@ import { handleSeedDatabase } from '../firebase/seedDatabase';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import AppearanceTab from './Settings/AppearanceTab';
+import TicketEditorTab from './Settings/TicketEditorTab';
 import { useStorage } from '../hooks/useStorage';
 
 const ConfiguracionPage = () => {
@@ -131,6 +132,8 @@ const ConfiguracionPage = () => {
         email: formData.email,
         phone: formData.phone
       };
+    } else if (tabKey === 'ticket') {
+      dataToSave = { ticketConfig: formData.ticketConfig };
     }
     try {
       if (!businessId) throw new Error('Business ID no disponible');
@@ -186,6 +189,7 @@ const ConfiguracionPage = () => {
   const settingsTabs = [
     { id: 'appearance', icon: 'pen-tool', label: t('settings.tabs.appearance') },
     { id: 'company', icon: 'briefcase', label: t('settings.tabs.company') },
+    { id: 'ticket', icon: 'file-text', label: 'Ticket de Venta' },
     { id: 'accounting', icon: 'dollar-sign', label: t('settings.tabs.accounting') },
     { id: 'security', icon: 'lock', label: t('settings.tabs.security') },
     { id: 'maintenance', icon: 'database', label: t('settings.tabs.maintenance') },
@@ -231,6 +235,15 @@ const ConfiguracionPage = () => {
           {/* --- APARIENCIA --- */}
           <div className={`space-y-8 ${activeTab === 'appearance' ? '' : 'hidden'}`}>
             <AppearanceTab />
+          </div>
+
+          {/* --- TICKET DE VENTA --- */}
+          <div className={`space-y-6 ${activeTab === 'ticket' ? '' : 'hidden'}`}>
+            <div className="flex flex-col gap-1 mb-2">
+              <h3 className="text-xl font-bold text-text-main">Editor de Ticket de Venta</h3>
+              <p className="text-sm text-text-muted">Personaliza qué información aparece en el ticket que recibe el cliente al pagar.</p>
+            </div>
+            <TicketEditorTab />
           </div>
 
           {/* --- INFORMACIÓN DE EMPRESA --- */}

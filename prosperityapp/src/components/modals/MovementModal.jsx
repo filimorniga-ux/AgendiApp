@@ -12,9 +12,7 @@ import SalesCommissionModal from './SalesCommissionModal';
 import { useTranslation } from 'react-i18next';
 import CurrencyInput from '../ui/CurrencyInput';
 import { useStorage } from '../../hooks/useStorage';
-import { useReactToPrint } from 'react-to-print';
-import TicketTemplate from '../reports/TicketTemplate';
-import PrintPreviewModal from './PrintPreviewModal';
+import PaymentSuccessModal from './PaymentSuccessModal';
 import Swal from 'sweetalert2';
 import { BarcodeScanner } from '../barcode/BarcodeScanner';
 import { BarcodeScannerButton } from '../barcode/BarcodeScannerButton';
@@ -46,9 +44,11 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
   const [isTechModalOpen, setIsTechModalOpen] = useState(false);
   const [isCommissionModalOpen, setIsCommissionModalOpen] = useState(false);
   const [currentItemCartId, setCurrentItemCartId] = useState(null);
+
+  // Payment success modal
+  const [isPaymentSuccessOpen, setIsPaymentSuccessOpen] = useState(false);
   const [ticketData, setTicketData] = useState(null);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const ticketRef = React.useRef();
+  const [voucherData, setVoucherData] = useState([]);
 
   // ── Barcode scanner state ──────────────────────────────────────────────
   const [scannerActive, setScannerActive] = useState(false);
@@ -91,20 +91,25 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
     }
   }, [lookup, lookupLoading, cart, t]);
 
-  const handlePrintTicket = useReactToPrint({
-    contentRef: ticketRef,
-    documentTitle: `Ticket_${new Date().toISOString()}`,
-    onAfterPrint: () => {
-      setTicketData(null);
-      // handleClose is called in handleConfirmPrint or onClose of preview
+  // Calcular número de ticket diario para un colaborador
+  // = cantidad de transactionIds distintos hoy para ese collaborator_id + 1
+  const getDailyTicketNumber = async (collaboratorId) => {
+    const todayISO = new Date().toISOString().split('T')[0];
+    try {
+      const { data } = await supabase
+        .from('movements')
+        .select('transaction_id')
+        .eq('business_id', businessId)
+        .eq('collaborator_id', collaboratorId)
+        .eq('date', todayISO)
+        .in('type', ['Servicio', 'Venta']);
+      if (!data) return 1;
+      const unique = new Set(data.map(r => r.transaction_id));
+      return unique.size + 1; // +1 porque esta transacción ya fue insertada
+    } catch {
+      return 1;
     }
-  });
-
-  useEffect(() => {
-    if (ticketData) {
-      handlePrintTicket();
-    }
-  }, [ticketData]);
+  };
 
   // UI States
   const [showManualService, setShowManualService] = useState(false);
@@ -660,18 +665,53 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
 
       toast.success(isEditMode ? t('modals.buttons.updateChanges') : t('modals.buttons.successRegister'));
 
-      // Abrir vista previa del ticket
-      setTicketData({
+      // ── Preparar datos para el modal de éxito de pago ──────────────────
+      const clientLabel = selectedClient ? selectedClient.name : t('modals.forms.occasionalClient');
+
+      // Ticket del cliente (todos los ítems visibles)
+      const newTicketData = {
         items: cart.map(item => ({
           description: item.description,
           amount: item.amount,
           type: item.type,
-          collaboratorName: item.collaboratorName
+          collaboratorName: item.collaboratorName,
         })),
         total: cart.reduce((sum, item) => sum + item.amount, 0),
-        paymentMethod: paymentMethod
-      });
-      setIsPreviewOpen(true);
+        paymentMethod,
+        client: clientLabel,
+        date: new Date(),
+      };
+
+      // Agrupar ítems por colaborador (solo Servicio y Venta)
+      const collabMap = {};
+      for (const item of cart) {
+        if (!['Servicio', 'Venta'].includes(item.type)) continue;
+        if (!item.collaboratorId) continue;
+        if (!collabMap[item.collaboratorId]) {
+          collabMap[item.collaboratorId] = {
+            collaboratorId: item.collaboratorId,
+            collaboratorName: item.collaboratorName,
+            items: [],
+          };
+        }
+        collabMap[item.collaboratorId].items.push({
+          description: item.description,
+          amount: item.amount,
+          type: item.type,
+        });
+      }
+
+      // Calcular número de ticket del día para cada colaborador
+      const vouchers = await Promise.all(
+        Object.values(collabMap).map(async (v) => ({
+          ...v,
+          ticketNumber: await getDailyTicketNumber(v.collaboratorId),
+        }))
+      );
+
+      setTicketData(newTicketData);
+      setVoucherData(vouchers);
+      setIsPaymentSuccessOpen(true);
 
     } catch (error) {
       console.warn('Error saving operation:', error);
@@ -681,16 +721,10 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
     }
   };
 
-  const handleConfirmPrint = async () => {
-    setIsPreviewOpen(false);
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile && navigator.share) {
-      alert('En dispositivos móviles, usa el menú de compartir de tu navegador para guardar como PDF o imprimir');
-    }
-
-    handlePrintTicket();
+  const handlePaymentSuccessClose = () => {
+    setIsPaymentSuccessOpen(false);
+    setTicketData(null);
+    setVoucherData([]);
     handleClose();
   };
 
@@ -1165,31 +1199,19 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
         />
       )}
 
-      {/* Print Preview Modal */}
-      <PrintPreviewModal
-        isOpen={isPreviewOpen}
-        onClose={() => { setIsPreviewOpen(false); handleClose(); }}
-        onPrint={handleConfirmPrint}
-        title={t('modals.confirmPrintTicket')}
-      >
-        <div className="flex justify-center">
-          {/* Render TicketTemplate visible for preview */}
-          <div className="border border-gray-300 shadow-sm p-4 bg-white text-black w-[80mm]">
-            <TicketTemplate data={ticketData} />
-          </div>
-        </div>
-      </PrintPreviewModal>
-
-      {/* Hidden Ticket Template for React-to-Print */}
-      <div style={{ display: 'none' }}>
-        {ticketData && (
-          <TicketTemplate
-            ref={ticketRef}
-            data={ticketData}
-            config={config}
-          />
-        )}
-      </div>
+      {/* Payment Success Modal — ticket cliente + comprobantes colaboradores */}
+      <PaymentSuccessModal
+        isOpen={isPaymentSuccessOpen}
+        onClose={handlePaymentSuccessClose}
+        ticketData={ticketData}
+        voucherData={voucherData}
+        config={config}
+        businessInfo={{
+          businessName: settings.businessName || settings.brandName,
+          logoUrl: settings.logoUrl,
+          ticketWidth: settings.ticketConfig?.ticketWidth || '80mm',
+        }}
+      />
     </>
   );
 };
