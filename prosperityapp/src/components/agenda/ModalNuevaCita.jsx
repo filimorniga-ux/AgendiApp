@@ -75,13 +75,13 @@ const ModalNuevaCita = ({ isOpen, onClose, slotInfo }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-end sm:items-center">
-      <div className="bg-secondary p-5 rounded-t-[20px] sm:rounded-lg shadow-xl w-full sm:max-w-md z-50 text-text-main max-h-[92dvh] overflow-y-auto">
+      <div className="bg-bg-secondary p-5 rounded-t-[20px] sm:rounded-lg shadow-xl w-full sm:max-w-md z-50 text-text-main max-h-[92dvh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Crear Nueva Cita</h2>
           <button onClick={onClose} className="text-text-main hover:text-accent text-2xl">&times;</button>
         </div>
 
-        <div className="bg-main p-3 rounded-md mb-6 text-sm">
+        <div className="bg-bg-main p-3 rounded-md mb-6 text-sm">
           <p><span className="font-semibold">Colaborador:</span> {slotInfo.collaborator.name}</p>
           <p><span className="font-semibold">Hora de inicio:</span> {slotInfo.time}</p>
         </div>
@@ -108,7 +108,7 @@ const ModalNuevaCita = ({ isOpen, onClose, slotInfo }) => {
           </div>
 
           <div className="flex justify-end gap-4">
-            <button type="button" onClick={onClose} className="px-4 py-2 bg-tertiary text-text-main rounded-md hover:bg-opacity-80" disabled={isSaving}>
+            <button type="button" onClick={onClose} className="px-4 py-2 bg-bg-tertiary text-text-main rounded-md hover:opacity-80" disabled={isSaving}>
               Cancelar
             </button>
             <button type="submit" className="px-4 py-2 bg-accent text-accent-text font-semibold rounded-md hover:bg-opacity-90" disabled={isSaving}>

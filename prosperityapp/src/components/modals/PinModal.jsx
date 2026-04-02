@@ -30,10 +30,10 @@ const PinModal = ({ isOpen, onClose, onSuccess }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 modal-backdrop">
-      <div className="bg-secondary rounded-lg shadow-xl border border-main w-full max-w-sm modal-content">
-        <div className="p-4 border-b border-main flex justify-between items-center">
-          <h3 className="text-xl font-bold text-white">Requiere Autorización</h3>
-          <button onClick={onClose} className="text-text-main/70 hover:text-white text-3xl leading-none">&times;</button>
+      <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-sm modal-content">
+        <div className="p-4 border-b border-border-main flex justify-between items-center">
+          <h3 className="text-xl font-bold text-text-main">Requiere Autorización</h3>
+          <button onClick={onClose} className="text-text-muted hover:text-text-main text-3xl leading-none">&times;</button>
         </div>
         <form onSubmit={handleSubmit} className="p-6">
           <label htmlFor="pin-input" className="block mb-2 font-semibold">PIN de Administrador</label>
@@ -42,7 +42,7 @@ const PinModal = ({ isOpen, onClose, onSuccess }) => {
             type="password"
             value={pin}
             onChange={(e) => setPin(e.target.value)}
-            className="w-full bg-tertiary border border-border-main rounded p-2 text-center text-2xl tracking-widest"
+            className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-center text-2xl tracking-widest text-text-main"
             maxLength={4}
             autoFocus
           />

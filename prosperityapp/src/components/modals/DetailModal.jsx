@@ -15,10 +15,10 @@ const DetailModal = ({ isOpen, onClose, title, items = [] }) => {
   const total = items.reduce((sum, item) => sum + (item.amount || 0), 0);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 modal-backdrop">
-      <div className="bg-secondary rounded-lg shadow-xl border border-main w-full max-w-lg modal-content flex flex-col max-h-[80vh]">
-        <div className="p-4 border-b border-main flex justify-between items-center">
-          <h3 className="text-xl font-bold text-white">{title}</h3>
-          <button onClick={onClose} className="text-text-main/70 hover:text-white text-3xl leading-none">&times;</button>
+      <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-lg modal-content flex flex-col max-h-[80vh]">
+        <div className="p-4 border-b border-border-main flex justify-between items-center">
+          <h3 className="text-xl font-bold text-text-main">{title}</h3>
+          <button onClick={onClose} className="text-text-muted hover:text-text-main text-3xl leading-none">&times;</button>
         </div>
         <div className="p-4 overflow-y-auto flex-grow">
           <ul className="space-y-2">
@@ -26,10 +26,10 @@ const DetailModal = ({ isOpen, onClose, title, items = [] }) => {
               <li className="text-center text-text-main/70 p-4">No hay movimientos para mostrar.</li>
             )}
             {items.map((item, index) => (
-              <li key={item.id || index} className="p-3 bg-main/50 rounded-md">
+              <li key={item.id || index} className="p-3 bg-bg-main/50 rounded-md">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-white">{item.description}</p>
+                    <p className="text-text-main">{item.description}</p>
                     {item.date && (
                       <p className="text-xs text-text-main/70">
                         {new Date(item.date?.toDate()).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' })}
@@ -53,8 +53,8 @@ const DetailModal = ({ isOpen, onClose, title, items = [] }) => {
             ))}
           </ul>
         </div>
-        <div className="p-4 border-t border-main bg-main/50 rounded-b-lg flex justify-end items-center">
-          <span className="text-lg font-bold text-white">Total: {formatCurrency(total)}</span>
+        <div className="p-4 border-t border-border-main bg-bg-main/50 rounded-b-lg flex justify-end items-center">
+          <span className="text-lg font-bold text-text-main">Total: {formatCurrency(total)}</span>
         </div>
       </div>
     </div>

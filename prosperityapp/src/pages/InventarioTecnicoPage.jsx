@@ -118,7 +118,7 @@ const InventarioTecnicoPage = () => {
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h2 className="text-3xl font-bold text-white">Inventario Técnico</h2>
+          <h2 className="text-3xl font-bold text-text-main">Inventario Técnico</h2>
           <p className="text-text-main/70">Gestiona los productos de uso interno (costos).</p>
         </div>
         <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ const InventarioTecnicoPage = () => {
             <tbody>
               {(items || []).map(p => (
                 <tr key={p.id} className="border-b border-border-main text-sm hover:bg-tertiary/50">
-                  <td className="p-3 text-white font-semibold">{p.name}</td>
+                  <td className="p-3 text-text-main font-semibold">{p.name}</td>
                   <td className="p-3">{p.brand}</td>
                   <td className="p-3 text-right font-bold">{p.stockUnits}</td>
                   <td className="p-3 text-right">{p.sellMode === 'whole' ? 'Unidad' : `${p.unitSize} ${p.unitOfMeasure}`}</td>
@@ -195,7 +195,7 @@ const InventarioTecnicoPage = () => {
                   </td>
                   <td className="p-3 text-right text-yellow-400">{formatCurrency(p.facturaCost)}</td>
                   <td className="p-3 text-right text-cyan-400">{formatCurrency(p.collabCost)}</td>
-                  <td className="p-3 text-right font-semibold text-white">{formatCurrency(p.totalStockValue)}</td>
+                  <td className="p-3 text-right font-semibold text-text-main">{formatCurrency(p.totalStockValue)}</td>
                   <td className="p-3 text-right font-semibold text-accent">
                     {p.sellMode === 'whole'
                       ? formatCurrency(p.collabCost)

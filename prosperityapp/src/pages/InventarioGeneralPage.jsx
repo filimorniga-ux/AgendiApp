@@ -51,7 +51,7 @@ const InventarioGeneralPage = () => {
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h2 className="text-3xl font-bold text-white">Inventario General</h2>
+          <h2 className="text-3xl font-bold text-text-main">Inventario General</h2>
           <p className="text-text-main/70">Vista general de existencias y valorización.</p>
         </div>
         <div className="bg-secondary p-4 rounded-lg border border-border-main">
@@ -64,13 +64,13 @@ const InventarioGeneralPage = () => {
         <div className="flex rounded-md bg-main/50 p-1">
           <button 
             onClick={() => setActiveTab('technical')}
-            className={`px-4 py-2 text-sm font-semibold rounded ${activeTab === 'technical' ? 'bg-accent text-accent-text' : 'text-text-main/70 hover:text-white'}`}
+            className={`px-4 py-2 text-sm font-semibold rounded ${activeTab === 'technical' ? 'bg-accent text-accent-text' : 'text-text-main/70 hover:text-text-main'}`}
           >
             Inventario Técnico
           </button>
           <button 
             onClick={() => setActiveTab('retail')}
-            className={`px-4 py-2 text-sm font-semibold rounded ${activeTab === 'retail' ? 'bg-accent text-accent-text' : 'text-text-main/70 hover:text-white'}`}
+            className={`px-4 py-2 text-sm font-semibold rounded ${activeTab === 'retail' ? 'bg-accent text-accent-text' : 'text-text-main/70 hover:text-text-main'}`}
           >
             Inventario Retail (Venta)
           </button>
@@ -92,7 +92,7 @@ const InventarioGeneralPage = () => {
         ) : (
           categories.map(([categoryName, data]) => (
             <details key={categoryName} className="bg-secondary rounded-lg border border-border-main" open>
-              <summary className="p-4 font-semibold text-lg cursor-pointer flex justify-between text-white hover:bg-tertiary/50">
+              <summary className="p-4 font-semibold text-lg cursor-pointer flex justify-between text-text-main hover:bg-bg-tertiary/50">
                 <span>{categoryName} <span className="text-sm text-text-main/70">({data.totalStock} items)</span></span>
                 <span className="text-accent">{formatCurrency(data.totalValue)}</span>
               </summary>

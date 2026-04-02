@@ -1,12 +1,11 @@
-// ===== INICIO: src/components/layout/Sidebar.jsx (collapsible + live logo) =====
+// ===== INICIO: src/components/layout/Sidebar.jsx (collapsible + live logo + collaborator mode) =====
 import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import feather from 'feather-icons';
 import { ThemeContext } from '../../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useData } from '../../context/DataContext';
-import { auth } from '../../firebase/config';
-import { signOut } from 'firebase/auth';
+import { useBusiness } from '../../context/BusinessContext';
 import toast from 'react-hot-toast';
 
 // Helper para renderizar iconos de feather de forma segura
@@ -31,14 +30,19 @@ const Icon = ({ name, size = 20, className = '' }) => {
  *   isMobile           — bool
  *   onClose            — fn()   called when user closes on mobile
  */
+// Módulos solo disponibles para colaboradores
+const COLLABORATOR_MODULES = ['/app', '/app/nomina', '/app/precios'];
+
 const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClose }) => {
   const { toggleTheme, isDark } = useContext(ThemeContext);
   const { t, i18n } = useTranslation();
   const { userRole, config } = useData();
+  const { realRole, signOutAll } = useBusiness();
   const navigate = useNavigate();
 
+  const isCollaborator = realRole === 'collaborator';
+
   // ── Logo y nombre del negocio (reactivo al config del contexto) ──────────
-  // La tabla config tiene 1 sola fila por business; su id es el businessId UUID
   const settings = config?.[0] || {};
   const brandName = settings.brandName || settings.businessName || 'AgendiApp';
   const logoUrl = settings.logoUrl || null;
@@ -65,6 +69,8 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
   const restrictedPaths = ['/nomina', '/inventario', '/caja', '/colaboradores', '/cierres', '/precios', '/giftcards'];
 
   const modulesData = allModules.filter(module => {
+    // Modo colaborador: solo ve 3 módulos
+    if (isCollaborator) return COLLABORATOR_MODULES.includes(module.to);
     if (adminRoles.includes(userRole)) return true;
     return !restrictedPaths.some(path => module.to.includes(path));
   });
@@ -73,7 +79,7 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await signOutAll();
       toast.success(t('common.logoutSuccess') || 'Sesión cerrada correctamente');
       window.location.href = '/';
     } catch (error) {

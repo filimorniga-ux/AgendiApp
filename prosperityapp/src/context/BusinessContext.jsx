@@ -1,7 +1,8 @@
 /**
  * BusinessContext + BusinessProvider
  *
- * Capa externa: maneja Firebase Auth y resuelve businessId desde Supabase.
+ * Capa externa: maneja Firebase Auth (dueños/admins) Y Supabase Auth (colaboradores).
+ * Resuelve businessId y realRole para todos los tipos de usuario.
  * Debe envolver DataProvider en App.jsx para que useSupabaseCollection
  * pueda leer businessId sin dependencia circular.
  */
@@ -14,17 +15,29 @@ const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
 const DEV_USER   = DEV_BYPASS ? { uid: 'filimorniga-uid-placeholder', email: 'dev@local.dev' } : null;
 
 export const BusinessContext = createContext({
-  businessId:  null,
-  user:        null,
-  realRole:    null,
-  loadingAuth: true,
+  businessId:    null,
+  user:          null,
+  supabaseUser:  null,
+  realRole:      null,
+  loadingAuth:   true,
+  signOutAll:    async () => {},
 });
 
 export const BusinessProvider = ({ children }) => {
-  const [user,        setUser]        = useState(null);
-  const [realRole,    setRealRole]    = useState(null);
-  const [loadingAuth, setLoadingAuth] = useState(true);
-  const [businessId,  setBusinessId]  = useState(null);
+  const [user,         setUser]         = useState(null);
+  const [supabaseUser, setSupabaseUser] = useState(null);
+  const [realRole,     setRealRole]     = useState(null);
+  const [loadingAuth,  setLoadingAuth]  = useState(true);
+  const [businessId,   setBusinessId]   = useState(null);
+
+  const signOutAll = async () => {
+    await supabase.auth.signOut().catch(() => {});
+    await auth.signOut().catch(() => {});
+    setUser(null);
+    setSupabaseUser(null);
+    setRealRole(null);
+    setBusinessId(null);
+  };
 
   React.useEffect(() => {
     // ── Modo bypass: sin Firebase Auth ────────────────────────────
@@ -55,8 +68,50 @@ export const BusinessProvider = ({ children }) => {
       return;
     }
 
-    // ── Flujo normal con Firebase Auth ────────────────────────────
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    let firebaseResolved = false;
+    let supabaseResolved = false;
+    let setLoadingDone   = false;
+
+    const trySetLoadingDone = () => {
+      if (firebaseResolved && supabaseResolved && !setLoadingDone) {
+        setLoadingDone = true;
+        setLoadingAuth(false);
+      }
+    };
+
+    // ── Supabase Auth listener (colaboradores) ─────────────────────
+    const { data: { subscription: sbSub } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        const sbUser = session?.user ?? null;
+        setSupabaseUser(sbUser);
+
+        if (sbUser) {
+          // Look up this Supabase user in the collaborators table
+          const { data: collab } = await supabase
+            .from('collaborators')
+            .select('id, business_id')
+            .eq('auth_user_id', sbUser.id)
+            .maybeSingle();
+
+          if (collab?.business_id) {
+            setRealRole('collaborator');
+            setBusinessId(collab.business_id);
+            // Set RLS app.business_id for collaborator
+            await supabase.rpc('set_config', {
+              setting: 'app.business_id',
+              value: collab.business_id,
+              is_local: false,
+            }).catch(console.warn);
+          }
+        }
+
+        supabaseResolved = true;
+        trySetLoadingDone();
+      }
+    );
+
+    // ── Firebase Auth listener (dueños / admins) ───────────────────
+    const unsubscribeFirebase = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
 
       if (currentUser) {
@@ -105,18 +160,28 @@ export const BusinessProvider = ({ children }) => {
           console.warn('[BusinessProvider] Supabase user error:', err);
         }
       } else {
-        setRealRole(null);
-        setBusinessId(null);
+        // Only clear Firebase-specific state; collaborator Supabase session is independent
+        setUser(null);
+        // If there's no Supabase session either, clear everything
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          setRealRole(null);
+          setBusinessId(null);
+        }
       }
 
-      setLoadingAuth(false);
+      firebaseResolved = true;
+      trySetLoadingDone();
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeFirebase();
+      sbSub.unsubscribe();
+    };
   }, []);
 
   return (
-    <BusinessContext.Provider value={{ businessId, user, realRole, loadingAuth }}>
+    <BusinessContext.Provider value={{ businessId, user, supabaseUser, realRole, loadingAuth, signOutAll }}>
       {children}
     </BusinessContext.Provider>
   );
