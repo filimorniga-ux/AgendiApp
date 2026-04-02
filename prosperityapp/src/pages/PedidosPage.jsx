@@ -345,26 +345,28 @@ const PedidosPage = () => {
 
     return (
         <div className="h-full flex flex-col">
-            <div className="flex justify-between items-center mb-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
                 <div>
-                    <h2 className="text-3xl font-bold text-text-main">{t('orders.title')}</h2>
-                    <p className="text-text-muted">{t('orders.subtitle')}</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-text-main">{t('orders.title')}</h2>
+                    <p className="text-text-muted text-sm">{t('orders.subtitle')}</p>
                 </div>
             </div>
 
-            <div className="flex flex-wrap gap-4 mb-6 bg-bg-secondary p-4 rounded-lg border border-border-main">
-                <div className="flex rounded-md bg-bg-main/50 p-1">
-                    <button onClick={() => setActiveTab('suppliers')} className={`px-4 py-2 text-sm font-semibold rounded ${activeTab === 'suppliers' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}>{t('orders.tabs.suppliers')}</button>
-                    <button onClick={() => setActiveTab('invoices')} className={`px-4 py-2 text-sm font-semibold rounded ${activeTab === 'invoices' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}>{t('orders.tabs.invoices')}</button>
-                    <button onClick={() => setActiveTab('debts')} className={`px-4 py-2 text-sm font-semibold rounded ${activeTab === 'debts' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}>{t('orders.tabs.debts')}</button>
+            {/* Tab bar + Add button */}
+            <div className="flex items-center gap-2 mb-4 bg-bg-secondary px-3 py-2 rounded-lg border border-border-main overflow-x-auto">
+                <div className="flex rounded-md bg-bg-main/50 p-1 min-w-max">
+                    <button onClick={() => setActiveTab('suppliers')} className={`px-3 py-2 text-xs sm:text-sm font-semibold rounded whitespace-nowrap ${activeTab === 'suppliers' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}>{t('orders.tabs.suppliers')}</button>
+                    <button onClick={() => setActiveTab('invoices')} className={`px-3 py-2 text-xs sm:text-sm font-semibold rounded whitespace-nowrap ${activeTab === 'invoices' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}>{t('orders.tabs.invoices')}</button>
+                    <button onClick={() => setActiveTab('debts')} className={`px-3 py-2 text-xs sm:text-sm font-semibold rounded whitespace-nowrap ${activeTab === 'debts' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}>{t('orders.tabs.debts')}</button>
                 </div>
-                <button onClick={() => openModal(activeTab === 'suppliers' ? 'supplier' : activeTab === 'invoices' ? 'invoice' : 'debt')} className="btn-golden ml-auto flex items-center gap-2">
+                <button onClick={() => openModal(activeTab === 'suppliers' ? 'supplier' : activeTab === 'invoices' ? 'invoice' : 'debt')} className="btn-golden ml-auto flex items-center gap-2 flex-shrink-0">
                     <i data-feather="plus" className="w-4 h-4"></i>
-                    <span>{activeTab === 'suppliers' ? t('orders.suppliers.addBtn') : activeTab === 'invoices' ? t('orders.invoices.uploadBtn') : t('orders.debts.addBtn')}</span>
+                    <span className="hidden sm:inline">{activeTab === 'suppliers' ? t('orders.suppliers.addBtn') : activeTab === 'invoices' ? t('orders.invoices.uploadBtn') : t('orders.debts.addBtn')}</span>
                 </button>
             </div>
 
-            <div className="flex-grow overflow-y-auto pr-2">
+            <div className="flex-grow overflow-y-auto pb-24 sm:pb-4">
                 {activeTab === 'suppliers' && renderSuppliers()}
                 {activeTab === 'invoices' && renderInvoices()}
                 {activeTab === 'debts' && renderDebts()}
@@ -372,8 +374,8 @@ const PedidosPage = () => {
 
             {/* --- MODALS --- */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 modal-backdrop">
-                    <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-md modal-content p-6 max-h-[90vh] overflow-y-auto">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-70 modal-backdrop">
+                    <div className="bg-bg-secondary rounded-t-2xl sm:rounded-lg shadow-xl border border-border-main w-full sm:max-w-md modal-content p-5 max-h-[90vh] overflow-y-auto">
                         <h3 className="text-xl font-bold text-text-main mb-4">
                             {modalType === 'supplier' ? t('orders.suppliers.addBtn') :
                                 modalType === 'invoice' ? t('orders.invoices.uploadBtn') :

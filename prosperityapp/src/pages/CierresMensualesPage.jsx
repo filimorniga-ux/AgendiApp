@@ -27,7 +27,7 @@ const MonthlyColumn = ({ title, icon, records = [], categoryKey, onEdit, onDelet
   }, 0);
   const locale = 'es-CL';
   return (
-    <div className="bg-bg-secondary rounded-lg p-4 flex flex-col min-w-[380px] lg:min-w-[420px] max-h-[75vh] border border-border-main transition-all duration-300 print:min-w-0 print:max-h-none print:border-gray-300 print:bg-white print:break-inside-avoid">
+    <div className="bg-bg-secondary rounded-lg p-3 sm:p-4 flex flex-col min-w-[280px] sm:min-w-[350px] lg:min-w-[400px] max-h-[65vh] sm:max-h-[75vh] border border-border-main transition-all duration-300 print:min-w-0 print:max-h-none print:border-gray-300 print:bg-white print:break-inside-avoid">
       <h3 className="font-bold text-lg mb-1 flex items-center text-text-main">
         <i data-feather={icon} className="w-5 h-5 mr-2 text-accent"></i> {title}
       </h3>
@@ -255,33 +255,32 @@ const CierresMensualesPage = () => {
         <p className="text-sm text-gray-600">Generado: {new Date().toLocaleDateString()}</p>
       </div>
 
-      <div className="flex flex-wrap justify-between items-center mb-6 gap-4 print:hidden">
+      {/* Header responsive */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3 print:hidden">
         <div>
-          <h2 className="text-3xl font-bold text-text-main">{t('closings.title')}</h2>
-          <p className="text-text-muted">{t('closings.subtitle')}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-text-main">{t('closings.title')}</h2>
+          <p className="text-text-muted text-sm">{t('closings.subtitle')}</p>
         </div>
-        <div className="flex items-center gap-2 bg-bg-secondary p-2 rounded-lg border border-border-main print:hidden">
+        <div className="flex flex-wrap items-center gap-2 bg-bg-secondary p-2 rounded-lg border border-border-main">
           <input
             type="month"
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="bg-bg-tertiary border border-border-main rounded p-1 text-text-main focus:outline-none focus:border-accent"
+            className="bg-bg-tertiary border border-border-main rounded p-1 text-text-main text-sm focus:outline-none focus:border-accent flex-1 sm:flex-none"
           />
           <button onClick={handleOpenCreateModal} className="btn-golden flex items-center text-sm py-1 px-3">
-            <i data-feather="plus" className="w-4 h-4 mr-2"></i>
-            <span>{t('closings.addBtn')}</span>
+            <i data-feather="plus" className="w-4 h-4 mr-1"></i>
+            <span className="hidden sm:inline">{t('closings.addBtn')}</span>
           </button>
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-3 py-1 bg-bg-tertiary text-text-main border border-border-main rounded hover:bg-bg-main transition-colors"
+          <button onClick={handlePrint}
+            className="flex items-center gap-1 px-3 py-1 bg-bg-tertiary text-text-main border border-border-main rounded hover:bg-bg-main transition-colors"
             title={t('reports.printView')}
           >
             <i data-feather="printer" className="w-4 h-4"></i>
             <span className="hidden md:inline text-sm">{t('reports.printView')}</span>
           </button>
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-2 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+          <button onClick={handleExport}
+            className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
             title={t('reports.exportExcel')}
           >
             <i data-feather="download" className="w-4 h-4"></i>
@@ -297,8 +296,8 @@ const CierresMensualesPage = () => {
         </div>
       ) : (
         <>
-          <div className="flex-1 overflow-x-auto pb-4 print:overflow-visible">
-            <div className="flex space-x-4 print:grid print:grid-cols-3 print:gap-4">
+          <div className="flex-1 overflow-x-auto pb-24 sm:pb-4 print:overflow-visible">
+            <div className="flex space-x-3 print:grid print:grid-cols-3 print:gap-4">
               {Object.entries(monthlyCategories).map(([key, data]) => (
                 <MonthlyColumn
                   key={key}
@@ -313,7 +312,7 @@ const CierresMensualesPage = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 animate-fade-in">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4 animate-fade-in">
             <div className="lg:col-span-1 bg-bg-secondary p-6 rounded-lg border-2 border-accent shadow-lg flex flex-col justify-center">
               <h3 className="text-sm font-bold text-text-muted uppercase tracking-widest mb-2">{t('closings.totalToDistribute')}</h3>
               <p className="text-5xl font-extrabold text-accent mb-6">{formatCurrency(summary.totalToDistribute)}</p>

@@ -81,25 +81,28 @@ const GiftCardPage = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center mb-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
         <div>
-          <h2 className="text-3xl font-bold text-text-main">{t('giftcards.title')}</h2>
-          <p className="text-text-muted">{t('giftcards.subtitle')}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-text-main">{t('giftcards.title')}</h2>
+          <p className="text-text-muted text-sm">{t('giftcards.subtitle')}</p>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-6 bg-bg-secondary p-4 rounded-lg border border-border-main">
+      {/* Search */}
+      <div className="mb-4 bg-bg-secondary p-3 rounded-lg border border-border-main">
         <input
           type="search"
-          className="flex-grow bg-bg-tertiary border border-border-main rounded p-2 placeholder-text-muted text-text-main"
+          className="w-full bg-bg-tertiary border border-border-main rounded p-2 placeholder-text-muted text-text-main text-sm"
           placeholder={t('giftcards.searchPlaceholder')}
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <div className="flex-grow overflow-y-auto pr-2">
-        <div className="bg-bg-secondary rounded-lg border border-border-main overflow-x-auto">
+      <div className="flex-grow overflow-y-auto pb-24 sm:pb-4">
+        {/* Desktop table */}
+        <div className="hidden sm:block bg-bg-secondary rounded-lg border border-border-main overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-bg-main/50 text-xs uppercase text-text-muted">
               <tr>
@@ -205,6 +208,51 @@ const GiftCardPage = () => {
               })}
             </tbody>
           </table>
+          {filteredGiftCards && filteredGiftCards.length === 0 && (
+            <p className="text-center text-text-muted p-8">{t('giftcards.noData')}</p>
+          )}
+        </div>
+
+        {/* Mobile cards */}
+        <div className="sm:hidden space-y-3">
+          {(filteredGiftCards || []).map(gc => {
+            const isExhausted = gc.status === 'Agotada' || gc.balance <= 0;
+            const isCurrentlyUploading = uploadingCardId === gc.id;
+            return (
+              <div key={gc.id} className={`bg-bg-secondary rounded-lg border border-border-main p-3 ${isExhausted ? 'opacity-60' : ''}`}>
+                <div className="flex justify-between items-start mb-2">
+                  <span className="font-bold text-text-main text-sm">{gc.code}</span>
+                  <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${isExhausted ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'}`}>
+                    {isExhausted ? t('giftcards.status.exhausted') : t('giftcards.status.active')}
+                  </span>
+                </div>
+                <p className="text-text-secondary text-xs mb-1">{gc.buyerName}</p>
+                {gc.buyerContact && <p className="text-text-muted text-xs">{gc.buyerContact}</p>}
+                <div className="flex justify-between items-center mt-2 pt-2 border-t border-border-main/50">
+                  <div>
+                    <span className="text-xs text-text-muted">Saldo: </span>
+                    <span className={`font-bold text-sm ${isExhausted ? 'text-text-muted' : 'text-accent'}`}>{formatCurrency(gc.balance)}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <label className="cursor-pointer">
+                      <input type="file" className="hidden" onChange={(e) => handleUploadReceipt(e, gc.id, 'purchase')}
+                        accept=".pdf,.jpg,.png,.jpeg" disabled={isCurrentlyUploading} />
+                      <div className={`px-2 py-1 rounded border text-xs font-semibold ${gc.receiptUrl ? 'bg-green-500/20 border-green-500/50 text-green-300' : 'bg-bg-tertiary border-border-main text-text-muted'}`}>
+                        {isCurrentlyUploading && uploadType === 'purchase' ? `${Math.round(progress)}%` : '🧾'}
+                      </div>
+                    </label>
+                    <label className="cursor-pointer">
+                      <input type="file" className="hidden" onChange={(e) => handleUploadReceipt(e, gc.id, 'redemption')}
+                        accept=".pdf,.jpg,.png,.jpeg" disabled={isCurrentlyUploading} />
+                      <div className={`px-2 py-1 rounded border text-xs font-semibold ${gc.redemptionReceiptUrl ? 'bg-blue-500/20 border-blue-500/50 text-blue-300' : 'bg-bg-tertiary border-border-main text-text-muted'}`}>
+                        {isCurrentlyUploading && uploadType === 'redemption' ? `${Math.round(progress)}%` : '🔄'}
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
           {filteredGiftCards && filteredGiftCards.length === 0 && (
             <p className="text-center text-text-muted p-8">{t('giftcards.noData')}</p>
           )}

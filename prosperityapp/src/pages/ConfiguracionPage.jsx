@@ -183,33 +183,47 @@ const ConfiguracionPage = () => {
 
   if (isLoading) return null;
 
+  const settingsTabs = [
+    { id: 'appearance', icon: 'pen-tool', label: t('settings.tabs.appearance') },
+    { id: 'company', icon: 'briefcase', label: t('settings.tabs.company') },
+    { id: 'accounting', icon: 'dollar-sign', label: t('settings.tabs.accounting') },
+    { id: 'security', icon: 'lock', label: t('settings.tabs.security') },
+    { id: 'maintenance', icon: 'database', label: t('settings.tabs.maintenance') },
+  ];
+
   return (
     <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center mb-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
         <div>
-          <h2 className="text-3xl font-bold text-text-main">{t('settings.title')}</h2>
-          <p className="text-text-muted">{t('settings.subtitle')}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-text-main">{t('settings.title')}</h2>
+          <p className="text-text-muted text-sm">{t('settings.subtitle')}</p>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-        <div className="lg:w-1/4">
+      {/* Mobile: horizontal pill nav — Desktop: side nav */}
+      <div className="flex lg:hidden overflow-x-auto gap-1 mb-4 pb-1 border-b border-border-main">
+        {settingsTabs.map(tab => (
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors flex-shrink-0 ${activeTab === tab.id ? 'bg-accent text-accent-text' : 'bg-bg-secondary text-text-muted border border-border-main hover:bg-bg-tertiary'}`}
+          >
+            <i data-feather={tab.icon} className="w-4 h-4"></i>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 flex-1 overflow-y-auto pb-24 sm:pb-4">
+        {/* Desktop side nav */}
+        <div className="hidden lg:block lg:w-1/4">
           <nav id="settings-tabs" className="flex flex-col space-y-1">
-            <button onClick={() => setActiveTab('appearance')} className={`p-3 rounded-md text-left flex items-center gap-3 transition-colors ${activeTab === 'appearance' ? 'bg-accent text-accent-text font-bold' : 'text-text-muted hover:bg-bg-tertiary'}`}>
-              <i data-feather="pen-tool" className="w-5 h-5"></i> {t('settings.tabs.appearance')}
-            </button>
-            <button onClick={() => setActiveTab('company')} className={`p-3 rounded-md text-left flex items-center gap-3 transition-colors ${activeTab === 'company' ? 'bg-accent text-accent-text font-bold' : 'text-text-muted hover:bg-bg-tertiary'}`}>
-              <i data-feather="briefcase" className="w-5 h-5"></i> {t('settings.tabs.company')}
-            </button>
-            <button onClick={() => setActiveTab('accounting')} className={`p-3 rounded-md text-left flex items-center gap-3 transition-colors ${activeTab === 'accounting' ? 'bg-accent text-accent-text font-bold' : 'text-text-muted hover:bg-bg-tertiary'}`}>
-              <i data-feather="dollar-sign" className="w-5 h-5"></i> {t('settings.tabs.accounting')}
-            </button>
-            <button onClick={() => setActiveTab('security')} className={`p-3 rounded-md text-left flex items-center gap-3 transition-colors ${activeTab === 'security' ? 'bg-accent text-accent-text font-bold' : 'text-text-muted hover:bg-bg-tertiary'}`}>
-              <i data-feather="lock" className="w-5 h-5"></i> {t('settings.tabs.security')}
-            </button>
-            <button onClick={() => setActiveTab('maintenance')} className={`p-3 rounded-md text-left flex items-center gap-3 transition-colors ${activeTab === 'maintenance' ? 'bg-accent text-accent-text font-bold' : 'text-text-muted hover:bg-bg-tertiary'}`}>
-              <i data-feather="database" className="w-5 h-5"></i> {t('settings.tabs.maintenance')}
-            </button>
+            {settingsTabs.map(tab => (
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                className={`p-3 rounded-md text-left flex items-center gap-3 transition-colors ${activeTab === tab.id ? 'bg-accent text-accent-text font-bold' : 'text-text-muted hover:bg-bg-tertiary'}`}
+              >
+                <i data-feather={tab.icon} className="w-5 h-5"></i> {tab.label}
+              </button>
+            ))}
           </nav>
         </div>
 

@@ -390,37 +390,37 @@ const ReportsPage = () => {
   ];
 
   return (
-    <div className="p-6 h-full flex flex-col bg-bg-main text-text-main overflow-hidden print:overflow-visible print:bg-white print:text-black print:p-0">
+    <div className="p-3 sm:p-6 h-full flex flex-col bg-bg-main text-text-main overflow-hidden print:overflow-visible print:bg-white print:text-black print:p-0">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6 print:hidden">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3 print:hidden">
         <div>
-          <h1 className="text-3xl font-bold">{t('reports.title')}</h1>
-          <p className="text-text-muted">{t('reports.subtitle')}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t('reports.title')}</h1>
+          <p className="text-text-muted text-sm">{t('reports.subtitle')}</p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => setIsExportModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
             title={t('reports.fullBackup')}
           >
-            <Icon name="database" className="w-5 h-5" />
-            <span className="font-semibold hidden md:inline">{t('reports.fullBackup')}</span>
+            <Icon name="database" className="w-4 h-4" />
+            <span className="font-semibold hidden sm:inline text-sm">{t('reports.fullBackup')}</span>
           </button>
           <button
             onClick={handlePrint}
-            className="flex items-center gap-2 px-4 py-2 bg-bg-tertiary text-text-main border border-border-main rounded-lg hover:bg-bg-secondary transition-colors shadow-lg"
+            className="flex items-center gap-2 px-3 py-2 bg-bg-tertiary text-text-main border border-border-main rounded-lg hover:bg-bg-secondary transition-colors"
             title={t('reports.printView')}
           >
-            <Icon name="printer" className="w-5 h-5" />
-            <span className="font-semibold hidden md:inline">{t('reports.printView')}</span>
+            <Icon name="printer" className="w-4 h-4" />
+            <span className="font-semibold hidden sm:inline text-sm">{t('reports.printView')}</span>
           </button>
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-lg"
+            className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             title={t('reports.exportExcel')}
           >
-            <Icon name="download" className="w-5 h-5" />
-            <span className="font-semibold hidden md:inline">{t('reports.exportExcel')}</span>
+            <Icon name="download" className="w-4 h-4" />
+            <span className="font-semibold hidden sm:inline text-sm">{t('reports.exportExcel')}</span>
           </button>
         </div>
       </div>
@@ -442,25 +442,25 @@ const ReportsPage = () => {
         />
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex gap-2 mb-4 border-b border-border-main overflow-x-auto print:hidden">
+      {/* Navigation Tabs — scrollable on mobile */}
+      <div className="flex gap-1 mb-4 border-b border-border-main overflow-x-auto print:hidden -webkit-overflow-scrolling-touch scrollbar-hide">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id
+            className={`flex items-center gap-1.5 px-3 py-3 border-b-2 transition-colors whitespace-nowrap text-sm ${activeTab === tab.id
               ? 'border-accent text-accent font-bold'
               : 'border-transparent text-text-muted hover:text-text-main'
               }`}
           >
-            <Icon name={tab.icon} className="w-4 h-4" />
-            {tab.label}
+            <Icon name={tab.icon} className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden sm:inline">{tab.label}</span>
           </button>
         ))}
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 bg-bg-secondary rounded-lg border border-border-main overflow-y-auto shadow-inner print:shadow-none print:border-none print:bg-white print:overflow-visible">
+      <div className="flex-1 bg-bg-secondary rounded-lg border border-border-main overflow-y-auto shadow-inner pb-24 sm:pb-0 print:shadow-none print:border-none print:bg-white print:overflow-visible">
         {activeTab === 'financial' && renderFinancialTable()}
         {activeTab === 'inventory' && renderInventoryTable()}
         {activeTab === 'payroll' && renderPayrollTable()}
