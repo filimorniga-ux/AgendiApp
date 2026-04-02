@@ -74,25 +74,6 @@ export default defineConfig({
         clientsClaim: true,
 
         runtimeCaching: [
-          // ── Google Fonts ──────────────────────────────────────────────────
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-stylesheets',
-              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-webfonts',
-              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
           // ── Supabase Storage (imágenes / recibos) ─────────────────────────
           {
             urlPattern: /^https:\/\/mzoodzsefyaymhjpzopm\.supabase\.co\/storage\/.*/i,
@@ -125,21 +106,36 @@ export default defineConfig({
 
   build: {
     target: 'es2020',
+    modulePreload: {
+      // Inyecta <link rel="modulepreload"> automáticamente para el chunk crítico
+      polyfill: true,
+    },
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            // ── Vendor crítico (siempre necesario) ────────────────────────
+            if (id.includes('react-dom') || id.includes('react-router')) {
               return 'vendor-react';
             }
+            if (id.includes('/react/') && !id.includes('react-dom') && !id.includes('react-router')) {
+              return 'vendor-react';
+            }
+            // ── Supabase ─────────────────────────────────────────────────
             if (id.includes('@supabase')) {
               return 'vendor-supabase';
             }
+            // ── i18n ──────────────────────────────────────────────────────
             if (id.includes('i18next') || id.includes('react-i18next')) {
               return 'vendor-i18n';
             }
+            // ── UI utilities ──────────────────────────────────────────────
             if (id.includes('sweetalert2') || id.includes('react-hot-toast') || id.includes('feather-icons')) {
               return 'vendor-ui';
+            }
+            // ── Fontsource (fuente local) ──────────────────────────────────
+            if (id.includes('@fontsource')) {
+              return 'vendor-fonts';
             }
           }
         },

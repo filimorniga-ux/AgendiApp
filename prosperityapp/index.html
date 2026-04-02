@@ -3,42 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-
-    <!-- PWA: Tema y color de barra de estado -->
-    <meta name="theme-color" content="#1A202C" />
-    <meta name="background-color" content="#1A202C" />
-
-    <!-- PWA: iOS (Safari) -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <!-- PWA: Android / Chrome (standard) -->
+    <meta name="theme-color" content="#B8860B" />
+    <meta name="description" content="AgendiApp — Gestión profesional de agendas, inventario y colaboradores para salones y spa." />
     <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
     <meta name="apple-mobile-web-app-title" content="AgendiApp" />
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-    <!-- iOS Splash Screens -->
-    <link rel="apple-touch-startup-image" href="/pwa-512x512.png" />
-
-    <!-- PWA: Windows / General -->
     <meta name="application-name" content="AgendiApp" />
-    <meta name="msapplication-TileColor" content="#1A202C" />
-    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />
 
-    <!-- SEO Básico -->
-    <meta name="description" content="Gestión profesional de agendas, inventario y colaboradores para salones y spa." />
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="AgendiApp — Gestión de Salones" />
+    <meta property="og:description" content="Administra citas, inventario, colaboradores y caja desde un solo lugar." />
+    <meta property="og:locale" content="es_ES" />
 
-    <!-- Favicons -->
+    <!-- Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Preconnect: Supabase (única dependencia externa crítica) -->
+    <link rel="preconnect" href="https://mzoodzsefyaymhjpzopm.supabase.co" crossorigin />
 
-    <title>AgendiApp</title>
+    <!-- Feather icons — defer para no bloquear render -->
+    <script src="https://unpkg.com/feather-icons" defer></script>
+
+    <title>AgendiApp — Gestión de Salones y Spa</title>
   </head>
   <body>
+    <noscript>Necesitas habilitar JavaScript para usar esta aplicación.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

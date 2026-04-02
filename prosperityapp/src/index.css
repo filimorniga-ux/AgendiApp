@@ -1,5 +1,6 @@
 /* ===== INICIO: src/index.css (Sistema Multi-Tema AgendiApp) ===== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+/* ── Fuente local (Fontsource) — elimina round-trip a Google Fonts CDN ── */
+@import '@fontsource-variable/inter';
 @import "tailwindcss";
 
 /* --- Configuración de Tema (Tailwind v4 @theme) --- */
