@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { storage } from '../firebase/config';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { supabase } from '../supabase/client';
 
 export const useStorage = () => {
     const [progress, setProgress] = useState(0);
@@ -13,41 +12,47 @@ export const useStorage = () => {
         setError(null);
         setProgress(0);
 
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (!file) {
                 setError("No file selected");
                 setIsUploading(false);
-                reject("No file selected");
-                return;
+                return reject("No file selected");
             }
 
-            const storageRef = ref(storage, path);
-            const uploadTask = uploadBytesResumable(storageRef, file);
+            try {
+                // Generar nombre de archivo único
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+                const fullPath = `${path}/${fileName}`;
 
-            uploadTask.on(
-                'state_changed',
-                (snapshot) => {
-                    const percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    setProgress(percentage);
-                },
-                (err) => {
-                    setError(err);
-                    setIsUploading(false);
-                    reject(err);
-                },
-                async () => {
-                    try {
-                        const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                        setUrl(downloadUrl);
-                        setIsUploading(false);
-                        resolve(downloadUrl);
-                    } catch (err) {
-                        setError(err);
-                        setIsUploading(false);
-                        reject(err);
-                    }
+                // Subir a Supabase Storage (requiere bucket 'media')
+                const { data, error: uploadError } = await supabase.storage
+                    .from('media')
+                    .upload(fullPath, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (uploadError) {
+                    throw uploadError;
                 }
-            );
+
+                setProgress(100);
+
+                // Obtener URL pública
+                const { data: { publicUrl } } = supabase.storage
+                    .from('media')
+                    .getPublicUrl(fullPath);
+
+                setUrl(publicUrl);
+                setIsUploading(false);
+                resolve(publicUrl);
+            } catch (err) {
+                console.error("Storage upload error:", err);
+                setError(err);
+                setIsUploading(false);
+                reject(err);
+            }
         });
     };
 
