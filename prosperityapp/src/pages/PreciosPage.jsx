@@ -106,62 +106,66 @@ const PreciosPage = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center mb-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
         <div>
-          <h2 className="text-3xl font-bold text-text-main">{t('prices.title')}</h2>
-          <p className="text-text-muted">{t('prices.subtitle')}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-text-main">{t('prices.title')}</h2>
+          <p className="text-text-muted text-sm">{t('prices.subtitle')}</p>
         </div>
-        <button onClick={handleOpenCreateModal} className="btn-golden flex items-center">
-          <i data-feather="plus" className="mr-2 h-5 w-5"></i>
-          <span>{t('prices.addBtn')}</span>
+        <button onClick={handleOpenCreateModal} className="sm:flex-none btn-golden flex items-center justify-center gap-2">
+          <i data-feather="plus" className="h-4 w-4"></i>
+          <span className="text-sm">{t('prices.addBtn')}</span>
         </button>
       </div>
-      <div className="flex flex-wrap gap-4 mb-6 bg-bg-secondary p-4 rounded-lg border border-border-main">
+      {/* Filtros - stack vertical en mobile */}
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 bg-bg-secondary p-3 sm:p-4 rounded-lg border border-border-main">
         <input
           type="search"
-          className="flex-grow bg-bg-tertiary border border-border-main rounded p-2 placeholder-text-muted text-text-main"
+          className="flex-grow bg-bg-tertiary border border-border-main rounded p-2 placeholder-text-muted text-text-main text-sm"
           placeholder={t('prices.searchPlaceholder')}
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
         />
-        <select 
-          className="bg-bg-tertiary border border-border-main rounded p-2 text-text-main"
-          value={selectedCategory}
-          onChange={e => setSelectedCategory(e.target.value)}
-        >
-          <option value="all">{t('prices.allCategories')}</option>
-          {orderedCategories.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <select 
-          className="bg-bg-tertiary border border-border-main rounded p-2 text-text-main"
-          value={sortOrder}
-          onChange={e => setSortOrder(e.target.value)}
-        >
-          <option value="name-asc">{t('prices.sort.nameAsc')}</option>
-          <option value="name-desc">{t('prices.sort.nameDesc')}</option>
-          <option value="price-asc">{t('prices.sort.priceAsc')}</option>
-          <option value="price-desc">{t('prices.sort.priceDesc')}</option>
-        </select>
+        <div className="flex gap-2">
+          <select 
+            className="flex-1 bg-bg-tertiary border border-border-main rounded p-2 text-text-main text-sm"
+            value={selectedCategory}
+            onChange={e => setSelectedCategory(e.target.value)}
+          >
+            <option value="all">{t('prices.allCategories')}</option>
+            {orderedCategories.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <select 
+            className="flex-1 bg-bg-tertiary border border-border-main rounded p-2 text-text-main text-sm"
+            value={sortOrder}
+            onChange={e => setSortOrder(e.target.value)}
+          >
+            <option value="name-asc">{t('prices.sort.nameAsc')}</option>
+            <option value="name-desc">{t('prices.sort.nameDesc')}</option>
+            <option value="price-asc">{t('prices.sort.priceAsc')}</option>
+            <option value="price-desc">{t('prices.sort.priceDesc')}</option>
+          </select>
+        </div>
       </div>
-      <div id="servicios-list-container" className="flex-grow overflow-y-auto space-y-4 pr-2">
+      <div id="servicios-list-container" className="flex-grow overflow-y-auto space-y-3 pb-24 sm:pb-4">
         {Object.keys(filteredAndSortedCategories).map(category => (
           <details key={category} className="bg-bg-secondary rounded-lg border border-border-main" open>
-            <summary className="p-4 font-semibold text-lg cursor-pointer flex justify-between text-text-main hover:bg-bg-tertiary">
-              {category}
-              <i data-feather="chevron-down" className="text-text-muted"></i>
+            <summary className="p-3 sm:p-4 font-semibold text-base sm:text-lg cursor-pointer flex justify-between items-center text-text-main hover:bg-bg-tertiary rounded-lg">
+              <span>{category}</span>
+              <i data-feather="chevron-down" className="text-text-muted w-4 h-4 flex-shrink-0"></i>
             </summary>
-            <div className="p-4 border-t border-border-main">
-              <ul className="space-y-2">
+            <div className="p-3 border-t border-border-main">
+              <ul className="space-y-1">
                 {filteredAndSortedCategories[category].map((s) => (
                     <li key={s.id} className="flex justify-between items-center p-2 rounded-md hover:bg-bg-tertiary">
-                      <span className="text-text-secondary">{s.name}</span>
-                      <div className="flex items-center gap-4">
-                        <span className="font-semibold text-accent">{formatCurrency(s.price)}</span>
-                        <div>
-                          <button onClick={() => handleOpenEditModal(s)} className="p-1 text-text-muted hover:text-accent">
+                      <span className="text-text-secondary text-sm">{s.name}</span>
+                      <div className="flex items-center gap-2 sm:gap-4">
+                        <span className="font-semibold text-accent text-sm">{formatCurrency(s.price)}</span>
+                        <div className="flex gap-0.5">
+                          <button onClick={() => handleOpenEditModal(s)} className="w-8 h-8 flex items-center justify-center text-text-muted hover:text-accent">
                             <i data-feather="edit" className="w-4 h-4"></i>
                           </button>
-                          <button onClick={() => handleDeleteService(s)} className="p-1 text-text-muted hover:text-red-400">
+                          <button onClick={() => handleDeleteService(s)} className="w-8 h-8 flex items-center justify-center text-text-muted hover:text-red-400">
                             <i data-feather="trash-2" className="w-4 h-4"></i>
                           </button>
                         </div>

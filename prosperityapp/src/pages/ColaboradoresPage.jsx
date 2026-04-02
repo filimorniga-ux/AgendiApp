@@ -44,37 +44,40 @@ const SortableCollaboratorRow = ({ collaborator, sortBy, t, onEdit, onDelete }) 
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center p-4 border-t border-border-main hover:bg-bg-tertiary ${isDragging ? 'shadow-xl bg-bg-secondary border-accent z-50' : ''}`}
+      className={`bg-bg-secondary rounded-lg border border-border-main p-3 sm:p-4 flex items-center gap-3 ${isDragging ? 'shadow-xl border-accent z-50 opacity-80' : ''}`}
     >
-      {/* Drag Handle - Only visible in custom mode */}
+      {/* Drag Handle */}
       {sortBy === 'custom' && (
-        <div {...attributes} {...listeners} className="w-10 cursor-grab active:cursor-grabbing text-text-muted hover:text-accent touch-none">
+        <div {...attributes} {...listeners} className="p-1 cursor-grab active:cursor-grabbing text-text-muted hover:text-accent touch-none flex-shrink-0">
           <i data-feather="move" className="w-4 h-4"></i>
         </div>
       )}
-      {sortBy !== 'custom' && <span className="w-10"></span>} {/* Placeholder for alignment */}
 
-      <span className="flex-1 font-bold text-text-main">{collaborator.name} {collaborator.lastName}</span>
-      <span className="w-1/3 text-sm text-text-muted">{collaborator.role || t('common.notAvailable')}</span>
-      <span className="w-24 text-center font-semibold text-accent">{collaborator.commissionPercent ? `${collaborator.commissionPercent}% ` : 'N/A'}</span>
-      <span className="w-24 text-center">
-        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${collaborator.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-          {collaborator.status === 'active' ? t('common.active') : t('common.inactive')}
-        </span>
-      </span>
-      <div className="w-20 flex justify-end gap-2">
-        <button
-          onClick={() => onEdit(collaborator)}
-          className="p-1 text-text-muted hover:text-accent transition-colors"
-          title={t('common.edit')}
-        >
+      {/* Avatar */}
+      <div className="w-10 h-10 rounded-full bg-accent/20 text-accent font-bold flex items-center justify-center flex-shrink-0 text-sm">
+        {(collaborator.name || '?')[0].toUpperCase()}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-text-main text-sm truncate">{collaborator.name} {collaborator.lastName}</p>
+        <div className="flex items-center gap-2 flex-wrap mt-0.5">
+          <span className="text-xs text-text-muted">{collaborator.role || t('common.notAvailable')}</span>
+          {collaborator.commissionPercent ? (
+            <span className="text-xs text-accent font-semibold">{collaborator.commissionPercent}%</span>
+          ) : null}
+          <span className={`px-1.5 py-0.5 text-xs font-semibold rounded-full ${collaborator.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+            {collaborator.status === 'active' ? t('common.active') : t('common.inactive')}
+          </span>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-1 flex-shrink-0">
+        <button onClick={() => onEdit(collaborator)} className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-accent rounded-md bg-bg-tertiary" title={t('common.edit')}>
           <i data-feather="edit-2" className="w-4 h-4"></i>
         </button>
-        <button
-          onClick={() => onDelete(collaborator)}
-          className="p-1 text-text-muted hover:text-red-500 transition-colors"
-          title={t('common.delete')}
-        >
+        <button onClick={() => onDelete(collaborator)} className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-red-500 rounded-md bg-bg-tertiary" title={t('common.delete')}>
           <i data-feather="trash-2" className="w-4 h-4"></i>
         </button>
       </div>
@@ -179,58 +182,41 @@ const ColaboradoresPage = () => {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
         <div>
-          <h2 className="text-3xl font-bold text-text-main">{t('collaborators.title')}</h2>
-          <p className="text-text-muted">{t('collaborators.subtitle')}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-text-main">{t('collaborators.title')}</h2>
+          <p className="text-text-muted text-sm">{t('collaborators.subtitle')}</p>
         </div>
-        <div className="flex gap-3">
-          {/* Botón de Ordenar */}
+        <div className="flex gap-2">
           <button
             onClick={() => setSortBy(prev => prev === 'custom' ? 'alphabetical' : 'custom')}
-            className="px-4 py-2 rounded-lg border border-border-main bg-bg-secondary text-text-main hover:bg-bg-tertiary transition-colors flex items-center gap-2"
-            title={sortBy === 'custom' ? t('common.sortAlphabetical') || 'Cambiar a orden alfabético' : t('common.sortCustom') || 'Cambiar a orden personalizado'}
+            className="px-3 py-2 rounded-lg border border-border-main bg-bg-secondary text-text-main hover:bg-bg-tertiary transition-colors flex items-center gap-2"
           >
             <i data-feather="list" className="w-4 h-4"></i>
             <span className="hidden sm:inline text-sm">{sortBy === 'custom' ? 'Orden Personalizado' : 'Orden A-Z'}</span>
           </button>
 
-          <button onClick={handleOpenCreateModal} className="btn-golden flex items-center">
-            <i data-feather="plus" className="mr-2 h-5 w-5"></i>
-            <span>{t('collaborators.addBtn')}</span>
+          <button onClick={handleOpenCreateModal} className="flex-1 sm:flex-none btn-golden flex items-center justify-center gap-2">
+            <i data-feather="plus" className="h-4 w-4"></i>
+            <span className="text-sm">{t('collaborators.addBtn')}</span>
           </button>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-6 bg-bg-secondary p-4 rounded-lg border border-border-main">
+      <div className="mb-4">
         <input
           type="search"
-          className="flex-grow bg-bg-tertiary border border-border-main rounded p-2 placeholder-text-muted text-text-main"
+          className="w-full bg-bg-tertiary border border-border-main rounded p-2 placeholder-text-muted text-text-main"
           placeholder={t('collaborators.searchPlaceholder')}
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <div className="bg-bg-secondary rounded-lg border border-border-main overflow-hidden">
-          <div className="bg-bg-main/50 flex p-4 text-xs uppercase text-text-muted">
-            {sortBy === 'custom' && <span className="w-10"><i data-feather="move" className="w-4 h-4"></i></span>}
-            <span className="flex-1">{t('collaborators.table.name')}</span>
-            <span className="w-1/3">{t('collaborators.table.role')}</span>
-            <span className="w-24 text-center">{t('collaborators.table.commission')}</span>
-            <span className="w-24 text-center">{t('collaborators.table.status')}</span>
-            <span className="w-20 text-right">{t('collaborators.table.actions')}</span>
-          </div>
-
-          <SortableContext
-            items={filteredCollabList.map(c => c.id)}
-            strategy={verticalListSortingStrategy}
-          >
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={filteredCollabList.map(c => c.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-2 pb-24 sm:pb-6">
             {filteredCollabList.map((c) => (
               <SortableCollaboratorRow
                 key={c.id}
@@ -241,8 +227,14 @@ const ColaboradoresPage = () => {
                 onDelete={handleDelete}
               />
             ))}
-          </SortableContext>
-        </div>
+            {filteredCollabList.length === 0 && (
+              <div className="text-center text-text-muted p-8">
+                <i data-feather="users" className="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+                <p>{t('collaborators.searchPlaceholder')}</p>
+              </div>
+            )}
+          </div>
+        </SortableContext>
       </DndContext>
 
       {isModalOpen && (

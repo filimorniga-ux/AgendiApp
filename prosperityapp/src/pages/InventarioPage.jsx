@@ -410,9 +410,10 @@ const InventarioPage = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-text-main">{t('inventory.title')}</h2>
-        <div className="flex items-center gap-2">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
+        <h2 className="text-2xl sm:text-3xl font-bold text-text-main">{t('inventory.title')}</h2>
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Modo de escaneo */}
           {scannerActive && (
             <div className="flex rounded-md bg-bg-main/50 p-1 border border-border-main">
@@ -438,7 +439,7 @@ const InventarioPage = () => {
             to="/app/inventario/auditoria"
             className="btn-golden bg-bg-tertiary text-text-main text-sm py-2 px-3 flex items-center gap-2 border border-border-main rounded-md hover:bg-bg-main/50"
           >
-            <i data-feather="archive" className="w-4 h-4"></i> {t('inventory.auditBtn')}
+            <i data-feather="archive" className="w-4 h-4"></i> <span className="hidden sm:inline">{t('inventory.auditBtn')}</span>
           </Link>
         </div>
       </div>
@@ -453,23 +454,23 @@ const InventarioPage = () => {
         />
       )}
 
-      <div className="flex flex-wrap gap-4 mb-6 bg-bg-secondary p-4 rounded-lg border border-border-main">
-        <div className="flex rounded-md bg-bg-main/50 p-1">
+      <div className="flex flex-wrap gap-4 mb-4 bg-bg-secondary p-3 sm:p-4 rounded-lg border border-border-main overflow-x-auto">
+        <div className="flex rounded-md bg-bg-main/50 p-1 min-w-max">
           <button
             onClick={() => setActiveTab('technical')}
-            className={`px-4 py-2 text-sm font-semibold rounded ${activeTab === 'technical' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
+            className={`px-3 sm:px-4 py-2 text-sm font-semibold rounded whitespace-nowrap ${activeTab === 'technical' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
           >
             {t('inventory.tabs.tech')}
           </button>
           <button
             onClick={() => setActiveTab('retail')}
-            className={`px-4 py-2 text-sm font-semibold rounded ${activeTab === 'retail' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
+            className={`px-3 sm:px-4 py-2 text-sm font-semibold rounded whitespace-nowrap ${activeTab === 'retail' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
           >
             {t('inventory.tabs.retail')}
           </button>
         </div>
       </div>
-      <div className="flex-grow overflow-y-auto pr-2">
+      <div className="flex-grow overflow-y-auto pb-24 sm:pb-4">
         {activeTab === 'technical' && <TabInventarioTecnico handleOpenStockModal={handleOpenStockModal} />}
         {activeTab === 'retail' && <TabInventarioRetail handleOpenStockModal={handleOpenStockModal} />}
       </div>

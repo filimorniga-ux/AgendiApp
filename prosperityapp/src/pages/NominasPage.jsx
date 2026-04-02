@@ -292,9 +292,9 @@ const NominasPage = () => {
   return (
     <>
       {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-text-main">{t('sidebar.payroll')}</h2>
-        <p className="text-text-muted">{t('payroll.subtitle')}</p>
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-text-main">{t('sidebar.payroll')}</h2>
+        <p className="text-text-muted text-sm">{t('payroll.subtitle')}</p>
       </div>
 
       {/* Tabs */}
@@ -323,6 +323,7 @@ const NominasPage = () => {
         <div className="flex flex-col gap-6">
           {/* Controles de fecha */}
           <div>
+            {/* Botones de acción: flex-wrap para que no se corten en mobile */}
             <div className="flex flex-wrap gap-2 mb-4">
               <button onClick={() => setSelectedDates(getDatesForCurrentWeek())} className="btn-golden bg-bg-tertiary text-text-muted text-sm py-2 px-3 flex items-center gap-2">
                 <i data-feather="calendar" className="w-4 h-4" /> {t('payroll.thisWeek')}
@@ -340,11 +341,11 @@ const NominasPage = () => {
                   <span className="hidden md:inline">{t('payroll.actionsBtn')}</span>
                 </button>
                 <Link to="/app/nomina/historial" className="btn-golden bg-bg-main/50 text-text-muted text-sm py-2 px-3 flex items-center gap-2">
-                  <i data-feather="archive" className="w-4 h-4" /> {t('payroll.historyBtn')}
+                  <i data-feather="archive" className="w-4 h-4" /> <span className="hidden sm:inline">{t('payroll.historyBtn')}</span>
                 </Link>
                 <button onClick={() => setIsCloseOpen(true)} disabled={!selectedDates.length}
                   className="btn-golden flex-shrink-0 flex items-center text-sm py-2 px-3 disabled:opacity-50">
-                  <i data-feather="check-circle" className="mr-2 h-4 w-4" /> {t('payroll.closePeriodBtn')}
+                  <i data-feather="check-circle" className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">{t('payroll.closePeriodBtn')}</span>
                 </button>
               </div>
             </div>
@@ -353,8 +354,8 @@ const NominasPage = () => {
             </div>
           </div>
 
-          {/* Tarjetas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {/* Tarjetas — 1 col en mobile, 2 en md, 3 en xl */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 pb-24 sm:pb-4">
             {payrollCards.map(card => (
               <CollaboratorCard
                 key={card.id}

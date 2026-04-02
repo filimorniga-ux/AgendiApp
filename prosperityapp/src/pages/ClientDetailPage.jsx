@@ -50,18 +50,25 @@ const ClientDetailPage = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="mb-6">
-        <Link to="/clientes" className="flex items-center gap-2 text-accent mb-4">
+      {/* Back + header */}
+      <div className="mb-4">
+        <Link to="/app/clientes" className="flex items-center gap-2 text-accent mb-3 text-sm hover:underline">
           <i data-feather="arrow-left" className="w-4 h-4"></i>
           Volver a Clientes
         </Link>
-        <h2 className="text-3xl font-bold text-white">{client.name} {client.lastName}</h2>
-        <p className="text-text-main/70">{client.phone} | {client.email || 'Sin email'}</p>
+        <h2 className="text-2xl sm:text-3xl font-bold text-text-main">{client.name} {client.lastName}</h2>
+        <p className="text-text-muted text-sm mt-1">
+          {client.phone && <span className="mr-3">📞 {client.phone}</span>}
+          {client.email && <span>✉️ {client.email}</span>}
+        </p>
       </div>
-      <div className="flex-grow overflow-y-auto pr-2">
-        <div className="bg-secondary rounded-lg border border-border-main overflow-x-auto">
+
+      {/* Movement list — cards en mobile, tabla en desktop */}
+      <div className="flex-grow overflow-y-auto pb-24 sm:pb-4">
+        {/* Desktop: tabla */}
+        <div className="hidden sm:block bg-bg-secondary rounded-lg border border-border-main overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-main/50 text-xs uppercase text-text-main/70">
+            <thead className="bg-bg-main/50 text-xs uppercase text-text-muted">
               <tr>
                 <th className="p-3 font-semibold">Fecha</th>
                 <th className="p-3 font-semibold">Descripción</th>
@@ -72,19 +79,15 @@ const ClientDetailPage = () => {
             </thead>
             <tbody>
               {history.map(m => (
-                <tr key={m.id} className="border-b border-border-main text-sm hover:bg-tertiary/50">
-                  <td className="p-3">
-                    {parseDate(m.date).toLocaleDateString('es-CL')}
-                  </td>
-                  <td className="p-3 text-white">{m.description}</td>
+                <tr key={m.id} className="border-b border-border-main text-sm hover:bg-bg-tertiary/50">
+                  <td className="p-3">{parseDate(m.date).toLocaleDateString('es-CL')}</td>
+                  <td className="p-3 text-text-main">{m.description}</td>
                   <td className="p-3">
                     <span className={`px-2 py-1 text-xs rounded-full ${
                       m.type === 'Servicio' ? 'bg-blue-500/20 text-blue-300' :
                       m.type === 'Venta' ? 'bg-purple-500/20 text-purple-300' :
                       'bg-gray-500/20 text-gray-300'
-                    }`}>
-                      {m.type}
-                    </span>
+                    }`}>{m.type}</span>
                   </td>
                   <td className="p-3">{m.collaboratorName || 'N/A'}</td>
                   <td className={`p-3 text-right font-semibold ${m.amount > 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -94,10 +97,37 @@ const ClientDetailPage = () => {
               ))}
             </tbody>
           </table>
-          {history.length === 0 && (
-            <p className="text-center text-text-main/70 p-8">Este cliente aún no tiene historial de movimientos.</p>
-          )}
         </div>
+
+        {/* Mobile: cards */}
+        <div className="sm:hidden space-y-2">
+          {history.map(m => (
+            <div key={m.id} className="bg-bg-secondary rounded-lg border border-border-main p-3">
+              <div className="flex justify-between items-start mb-1">
+                <span className="text-xs text-text-muted">{parseDate(m.date).toLocaleDateString('es-CL')}</span>
+                <span className={`px-2 py-0.5 text-xs rounded-full ${
+                  m.type === 'Servicio' ? 'bg-blue-500/20 text-blue-300' :
+                  m.type === 'Venta' ? 'bg-purple-500/20 text-purple-300' :
+                  'bg-gray-500/20 text-gray-300'
+                }`}>{m.type}</span>
+              </div>
+              <p className="font-semibold text-text-main text-sm">{m.description}</p>
+              <div className="flex justify-between items-center mt-1">
+                <span className="text-xs text-text-muted">{m.collaboratorName || 'N/A'}</span>
+                <span className={`font-bold text-sm ${m.amount > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {formatCurrency(m.amount)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {history.length === 0 && (
+          <div className="text-center text-text-muted p-8 bg-bg-secondary rounded-lg">
+            <i data-feather="clock" className="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+            <p>Este cliente aún no tiene historial de movimientos.</p>
+          </div>
+        )}
       </div>
     </div>
   );
