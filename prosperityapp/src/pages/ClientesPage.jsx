@@ -65,19 +65,20 @@ const ClientesPage = () => {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
         <div>
-          <h2 className="text-3xl font-bold text-text-main">{t('clients.title')}</h2>
-          <p className="text-text-muted">{t('clients.subtitle')}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-text-main">{t('clients.title')}</h2>
+          <p className="text-text-muted text-sm">{t('clients.subtitle')}</p>
         </div>
-        <div className="flex gap-3">
-          <button onClick={() => setIsImportModalOpen(true)} className="px-4 py-2 rounded-lg border border-border-main bg-bg-secondary text-text-main hover:bg-bg-tertiary transition-colors flex items-center gap-2">
-            <i data-feather="upload" className="h-5 w-5"></i>
-            <span>{t('clients.importButton')}</span>
+        <div className="flex gap-2 sm:gap-3">
+          <button onClick={() => setIsImportModalOpen(true)} className="flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg border border-border-main bg-bg-secondary text-text-main hover:bg-bg-tertiary transition-colors flex items-center justify-center gap-2">
+            <i data-feather="upload" className="h-4 w-4"></i>
+            <span className="text-sm">{t('clients.importButton')}</span>
           </button>
-          <button onClick={handleOpenCreateModal} className="btn-golden flex items-center">
-            <i data-feather="plus" className="mr-2 h-5 w-5"></i>
-            <span>{t('clients.addBtn')}</span>
+          <button onClick={handleOpenCreateModal} className="flex-1 sm:flex-none btn-golden flex items-center justify-center gap-2">
+            <i data-feather="plus" className="h-4 w-4"></i>
+            <span className="text-sm">{t('clients.addBtn')}</span>
           </button>
         </div>
       </div>
@@ -90,47 +91,45 @@ const ClientesPage = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      <div id="client-cards-container" className="space-y-4">
+      {/* Client list con padding inferior para bottom nav */}
+      <div id="client-cards-container" className="space-y-3 pb-24 sm:pb-6">
         {(filteredClients || []).map(client => (
-          <div key={client.id} className="bg-bg-secondary p-4 rounded-lg border border-border-main flex justify-between items-center">
-            <div>
-              <p className="font-bold text-text-main text-lg">{client.name} {client.lastName}</p>
-              <p className="text-sm text-text-muted flex items-center">
-                <i data-feather="phone" className="w-4 h-4 inline-block mr-2"></i>
-                {client.phone || t('common.notAvailable')}
-              </p>
-              <p className="text-sm text-text-muted flex items-center">
-                <i data-feather="mail" className="w-4 h-4 inline-block mr-2"></i>
-                {client.email || t('common.notAvailable')}
-              </p>
-              <p className="text-sm text-text-muted flex items-center">
-                <i data-feather="gift" className="w-4 h-4 inline-block mr-2"></i>
-                {client.birthday || t('common.notAvailable')}
-              </p>
-              <p className="text-sm text-text-muted flex items-center">
-                <i data-feather="calendar" className="w-4 h-4 inline-block mr-2"></i>
-                {t('clients.lastVisit')} {client.lastVisit || t('common.notAvailable')}
-              </p>
+          <div key={client.id} className="bg-bg-secondary p-3 sm:p-4 rounded-lg border border-border-main flex justify-between items-center gap-3">
+            {/* Avatar + info */}
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-full bg-accent/20 text-accent font-bold flex items-center justify-center flex-shrink-0 text-sm">
+                {(client.name || '?')[0].toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="font-bold text-text-main text-sm sm:text-base truncate">{client.name} {client.lastName}</p>
+                <p className="text-xs text-text-muted truncate">
+                  {client.phone || client.email || t('common.notAvailable')}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+            {/* Actions */}
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               <Link
-                to={`/clientes/${client.id}`}
-                className="p-2 text-text-muted hover:text-accent rounded-md bg-bg-tertiary"
+                to={`/app/clientes/${client.id}`}
+                className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-accent rounded-md bg-bg-tertiary"
                 title={t('clients.viewHistory')}
               >
                 <i data-feather="list" className="w-4 h-4"></i>
               </Link>
-              <button onClick={() => handleOpenEditModal(client)} className="p-2 text-text-muted hover:text-accent rounded-md bg-bg-tertiary" title={t('clients.editBtn')}>
+              <button onClick={() => handleOpenEditModal(client)} className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-accent rounded-md bg-bg-tertiary" title={t('clients.editBtn')}>
                 <i data-feather="edit-2" className="w-4 h-4"></i>
               </button>
-              <button onClick={() => handleDeleteClient(client)} className="p-2 text-text-muted hover:text-red-400 rounded-md bg-bg-tertiary" title={t('clients.deleteBtn')}>
+              <button onClick={() => handleDeleteClient(client)} className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-red-400 rounded-md bg-bg-tertiary" title={t('clients.deleteBtn')}>
                 <i data-feather="trash-2" className="w-4 h-4"></i>
               </button>
             </div>
           </div>
         ))}
         {filteredClients && filteredClients.length === 0 && (
-          <p className="text-center text-text-muted p-8">{t('clients.noClientsFound')}</p>
+          <div className="text-center text-text-muted p-8">
+            <i data-feather="users" className="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+            <p>{t('clients.noClientsFound')}</p>
+          </div>
         )}
       </div>
       <ClientModal

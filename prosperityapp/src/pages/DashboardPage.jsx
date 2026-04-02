@@ -41,12 +41,12 @@ const parseDate = (date) => {
 
 // --- Componente de Tarjeta (Tema Corregido) ---
 const SummaryCard = ({ title, value, icon, colorClass = 'text-accent' }) => (
-  <div className="bg-bg-secondary p-4 rounded-lg border border-border-main flex-1 min-w-[150px]">
+  <div className="bg-bg-secondary p-3 sm:p-4 rounded-lg border border-border-main flex-1">
     <div className="flex items-center gap-2">
-      <i data-feather={icon} className={`w-5 h-5 ${colorClass}`}></i>
-      <p className="text-sm text-text-muted">{title}</p>
+      <i data-feather={icon} className={`w-4 h-4 sm:w-5 sm:h-5 ${colorClass} flex-shrink-0`}></i>
+      <p className="text-xs sm:text-sm text-text-muted truncate">{title}</p>
     </div>
-    <p className={`text-2xl font-bold mt-2 ${colorClass}`}>{formatCurrency(value)}</p>
+    <p className={`text-lg sm:text-2xl font-bold mt-1 sm:mt-2 ${colorClass}`}>{formatCurrency(value)}</p>
   </div>
 );
 
@@ -149,13 +149,13 @@ const TabDiario = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           <SummaryCard title={t('dashboard.cards.services')} value={summary.totalServicios} icon="scissors" />
           <SummaryCard title={t('dashboard.cards.sales')} value={summary.totalVentas} icon="shopping-bag" />
           <SummaryCard title={t('dashboard.cards.expenses')} value={summary.totalGastos} icon="arrow-down-circle" colorClass="text-red-400" />
           <SummaryCard title={t('dashboard.cards.techCost')} value={summary.totalCostoTecnico} icon="tool" colorClass="text-yellow-400" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           <SummaryCard title={t('dashboard.cards.cash')} value={summary.totalEfectivo} icon="dollar-sign" colorClass="text-green-400" />
           <SummaryCard title={t('dashboard.cards.cards')} value={summary.totalTarjetas} icon="credit-card" colorClass="text-green-400" />
           <SummaryCard title={t('dashboard.cards.transfers')} value={summary.totalTransferencias} icon="smartphone" colorClass="text-green-400" />
@@ -346,7 +346,7 @@ const TabNominas = () => {
             locale="es-ES"
           />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           <SummaryCard title={t('dashboard.cards.produced')} value={summary.totalProduccion} icon="bar-chart-2" colorClass="text-green-400" />
           <SummaryCard title={t('dashboard.cards.cash')} value={summary.totalEfectivo} icon="dollar-sign" />
           <SummaryCard title={t('dashboard.cards.cards')} value={summary.totalTarjetas} icon="credit-card" />
@@ -728,31 +728,32 @@ const DashboardPage = () => {
 
   return (
     <>
-      <h1 className="text-3xl font-bold text-text-main mb-6">{t('dashboard.title')}</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-text-main mb-4 sm:mb-6">{t('dashboard.title')}</h1>
 
-      <div className="flex flex-wrap gap-4 mb-6 bg-bg-secondary p-4 rounded-lg border border-border-main">
-        <div className="flex rounded-md bg-bg-main p-1">
+      {/* Tab nav — scrollable en mobile */}
+      <div className="mb-4 sm:mb-6 bg-bg-secondary p-2 sm:p-4 rounded-lg border border-border-main overflow-x-auto hide-scrollbar">
+        <div className="flex rounded-md bg-bg-main p-1 min-w-max sm:min-w-0">
           <button
             onClick={() => setActiveTab('diario')}
-            className={`px-4 py-2 text-sm font-semibold rounded ${activeTab === 'diario' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded whitespace-nowrap ${activeTab === 'diario' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
           >
             {t('dashboard.tabs.daily')}
           </button>
           <button
             onClick={() => setActiveTab('nominas')}
-            className={`px-4 py-2 text-sm font-semibold rounded ${activeTab === 'nominas' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded whitespace-nowrap ${activeTab === 'nominas' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
           >
             {t('dashboard.tabs.period')}
           </button>
           <button
             onClick={() => setActiveTab('cierres')}
-            className={`px-4 py-2 text-sm font-semibold rounded ${activeTab === 'cierres' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded whitespace-nowrap ${activeTab === 'cierres' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
           >
             {t('dashboard.tabs.closings')}
           </button>
           <button
             onClick={() => setActiveTab('clientes')}
-            className={`px-4 py-2 text-sm font-semibold rounded ${activeTab === 'clientes' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded whitespace-nowrap ${activeTab === 'clientes' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
           >
             {t('dashboard.tabs.clients')}
           </button>

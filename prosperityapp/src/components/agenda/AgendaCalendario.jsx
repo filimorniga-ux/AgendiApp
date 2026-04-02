@@ -331,25 +331,26 @@ const AgendaCalendario = () => {
   if (isLoading) return null;
 
   return (
-    <div className="h-full flex flex-col gap-4">
+    <div className="h-full flex flex-col gap-3 sm:gap-4">
       {/* --- HEADER (Navegación y Controles) --- */}
-      <div className="flex flex-wrap justify-between items-center bg-bg-secondary p-4 rounded-lg border border-border-main shadow-sm gap-4">
-        <div className="flex items-center gap-4 flex-wrap">
-          <h2 className="text-2xl font-bold text-text-main mr-2">{t('calendar.title')}</h2>
+      <div className="flex flex-col sm:flex-row flex-wrap sm:justify-between sm:items-center bg-bg-secondary p-3 sm:p-4 rounded-lg border border-border-main shadow-sm gap-3">
+        {/* Row 1: título + navegación fecha */}
+        <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+          <h2 className="text-xl sm:text-2xl font-bold text-text-main">{t('calendar.title')}</h2>
 
           {/* Navegación de Fecha */}
           <div className="flex items-center bg-bg-main p-1 rounded-md border border-border-main">
-            <button onClick={navigateBack} className="p-2 text-text-muted hover:text-accent hover:bg-bg-secondary rounded-md transition-colors">
-              <i data-feather="chevron-left" className="w-5 h-5"></i>
+            <button onClick={navigateBack} className="p-1.5 sm:p-2 text-text-muted hover:text-accent hover:bg-bg-secondary rounded-md transition-colors">
+              <i data-feather="chevron-left" className="w-4 h-4 sm:w-5 sm:h-5"></i>
             </button>
 
             <div className="relative" ref={calendarRef}>
               <button
                 onClick={() => setShowMiniCalendar(!showMiniCalendar)}
-                className="px-4 py-2 font-bold text-text-main hover:text-accent transition-colors flex items-center gap-2 min-w-[200px] justify-center"
+                className="px-2 sm:px-4 py-1.5 sm:py-2 font-bold text-text-main hover:text-accent transition-colors flex items-center gap-1 sm:gap-2 min-w-[150px] sm:min-w-[200px] justify-center text-sm sm:text-base"
               >
-                <i data-feather="calendar" className="w-4 h-4"></i>
-                {date.toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}
+                <i data-feather="calendar" className="w-3 h-3 sm:w-4 sm:h-4"></i>
+                {date.toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'es-CL', { day: 'numeric', month: 'short', year: 'numeric' })}
               </button>
 
               {showMiniCalendar && (
@@ -359,51 +360,53 @@ const AgendaCalendario = () => {
               )}
             </div>
 
-            <button onClick={navigateNext} className="p-2 text-text-muted hover:text-accent hover:bg-bg-secondary rounded-md transition-colors">
-              <i data-feather="chevron-right" className="w-5 h-5"></i>
+            <button onClick={navigateNext} className="p-1.5 sm:p-2 text-text-muted hover:text-accent hover:bg-bg-secondary rounded-md transition-colors">
+              <i data-feather="chevron-right" className="w-4 h-4 sm:w-5 sm:h-5"></i>
             </button>
           </div>
 
-          <button onClick={navigateToday} className="px-3 py-1 text-sm font-semibold text-text-muted hover:text-accent transition-colors underline">
+          <button onClick={navigateToday} className="px-2 py-1 text-xs sm:text-sm font-semibold text-text-muted hover:text-accent transition-colors underline">
             {t('calendar.today')}
           </button>
         </div>
 
-        <div className="flex gap-3 ml-auto">
-          <button onClick={() => setIsTimeClockOpen(true)} className="px-4 py-2 bg-bg-tertiary text-text-main font-semibold rounded-md hover:bg-bg-main border border-border-main flex items-center gap-2 transition-colors">
+        {/* Row 2 (mobile: full width): botones de acción */}
+        <div className="flex gap-2 sm:gap-3 sm:ml-auto">
+          <button onClick={() => setIsTimeClockOpen(true)} className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-bg-tertiary text-text-main font-semibold rounded-md hover:bg-bg-main border border-border-main flex items-center justify-center gap-2 transition-colors">
             <i data-feather="clock" className="w-4 h-4"></i>
-            <span className="hidden sm:inline">{t('hr.title')}</span>
+            <span className="text-sm sm:text-base">{t('hr.title')}</span>
           </button>
 
-          <button onClick={() => handleAddAppointment(null)} className="btn-golden flex items-center shadow-md">
-            <i data-feather="plus" className="inline-block w-5 h-5 mr-2"></i>
-            <span>{t('calendar.newBtn')}</span>
+          <button onClick={() => handleAddAppointment(null)} className="flex-1 sm:flex-none btn-golden flex items-center justify-center gap-2 shadow-md">
+            <i data-feather="plus" className="w-4 h-4"></i>
+            <span className="text-sm">{t('calendar.newBtn')}</span>
           </button>
         </div>
       </div>
 
-      {/* --- PIZARRA KANBAN (Columnas) --- */}
-      <div className="flex-1 overflow-x-auto overflow-y-hidden pb-2">
-        <div className="flex h-full pb-2">
+      {/* --- PIZARRA KANBAN --- */}
+      <div className="flex-1 overflow-x-auto overflow-y-hidden pb-20 sm:pb-2">
+        <div className="flex h-full pb-2" style={{ scrollSnapType: 'x mandatory' }}>
           {(collaborators || []).filter(c => c.status === 'active').map(collab => {
             const collabAppointments = dailyAppointments.filter(apt => apt.stylistId === collab.id);
-            return (
-              <StylistColumn
-                key={collab.id}
-                stylist={collab}
-                appointments={collabAppointments}
-                onAdd={handleAddAppointment}
-                onEdit={handleEditAppointment}
-              />
+          return (
+              <div key={collab.id} style={{ scrollSnapAlign: 'start' }}>
+                <StylistColumn
+                  stylist={collab}
+                  appointments={collabAppointments}
+                  onAdd={handleAddAppointment}
+                  onEdit={handleEditAppointment}
+                />
+              </div>
             );
           })}
         </div>
       </div>
 
-      {/* --- MODAL DE CITA (RESTAURADO) --- */}
+      {/* --- MODAL DE CITA (bottom sheet en mobile) --- */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 modal-backdrop">
-          <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-lg modal-content flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-70 modal-backdrop">
+          <div className="bg-bg-secondary rounded-t-2xl sm:rounded-lg shadow-xl border border-border-main w-full sm:max-w-lg modal-content flex flex-col max-h-[92vh] sm:max-h-[90vh]">
             <div className="p-4 border-b border-border-main flex justify-between items-center">
               <h3 className="text-xl font-bold text-text-main">{selectedEvent ? t('calendar.modal.editTitle') : t('calendar.modal.newTitle')}</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-text-muted hover:text-text-main text-3xl leading-none">&times;</button>
