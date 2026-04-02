@@ -74,8 +74,8 @@ const ModalNuevaCita = ({ isOpen, onClose, slotInfo }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-center">
-      <div className="bg-secondary p-6 rounded-lg shadow-xl w-full max-w-md z-50 text-text-main">
+    <div className="fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-end sm:items-center">
+      <div className="bg-secondary p-5 rounded-t-[20px] sm:rounded-lg shadow-xl w-full sm:max-w-md z-50 text-text-main max-h-[92dvh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Crear Nueva Cita</h2>
           <button onClick={onClose} className="text-text-main hover:text-accent text-2xl">&times;</button>

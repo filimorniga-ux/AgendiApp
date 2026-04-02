@@ -1421,4 +1421,119 @@
   }
 }
 
+/* ==========================================================================
+   PHASE 5 — MODALES MOBILE-FIRST (Bottom-Sheet pattern)
+   Applies to ALL modals using .modal-backdrop / .modal-content classes.
+   No JSX edits required per modal — one CSS block covers ~18 modals.
+   ========================================================================== */
+
+@media (max-width: 640px) {
+
+  /* ── Overlay: anchor to bottom instead of center ── */
+  .modal-backdrop {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  /* ── Sheet container ── */
+  .modal-content {
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 92dvh !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    /* Slide-up animation */
+    animation: sheet-slide-up 0.28s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  /* drag handle decoration */
+  .modal-content::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: var(--color-border-main);
+    border-radius: 2px;
+    margin: 10px auto 0;
+    flex-shrink: 0;
+  }
+
+  /* Tighten inner padding on mobile */
+  .modal-content form,
+  .modal-content > div > form {
+    padding: 1rem !important;
+    gap: 0.875rem !important;
+  }
+
+  /* Headers inside sheets */
+  .modal-content > div:first-child > div:first-child,
+  .modal-content .p-4.border-b {
+    padding: 0.75rem 1rem !important;
+  }
+
+  /* ── MovementModal: fullscreen + single column ── */
+  .modal-content.max-w-5xl,
+  [class*="max-w-5xl"].modal-content {
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    overflow-y: auto;
+  }
+
+  /* Stack the 2-column layout of MovementModal vertically */
+  .modal-content .w-2\/5 {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--color-border-main);
+    max-height: 45vh;
+    overflow-y: auto;
+  }
+
+  .modal-content .w-3\/5 {
+    width: 100% !important;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+
+  /* Make the inner flex container in MovementModal vertical */
+  .modal-content > div > div.flex:not(.border-b) {
+    flex-direction: column !important;
+  }
+
+  /* ── CashSessionModal (uses backdrop-blur, not .modal-backdrop) ── */
+  [class*="backdrop-blur"] > [class*="rounded-xl"],
+  [class*="backdrop-blur"] > [class*="overflow-hidden"] {
+    border-radius: 20px 20px 0 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: 92dvh !important;
+  }
+
+  /* ── ModalNuevaCita (uses bg-secondary, not modal-content) ── */
+  .fixed.inset-0 > .bg-secondary {
+    border-radius: 20px 20px 0 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: 92dvh !important;
+    overflow-y: auto;
+    margin-top: auto;
+  }
+
+  /* ── PayrollActionsModal (no modal-content class) ── */
+  .fixed.inset-0 > [class*="rounded-lg"][class*="max-w-md"] {
+    border-radius: 20px 20px 0 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: 92dvh !important;
+    overflow-y: auto;
+    margin-top: auto;
+  }
+
+  /* hide scrollbars in sheet panels */
+  .modal-content::-webkit-scrollbar { display: none; }
+
+  @keyframes sheet-slide-up {
+    from { transform: translateY(100%); opacity: 0.6; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+}
+
 /* ===== FIN: src/index.css ===== */

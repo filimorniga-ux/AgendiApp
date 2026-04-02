@@ -20,8 +20,8 @@ const PayrollActionsModal = ({ isOpen, onClose, collaborators, onAction }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
-            <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-md p-6">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-70">
+            <div className="bg-bg-secondary rounded-t-[20px] sm:rounded-lg shadow-xl border border-border-main w-full sm:max-w-md p-5 sm:p-6 max-h-[92dvh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold text-text-main">{t('payroll.actionsTitle')}</h3>
                     <button onClick={onClose} className="text-text-muted hover:text-text-main">
