@@ -1,9 +1,8 @@
 
-> prosperityapp@1.0.0 dev
-> vite
+> prosperityapp@1.0.0 preview
+> vite preview
 
-
-  VITE v8.0.3  ready in 470 ms
-
-  ➜  Local:   http://localhost:5173/
+Port 4173 is in use, trying another one...
+Port 4174 is in use, trying another one...
+  ➜  Local:   http://localhost:4175/
   ➜  Network: use --host to expose

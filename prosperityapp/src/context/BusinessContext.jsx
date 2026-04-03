@@ -68,54 +68,80 @@ export const BusinessProvider = ({ children }) => {
       return;
     }
 
-    let firebaseResolved = false;
-    let supabaseResolved = false;
-    let setLoadingDone   = false;
+    let firebaseReady = false;
+    let supabaseReady = false;
 
-    const trySetLoadingDone = () => {
-      if (firebaseResolved && supabaseResolved && !setLoadingDone) {
-        setLoadingDone = true;
-        setLoadingAuth(false);
+    let fbData = { user: null, role: null, businessId: null };
+    let sbData = { user: null, role: null, businessId: null };
+
+    const updateState = () => {
+      if (!firebaseReady || !supabaseReady) return;
+
+      if (fbData.user && sbData.user) {
+        // Conflicting sessions: log out of Supabase to prioritize Firebase admin
+        supabase.auth.signOut().catch(() => {});
+        sbData = { user: null, role: null, businessId: null };
       }
+
+      if (fbData.user) {
+        setUser(fbData.user);
+        setSupabaseUser(null);
+        setRealRole(fbData.role);
+        setBusinessId(fbData.businessId);
+      } else if (sbData.user) {
+        setUser(null);
+        setSupabaseUser(sbData.user);
+        setRealRole('collaborator');
+        setBusinessId(sbData.businessId);
+      } else {
+        setUser(null);
+        setSupabaseUser(null);
+        setRealRole(null);
+        setBusinessId(null);
+      }
+
+      setLoadingAuth(false);
     };
 
     // ── Supabase Auth listener (colaboradores) ─────────────────────
     const { data: { subscription: sbSub } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        const sbUser = session?.user ?? null;
-        setSupabaseUser(sbUser);
+        try {
+          const sbUser = session?.user ?? null;
+          if (sbUser) {
+            const { data: collab } = await supabase
+              .from('collaborators')
+              .select('id, business_id')
+              .eq('auth_user_id', sbUser.id)
+              .maybeSingle();
 
-        if (sbUser) {
-          // Look up this Supabase user in the collaborators table
-          const { data: collab } = await supabase
-            .from('collaborators')
-            .select('id, business_id')
-            .eq('auth_user_id', sbUser.id)
-            .maybeSingle();
-
-          if (collab?.business_id) {
-            setRealRole('collaborator');
-            setBusinessId(collab.business_id);
-            // Set RLS app.business_id for collaborator
-            await supabase.rpc('set_config', {
-              setting: 'app.business_id',
-              value: collab.business_id,
-              is_local: false,
-            }).catch(console.warn);
+            if (collab?.business_id) {
+              sbData = { user: sbUser, role: 'collaborator', businessId: collab.business_id };
+              await supabase.rpc('set_config', {
+                setting: 'app.business_id',
+                value: collab.business_id,
+                is_local: false,
+              }).catch(console.warn);
+            } else {
+              sbData = { user: null, role: null, businessId: null };
+            }
+          } else {
+            sbData = { user: null, role: null, businessId: null };
           }
+        } catch (err) {
+          console.warn('[BusinessProvider] Supabase user error:', err);
+          sbData = { user: null, role: null, businessId: null };
         }
 
-        supabaseResolved = true;
-        trySetLoadingDone();
+        supabaseReady = true;
+        updateState();
       }
     );
 
     // ── Firebase Auth listener (dueños / admins) ───────────────────
     const unsubscribeFirebase = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-
-      if (currentUser) {
-        try {
+      try {
+        if (currentUser) {
           const { data: sbUser, error: userErr } = await supabase
             .from('users')
             .select('business_id, role')
@@ -124,11 +150,10 @@ export const BusinessProvider = ({ children }) => {
 
           if (userErr) throw userErr;
 
-          if (sbUser?.role)        setRealRole(sbUser.role);
-          if (sbUser?.business_id) {
-            setBusinessId(sbUser.business_id);
-          } else {
-            // Check if business already exists for this owner (migration edge case)
+          let role = sbUser?.role || 'owner';
+          let bId = sbUser?.business_id;
+
+          if (!bId) {
             let { data: biz } = await supabase
               .from('businesses')
               .select('id')
@@ -136,7 +161,6 @@ export const BusinessProvider = ({ children }) => {
               .maybeSingle();
 
             if (!biz) {
-              // Auto-seed: primer login → crear business
               const { data: newBiz } = await supabase
                 .from('businesses')
                 .upsert(
@@ -153,25 +177,21 @@ export const BusinessProvider = ({ children }) => {
                 { business_id: biz.id, firebase_uid: currentUser.uid, email: currentUser.email, role: 'owner' },
                 { onConflict: 'firebase_uid' }
               );
-              setBusinessId(biz.id);
+              bId = biz.id;
             }
           }
-        } catch (err) {
-          console.warn('[BusinessProvider] Supabase user error:', err);
+
+          fbData = { user: currentUser, role, businessId: bId };
+        } else {
+          fbData = { user: null, role: null, businessId: null };
         }
-      } else {
-        // Only clear Firebase-specific state; collaborator Supabase session is independent
-        setUser(null);
-        // If there's no Supabase session either, clear everything
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          setRealRole(null);
-          setBusinessId(null);
-        }
+      } catch (err) {
+        console.warn('[BusinessProvider] Firebase user error:', err);
+        fbData = { user: null, role: null, businessId: null };
       }
 
-      firebaseResolved = true;
-      trySetLoadingDone();
+      firebaseReady = true;
+      updateState();
     });
 
     return () => {

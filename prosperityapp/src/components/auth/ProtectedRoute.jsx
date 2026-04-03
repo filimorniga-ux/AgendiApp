@@ -41,8 +41,12 @@ const ProtectedRoute = ({ children }) => {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-    } catch {
-      setError('Correo o contraseña incorrectos');
+    } catch (err) {
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+        setError('Credenciales incorrectas. ¿Eres un colaborador? Cambia de pestaña arriba.');
+      } else {
+        setError('Correo o contraseña incorrectos');
+      }
     } finally {
       setLoading(false);
     }
@@ -55,8 +59,12 @@ const ProtectedRoute = ({ children }) => {
     try {
       const { error: sbErr } = await supabase.auth.signInWithPassword({ email, password });
       if (sbErr) throw sbErr;
-    } catch {
-      setError('Correo o contraseña de colaborador incorrectos');
+    } catch (err) {
+      if (err.message && err.message.includes('Invalid login credentials')) {
+        setError('Credenciales incorrectas. ¿Eres el administrador? Cambia de pestaña arriba.');
+      } else {
+        setError('Correo o contraseña de colaborador incorrectos');
+      }
     } finally {
       setLoading(false);
     }

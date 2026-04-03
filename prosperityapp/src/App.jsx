@@ -1,6 +1,6 @@
 // ===== INICIO: src/App.jsx (Sprint 108 — Performance: Lazy Loading) =====
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { BusinessProvider } from './context/BusinessContext';
 import { DataProvider } from './context/DataContext';
@@ -11,6 +11,8 @@ import OfflineIndicator from './components/OfflineIndicator';
 // Layout — siempre presente, no lazy (es el shell)
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import { useBusiness } from './context/BusinessContext';
+import { useLocation, Navigate } from 'react-router-dom';
 
 // ── Lazy imports — cada módulo se carga sólo cuando se navega a él ──────────
 const AgendaCalendario    = lazy(() => import('./components/agenda/AgendaCalendario'));
@@ -63,6 +65,21 @@ const PlaceholderPage = ({ title }) => (
   <h1 className="p-8 text-3xl font-bold text-text-main">{title}</h1>
 );
 
+const CollaboratorRouteGuard = ({ children }) => {
+  const { realRole } = useBusiness();
+  const location = useLocation();
+
+  if (realRole === 'collaborator') {
+    const allowedPaths = ['/app', '/app/nomina', '/app/precios'];
+    // Strict exact match for allowed paths
+    if (!allowedPaths.includes(location.pathname)) {
+      return <Navigate to="/app" replace />;
+    }
+  }
+
+  return children;
+};
+
 function App() {
   return (
     <ThemeProvider>
@@ -87,7 +104,9 @@ function App() {
 
                 <Route path="/app" element={
                   <ProtectedRoute>
-                    <Layout />
+                    <CollaboratorRouteGuard>
+                      <Layout />
+                    </CollaboratorRouteGuard>
                   </ProtectedRoute>
                 }>
                   <Route index element={<AgendaCalendario />} />

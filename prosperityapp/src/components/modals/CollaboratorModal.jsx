@@ -37,13 +37,45 @@ async function callCollaboratorAuthFn(payload, businessId) {
 const PinVerifier = ({ config, onSuccess, onCancel }) => {
   const [pin, setPin]   = useState('');
   const [err, setErr]   = useState('');
+  const [attempts, setAttempts] = useState(0);
+  const [blockedUntil, setBlockedUntil] = useState(null);
+
   const storedPin = config?.[0]?.securityPin || '1234';
+
+  useEffect(() => {
+    if (blockedUntil && Date.now() >= blockedUntil) {
+      setBlockedUntil(null);
+      setAttempts(0);
+      setErr('');
+    } else if (blockedUntil) {
+      const timer = setTimeout(() => {
+        setBlockedUntil(null);
+        setAttempts(0);
+        setErr('');
+      }, blockedUntil - Date.now());
+      return () => clearTimeout(timer);
+    }
+  }, [blockedUntil]);
 
   const verify = (e) => {
     e.preventDefault();
-    if (pin === storedPin) { onSuccess(); }
-    else { setErr('PIN incorrecto. Inténtalo de nuevo.'); }
+    if (blockedUntil) return;
+
+    if (pin === storedPin) {
+      onSuccess();
+    } else {
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+      if (newAttempts >= 3) {
+        setBlockedUntil(Date.now() + 30000); // 30 seconds block
+        setErr('Demasiados intentos fallidos. Inténtalo de nuevo en 30 segundos.');
+      } else {
+        setErr('PIN incorrecto. Inténtalo de nuevo.');
+      }
+    }
   };
+
+  const isBlocked = !!blockedUntil;
 
   return (
     <div className="flex flex-col items-center gap-4 py-6">
@@ -60,15 +92,16 @@ const PinVerifier = ({ config, onSuccess, onCancel }) => {
         <input
           type="password"
           value={pin}
-          onChange={(e) => { setPin(e.target.value); setErr(''); }}
+          onChange={(e) => { setPin(e.target.value); if (!isBlocked) setErr(''); }}
           placeholder="PIN de administrador"
-          className="w-full bg-bg-tertiary border border-border-main rounded-lg p-3 text-text-main text-center text-xl tracking-widest focus:outline-none focus:border-accent"
+          className="w-full bg-bg-tertiary border border-border-main rounded-lg p-3 text-text-main text-center text-xl tracking-widest focus:outline-none focus:border-accent disabled:opacity-50"
           maxLength={6}
           autoFocus
+          disabled={isBlocked}
         />
         {err && <p className="text-red-400 text-xs text-center">{err}</p>}
-        <button type="submit" className="btn-golden w-full py-2.5 font-semibold">
-          Autorizar
+        <button type="submit" disabled={isBlocked} className="btn-golden w-full py-2.5 font-semibold disabled:opacity-50">
+          {isBlocked ? 'Bloqueado' : 'Autorizar'}
         </button>
         <button type="button" onClick={onCancel} className="w-full py-2 text-text-muted text-sm hover:text-text-main transition-colors">
           Cancelar
@@ -240,8 +273,12 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
           { action: 'create', email: loginEmail, password: newPassword, collaboratorId: collaboratorToEdit.id },
           effectiveBusinessId
         );
-        // Update local formData to reflect the new authUserId (for UI badge)
-        setFormData(prev => ({ ...prev, authUserId: result.authUserId, loginEmail }));
+        if (result?.authUserId) {
+          // Update local formData to reflect the new authUserId (for UI badge)
+          setFormData(prev => ({ ...prev, authUserId: result.authUserId, loginEmail }));
+        } else {
+          throw new Error('Error al crear el acceso: No se recibió ID de usuario.');
+        }
       } else {
         toast.error('Primero guarda el colaborador antes de configurar el acceso');
         return;
@@ -250,7 +287,8 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
       setNewPassword('');
     } catch (err) {
       console.warn('[handleSaveAccess]', err);
-      toast.error(`Error: ${err.message}`);
+      toast.error(`Error de configuración: ${err.message || 'No se pudo guardar el acceso'}`);
+      // Revert partial state changes if needed
     } finally {
       setIsSavingAccess(false);
     }
