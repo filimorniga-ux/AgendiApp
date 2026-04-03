@@ -46,42 +46,28 @@ export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = nu
     // ── FETCH ONLINE ────────────────────────────────────────────────────────
     const fetchFromSupabase = async () => {
       try {
-        let rows;
+        let query = supabase
+          .from(tableName)
+          .select('*')
+          .eq('business_id', businessId);
 
-        if (DEV_BYPASS) {
-          // En DEV_BYPASS: usar RPC que combina set_config + SELECT en una sola
-          // transacción para evitar el problema del connection pooler de Supabase
-          const { data: rpcData, error: rpcErr } = await supabase.rpc(
-            'fetch_table_with_business_id',
-            { p_table: tableName, p_business_id: businessId }
-          );
-          if (rpcErr) throw rpcErr;
-          rows = rpcData || [];
-        } else {
-          // Flujo normal (producción con Supabase Auth)
-          let query = supabase
-            .from(tableName)
-            .select('*')
-            .eq('business_id', businessId);
-
-          if (Array.isArray(filters)) {
-            filters.forEach(f => {
-              if (f.field && f.op && f.value !== undefined) {
-                query = query.filter(f.field, f.op, f.value);
-              }
-            });
-          }
-
-          if (orderBy?.column) {
-            query = query.order(orderBy.column, { ascending: orderBy.ascending ?? true });
-          } else {
-            query = query.order('created_at', { ascending: false });
-          }
-
-          const { data: qRows, error: err } = await query;
-          if (err) throw err;
-          rows = qRows || [];
+        if (Array.isArray(filters)) {
+          filters.forEach(f => {
+            if (f.field && f.op && f.value !== undefined) {
+              query = query.filter(f.field, f.op, f.value);
+            }
+          });
         }
+
+        if (orderBy?.column) {
+          query = query.order(orderBy.column, { ascending: orderBy.ascending ?? true });
+        } else {
+          query = query.order('created_at', { ascending: false });
+        }
+
+        const { data: qRows, error: err } = await query;
+        if (err) throw err;
+        const rows = qRows || [];
 
         if (!isMounted) return;
 
@@ -108,6 +94,7 @@ export const useSupabaseCollection = (tableNameInput, filters = [], orderBy = nu
         if (isMounted) setLoading(false);
       }
     };
+
 
     // ── FALLBACK OFFLINE: leer desde IndexedDB ───────────────────────────
     const loadFromCache = async () => {

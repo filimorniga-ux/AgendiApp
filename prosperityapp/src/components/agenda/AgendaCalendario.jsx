@@ -430,7 +430,7 @@ const AgendaCalendario = () => {
                     onClick={() => setIsTechModalOpen(true)}
                     className="px-4 py-2 bg-bg-tertiary text-text-main font-semibold rounded-md hover:bg-accent hover:text-accent-text border border-border-main flex items-center gap-2 transition-colors"
                   >
-                    <i data-feather="calculator" className="w-4 h-4"></i>
+                    <i data-feather="hash" className="w-4 h-4"></i>
                     <span className="text-sm">Productos</span>
                   </button>
                 </div>

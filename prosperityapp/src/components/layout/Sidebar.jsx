@@ -1,5 +1,5 @@
 // ===== INICIO: src/components/layout/Sidebar.jsx (collapsible + live logo + collaborator mode) =====
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import feather from 'feather-icons';
 import { ThemeContext } from '../../context/ThemeContext';
@@ -18,6 +18,35 @@ const Icon = ({ name, size = 20, className = '' }) => {
       style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center' }}
       dangerouslySetInnerHTML={{ __html: icon.toSvg({ width: size, height: size }) }}
     />
+  );
+};
+
+// ── Reloj en tiempo real ────────────────────────────────────────────────────
+const LiveClock = ({ collapsed }) => {
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const timeStr = now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  const timeShort = now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const dateStr = now.toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' });
+
+  if (collapsed) {
+    return (
+      <div className="flex flex-col items-center gap-0.5 py-2 px-1 rounded-lg bg-bg-tertiary/60 border border-border-main/40 w-full">
+        <span className="text-accent font-bold text-xs tabular-nums leading-none">{timeShort}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-2 py-2.5 rounded-lg bg-bg-tertiary/60 border border-border-main/40 text-center">
+      <p className="text-text-main font-bold text-xl tabular-nums tracking-tight leading-none">{timeStr}</p>
+      <p className="text-text-muted text-xs mt-0.5 capitalize">{dateStr}</p>
+    </div>
   );
 };
 
@@ -194,6 +223,8 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
         className={`flex-shrink-0 border-t border-border-main/60
           ${collapsed ? 'p-2 flex flex-col items-center gap-2' : 'p-3 space-y-2'}`}
       >
+        {/* Reloj siempre visible */}
+        <LiveClock collapsed={collapsed} />
         {/* Idioma + tema (solo en modo expandido) */}
         {!collapsed && (
           <div className="flex justify-between items-center p-2 bg-bg-tertiary/50 rounded-md border border-border-main/50">

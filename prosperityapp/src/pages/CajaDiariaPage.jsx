@@ -40,7 +40,7 @@ export default function CajaDiariaPage() {
       {/* HEADER TABS DESKTOP & MOBILE */}
       <div className="flex flex-col md:flex-row md:items-end justify-between px-4 sm:px-6 mb-4 gap-4">
         <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-accent to-gold text-glow shadow-accent/50 mb-1">
+          <h1 className="text-3xl font-bold text-text-main mb-1">
             Gestión de Caja y Reportes
           </h1>
           <p className="text-text-muted text-sm sm:text-base">Centro de control financiero y auditoría</p>
