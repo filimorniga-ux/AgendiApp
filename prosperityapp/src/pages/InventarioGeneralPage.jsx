@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
+import EmptyState from '../components/ui/EmptyState';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -88,7 +89,11 @@ const InventarioGeneralPage = () => {
         {isLoading ? (
           <p>Cargando inventario...</p>
         ) : categories.length === 0 ? (
-          <p className="text-text-main/70 text-center p-8">No hay productos en esta categoría.</p>
+          <EmptyState 
+            title="Inventario vacío" 
+            description="No hay productos en esta categoría o que coincidan con la búsqueda." 
+            className="my-12"
+          />
         ) : (
           categories.map(([categoryName, data]) => (
             <details key={categoryName} className="bg-secondary rounded-lg border border-border-main" open>

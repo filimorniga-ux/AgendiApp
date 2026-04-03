@@ -68,8 +68,8 @@ const StepConfigModal = ({ isOpen, onClose, onSave, initialStep = null }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="bg-bg-secondary rounded-xl border border-border-main shadow-2xl w-full max-w-md p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 modal-backdrop">
+      <div className="bg-bg-secondary rounded-xl border border-border-main shadow-2xl w-full max-w-md p-6 modal-content">
         <div className="flex justify-between items-center mb-5">
           <h3 className="text-lg font-bold text-text-main">
             {initialStep ? 'Editar Paso' : 'Nuevo Paso de Fórmula'}

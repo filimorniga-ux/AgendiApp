@@ -203,8 +203,8 @@ const AdvancedExportModal = ({ onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
-            <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-lg p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 modal-backdrop">
+            <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-lg p-6 modal-content">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold text-text-main">Exportación Profesional</h3>
                     <button onClick={onClose} className="text-text-muted hover:text-text-main"><Icon name="x" className="w-6 h-6" /></button>

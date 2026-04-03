@@ -57,7 +57,21 @@ const ClientesPage = () => {
   };
 
   if (loading) {
-    return null;
+    return (
+      <div className="space-y-3">
+        {[1,2,3,4,5].map(i => (
+          <div key={i} className={`skeleton-card animate-fadeInUp stagger-${i}`}>
+            <div className="flex items-center gap-3 p-4">
+              <div className="skeleton w-10 h-10 rounded-full"></div>
+              <div className="flex-1 space-y-2">
+                <div className="skeleton skeleton-text w-1/3"></div>
+                <div className="skeleton skeleton-text w-1/2"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }
   if (error) {
     return <h1 className="text-2xl font-bold text-red-500 p-8">{error}</h1>;
@@ -93,8 +107,8 @@ const ClientesPage = () => {
       </div>
       {/* Client list con padding inferior para bottom nav */}
       <div id="client-cards-container" className="space-y-3 pb-24 sm:pb-6">
-        {(filteredClients || []).map(client => (
-          <div key={client.id} className="bg-bg-secondary p-3 sm:p-4 rounded-lg border border-border-main flex justify-between items-center gap-3">
+        {(filteredClients || []).map((client, idx) => (
+          <div key={client.id} className={`bg-bg-secondary p-3 sm:p-4 rounded-lg border border-border-main flex justify-between items-center gap-3 hover-lift animate-fadeInUp stagger-${Math.min(idx + 1, 8)}`}>
             {/* Avatar + info */}
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-full bg-accent/20 text-accent font-bold flex items-center justify-center flex-shrink-0 text-sm">
@@ -111,24 +125,25 @@ const ClientesPage = () => {
             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               <Link
                 to={`/app/clientes/${client.id}`}
-                className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-accent rounded-md bg-bg-tertiary"
+                className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-accent rounded-md bg-bg-tertiary transition-colors"
                 title={t('clients.viewHistory')}
               >
                 <i data-feather="list" className="w-4 h-4"></i>
               </Link>
-              <button onClick={() => handleOpenEditModal(client)} className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-accent rounded-md bg-bg-tertiary" title={t('clients.editBtn')}>
+              <button onClick={() => handleOpenEditModal(client)} className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-accent rounded-md bg-bg-tertiary transition-colors" title={t('clients.editBtn')}>
                 <i data-feather="edit-2" className="w-4 h-4"></i>
               </button>
-              <button onClick={() => handleDeleteClient(client)} className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-red-400 rounded-md bg-bg-tertiary" title={t('clients.deleteBtn')}>
+              <button onClick={() => handleDeleteClient(client)} className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-red-400 rounded-md bg-bg-tertiary transition-colors" title={t('clients.deleteBtn')}>
                 <i data-feather="trash-2" className="w-4 h-4"></i>
               </button>
             </div>
           </div>
         ))}
         {filteredClients && filteredClients.length === 0 && (
-          <div className="text-center text-text-muted p-8">
-            <i data-feather="users" className="w-12 h-12 mx-auto mb-3 opacity-30"></i>
-            <p>{t('clients.noClientsFound')}</p>
+          <div className="flex flex-col items-center py-16 text-text-muted animate-fadeInUp">
+            <i data-feather="users" className="w-16 h-16 mb-4 opacity-20 animate-float"></i>
+            <p className="text-lg font-semibold mb-1">{t('clients.noClientsFound')}</p>
+            <p className="text-sm opacity-60">Agrega tu primer cliente con el botón de arriba</p>
           </div>
         )}
       </div>

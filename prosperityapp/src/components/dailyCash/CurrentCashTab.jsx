@@ -19,12 +19,12 @@ const formatCurrency = (value) => {
 };
 
 const SummaryCard = ({ title, value, icon, colorClass = 'text-accent' }) => (
-  <div className="bg-bg-secondary p-4 rounded-lg border border-border-main flex-1 min-w-[150px]">
+  <div className="bg-bg-secondary p-4 rounded-lg border border-border-main flex-1 min-w-[150px] hover-lift">
     <div className="flex items-center gap-2">
       <i data-feather={icon} className={`w-5 h-5 ${colorClass}`}></i>
       <p className="text-sm text-text-muted">{title}</p>
     </div>
-    <p className={`text-2xl font-bold mt-2 ${colorClass} text-text-main`}>{formatCurrency(value)}</p>
+    <p className={`text-2xl font-bold mt-2 stat-value ${colorClass} text-text-main`}>{formatCurrency(value)}</p>
   </div>
 );
 
@@ -34,7 +34,7 @@ const DailyColumn = ({ title, icon, movements, accentClass = 'border-t-gray-500'
   const headerClasses = `p-4 border-b border-border-main ${onHeaderClick ? 'cursor-pointer hover:bg-bg-tertiary' : ''}`;
 
   return (
-    <div className={`w-72 flex-shrink-0 bg-bg-secondary rounded-lg border border-border-main shadow-md border-t-4 ${accentClass}`}>
+    <div className={`w-72 flex-shrink-0 bg-bg-secondary rounded-lg border border-border-main shadow-md border-t-4 ${accentClass} hover-lift`}>
       <div className={headerClasses} onClick={onHeaderClick}>
         <div className="flex items-center gap-3">
           <i data-feather={icon} className="w-6 h-6 text-accent"></i>
@@ -233,18 +233,18 @@ export default function CurrentCashTab({ onArqueoClick }) {
         <BarcodeScanner active={scannerActive} onScan={handleBarcodeScanPOS} onClose={() => setScannerActive(false)} mode="keyboard" />
       )}
 
-      {/* Tarjetas Resumen */}
+      {/* Tarjetas Resumen — con stagger */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-        <SummaryCard title={t('dailyCash.cashInBox')} value={summary.efectivoEnCaja} icon="archive" colorClass="text-green-400" />
-        <SummaryCard title={t('dailyCash.cards.services')} value={summary.totalServicios} icon="scissors" />
-        <SummaryCard title={t('dailyCash.cards.sales')} value={summary.totalVentas} icon="shopping-bag" />
-        <SummaryCard title={t('dailyCash.cards.tips')} value={summary.totalPropinas} icon="gift" />
-        <SummaryCard title={t('dailyCash.cards.giftcards')} value={summary.totalVentasGC} icon="credit-card" colorClass="text-blue-400" />
-        <SummaryCard title={t('dailyCash.cards.cards')} value={summary.totalTarjetas} icon="credit-card" />
-        <SummaryCard title={t('dailyCash.cards.transfers')} value={summary.totalTransferencias} icon="smartphone" />
-        <SummaryCard title={t('dailyCash.cards.gcPayments')} value={summary.totalPagosGC} icon="credit-card" colorClass="text-red-400" />
-        <SummaryCard title={t('dailyCash.cards.expenses')} value={summary.totalGastos} icon="arrow-down-circle" colorClass="text-red-400" />
-        <SummaryCard title={t('dailyCash.cards.advances')} value={summary.totalAdelantos} icon="dollar-sign" colorClass="text-yellow-400" />
+        <div className="animate-fadeInUp stagger-1"><SummaryCard title={t('dailyCash.cashInBox')} value={summary.efectivoEnCaja} icon="archive" colorClass="text-green-400" /></div>
+        <div className="animate-fadeInUp stagger-2"><SummaryCard title={t('dailyCash.cards.services')} value={summary.totalServicios} icon="scissors" /></div>
+        <div className="animate-fadeInUp stagger-3"><SummaryCard title={t('dailyCash.cards.sales')} value={summary.totalVentas} icon="shopping-bag" /></div>
+        <div className="animate-fadeInUp stagger-4"><SummaryCard title={t('dailyCash.cards.tips')} value={summary.totalPropinas} icon="gift" /></div>
+        <div className="animate-fadeInUp stagger-5"><SummaryCard title={t('dailyCash.cards.giftcards')} value={summary.totalVentasGC} icon="credit-card" colorClass="text-blue-400" /></div>
+        <div className="animate-fadeInUp stagger-1"><SummaryCard title={t('dailyCash.cards.cards')} value={summary.totalTarjetas} icon="credit-card" /></div>
+        <div className="animate-fadeInUp stagger-2"><SummaryCard title={t('dailyCash.cards.transfers')} value={summary.totalTransferencias} icon="smartphone" /></div>
+        <div className="animate-fadeInUp stagger-3"><SummaryCard title={t('dailyCash.cards.gcPayments')} value={summary.totalPagosGC} icon="credit-card" colorClass="text-red-400" /></div>
+        <div className="animate-fadeInUp stagger-4"><SummaryCard title={t('dailyCash.cards.expenses')} value={summary.totalGastos} icon="arrow-down-circle" colorClass="text-red-400" /></div>
+        <div className="animate-fadeInUp stagger-5"><SummaryCard title={t('dailyCash.cards.advances')} value={summary.totalAdelantos} icon="dollar-sign" colorClass="text-yellow-400" /></div>
       </div>
 
       {/* Columnas */}

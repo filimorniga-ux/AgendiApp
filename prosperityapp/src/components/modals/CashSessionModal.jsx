@@ -63,8 +63,8 @@ export default function CashSessionModal({ isOpen, onClose, summaryData, session
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm sm:p-4 animate-fadeIn">
-      <div className="bg-bg-secondary border border-border-main rounded-t-[20px] sm:rounded-xl w-full sm:max-w-lg overflow-hidden shadow-2xl relative animate-slideUp">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm sm:p-4 modal-backdrop">
+      <div className="bg-bg-secondary border border-border-main rounded-t-[20px] sm:rounded-xl w-full sm:max-w-lg overflow-hidden shadow-2xl relative modal-content">
         
         {/* Header */}
         <div className={`p-6 border-b border-border-main flex items-start gap-4 ${isCierre ? 'bg-red-500/10' : 'bg-accent/10'}`}>

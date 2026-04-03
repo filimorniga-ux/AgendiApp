@@ -387,10 +387,11 @@ const AgendaCalendario = () => {
       {/* --- PIZARRA KANBAN --- */}
       <div className="flex-1 overflow-x-auto overflow-y-hidden pb-20 sm:pb-2">
         <div className="flex h-full pb-2" style={{ scrollSnapType: 'x mandatory' }}>
-          {(collaborators || []).filter(c => c.status === 'active').map(collab => {
+          {(collaborators || []).filter(c => c.status === 'active').map((collab, idx) => {
             const collabAppointments = dailyAppointments.filter(apt => apt.stylistId === collab.id);
+            const staggerClass = `stagger-${Math.min(idx + 1, 8)}`;
           return (
-              <div key={collab.id} style={{ scrollSnapAlign: 'start' }}>
+              <div key={collab.id} className={`animate-fadeInUp ${staggerClass}`} style={{ scrollSnapAlign: 'start' }}>
                 <StylistColumn
                   stylist={collab}
                   appointments={collabAppointments}

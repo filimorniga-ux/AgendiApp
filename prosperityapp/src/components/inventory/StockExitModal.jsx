@@ -66,8 +66,8 @@ export function StockExitModal({ product, inventoryType, onClose, onSuccess }) {
   }
 
   return (
-    <div className="bc-modal-overlay" role="dialog" aria-modal="true" aria-label="Salida de mercancía">
-      <div className="bc-modal">
+    <div className="bc-modal-overlay modal-backdrop" role="dialog" aria-modal="true" aria-label="Salida de mercancía">
+      <div className="bc-modal modal-content">
         <div className="bc-modal__header bc-modal__header--exit">
           <span className="bc-modal__icon">📤</span>
           <h2>Salida de Mercancía</h2>

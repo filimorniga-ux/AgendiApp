@@ -1,0 +1,300 @@
+/* ==========================================================================
+   AGENDIAPP — SISTEMA DE ANIMACIONES MODERNO
+   Pure CSS · No external libs · Performance-first (GPU-accelerated)
+   ========================================================================== */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   1. KEYFRAMES
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Entrada suave: opacidad */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Entrada desde abajo */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Entrada desde arriba */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Entrada escalada (modales, dropdowns) */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Entrada desde la izquierda */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Entrada desde la derecha */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Shimmer — skeleton loading */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+/* Pulse suave — indicadores de estado */
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.7; transform: scale(0.97); }
+}
+
+/* Float — elementos flotantes/icónos decorativos */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* Bounce de entrada con efecto elástico */
+@keyframes bounceIn {
+  0%   { opacity: 0; transform: scale(0.4); }
+  60%  { opacity: 1; transform: scale(1.05); }
+  80%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+/* Ripple — efecto de onda en botones */
+@keyframes ripple {
+  from { transform: scale(0); opacity: 0.4; }
+  to   { transform: scale(4); opacity: 0; }
+}
+
+/* Slide up — sheets en mobile */
+@keyframes slideUpSheet {
+  from { transform: translateY(100%); opacity: 0.6; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Contador numérico — efecto tick */
+@keyframes countUp {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+/* Glow pulsante para el sidebar/accent */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 4px color-mix(in srgb, var(--color-accent) 30%, transparent); }
+  50%       { box-shadow: 0 0 16px color-mix(in srgb, var(--color-accent) 60%, transparent); }
+}
+
+/* Barra de progreso deslizante */
+@keyframes progressSlide {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   2. CLASES DE ANIMACIÓN (utility)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.animate-fadeIn        { animation: fadeIn        0.3s ease both; }
+.animate-fadeInUp      { animation: fadeInUp      0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fadeInDown    { animation: fadeInDown    0.3s ease both; }
+.animate-scaleIn       { animation: scaleIn       0.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-slideInLeft   { animation: slideInLeft   0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-slideInRight  { animation: slideInRight  0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-bounceIn      { animation: bounceIn      0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-pulseSoft     { animation: pulseSoft     2s ease-in-out infinite; }
+.animate-float         { animation: float         3s ease-in-out infinite; }
+.animate-glowPulse     { animation: glowPulse     2s ease-in-out infinite; }
+.animate-slideUpSheet  { animation: slideUpSheet  0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   3. DELAYS DE APARICIÓN EN CASCADA (stagger)
+   Para listas de cards o nav items
+   ───────────────────────────────────────────────────────────────────────────── */
+.stagger-1  { animation-delay: 0.05s; }
+.stagger-2  { animation-delay: 0.10s; }
+.stagger-3  { animation-delay: 0.15s; }
+.stagger-4  { animation-delay: 0.20s; }
+.stagger-5  { animation-delay: 0.25s; }
+.stagger-6  { animation-delay: 0.30s; }
+.stagger-7  { animation-delay: 0.35s; }
+.stagger-8  { animation-delay: 0.40s; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   4. EFECTOS HOVER (micro-interacciones)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Card lift */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease;
+  will-change: transform;
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-accent) 15%, transparent),
+              0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Glow en hover */
+.hover-glow {
+  transition: box-shadow 0.25s ease;
+}
+.hover-glow:hover {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 40%, transparent),
+              0 0 16px color-mix(in srgb, var(--color-accent) 20%, transparent);
+}
+
+/* Press effect en botones */
+.btn-press {
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  position: relative;
+  overflow: hidden;
+}
+.btn-press:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   5. SKELETON LOADING (shimmer)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-tertiary) 25%,
+    color-mix(in srgb, var(--color-bg-tertiary) 60%, var(--color-bg-secondary)) 50%,
+    var(--color-bg-tertiary) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 6px;
+}
+
+.skeleton-text  { height: 0.9em; }
+.skeleton-title { height: 1.4em; }
+.skeleton-card  { height: 80px; border-radius: 12px; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   6. RIPPLE EN BOTONES
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px;
+  background: color-mix(in srgb, currentColor 30%, transparent);
+  border-radius: 50%;
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+.btn-ripple:active::after {
+  animation: ripple 0.5s ease-out forwards;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   7. NAVEGACIÓN DEL SIDEBAR (indicador activo animado)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.sidebar-link {
+  position: relative;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+.sidebar-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 3px;
+  height: 60%;
+  background: var(--color-accent);
+  border-radius: 0 3px 3px 0;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s;
+  opacity: 0;
+}
+.sidebar-link.active::before,
+.sidebar-link[aria-current="page"]::before {
+  transform: translateY(-50%) scaleY(1);
+  opacity: 1;
+}
+.sidebar-link:not(.active):hover {
+  transform: translateX(2px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   8. MODAL / DIALOG TRANSITIONS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Backdrop */
+.modal-backdrop {
+  animation: fadeIn 0.2s ease both;
+}
+/* Contenido del modal */
+.modal-content {
+  animation: scaleIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   9. TRANSICIÓN DE PÁGINAS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.page-enter {
+  animation: fadeInUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   10. INDICADOR DE CARGA TIPO BARRA (top progress)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.progress-bar {
+  transform-origin: left;
+  animation: progressSlide 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   11. BADGE / NOTIFICACIÓN CON BOUNCE
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.badge-appear {
+  animation: bounceIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   12. NÚMERO ANIMADO (stat counters)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.stat-value {
+  display: inline-block;
+  animation: countUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   13. REDUCED MOTION — accesibilidad
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { exportToExcel } from '../../lib/exportUtils';
 import { exportToPDF } from '../../lib/exportPDFUtils';
 import { useSupabaseCollection } from '../../hooks/useSupabaseCollection';
+import EmptyState from '../ui/EmptyState';
 
 const formatCurrency = (val) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(val || 0);
 
@@ -85,7 +86,12 @@ export default function CashSessionsHistoryTab() {
             <tbody className="divide-y divide-border-main text-text-main">
               {sessions?.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-8 text-center text-text-muted">No hay sesiones de caja registradas</td>
+                  <td colSpan="6" className="p-8">
+                    <EmptyState 
+                      title="No hay sesiones de caja" 
+                      description="Aún no se ha registrado ninguna sesión de caja en el sistema." 
+                    />
+                  </td>
                 </tr>
               ) : (
                 sessions?.map((session) => (

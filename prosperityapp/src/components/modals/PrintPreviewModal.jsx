@@ -20,8 +20,8 @@ const PrintPreviewModal = ({ isOpen, onClose, onPrint, title, children }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm">
-            <div className="bg-bg-secondary rounded-lg shadow-2xl border border-border-main w-full max-w-4xl h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm modal-backdrop">
+            <div className="bg-bg-secondary rounded-lg shadow-2xl border border-border-main w-full max-w-4xl h-[90vh] flex flex-col modal-content">
                 {/* Header */}
                 <div className="p-4 border-b border-border-main flex justify-between items-center bg-bg-tertiary rounded-t-lg">
                     <div className="flex items-center gap-3">

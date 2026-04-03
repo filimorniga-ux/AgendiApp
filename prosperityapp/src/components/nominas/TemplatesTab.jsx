@@ -3,6 +3,7 @@ import { supabase } from '../../supabase/client';
 import { useData } from '../../context/DataContext';
 import { DEFAULT_TEMPLATE_STEPS } from '../../lib/payrollEngine';
 import FormulaBuilder from './FormulaBuilder';
+import EmptyState from '../ui/EmptyState';
 import toast from 'react-hot-toast';
 
 const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
@@ -356,9 +357,11 @@ const TemplatesTab = () => {
         {loading ? (
           <div className="text-center py-10 text-text-muted">Cargando…</div>
         ) : templates.length === 0 ? (
-          <div className="border-2 border-dashed border-border-main rounded-xl p-10 text-center">
-            <p className="text-text-muted mb-2">No hay plantillas guardadas.</p>
-            <p className="text-sm text-text-muted/60">Se usa la fórmula por defecto del sistema.</p>
+          <div className="border-2 border-dashed border-border-main rounded-xl p-6 text-center">
+            <EmptyState 
+              title="No hay plantillas guardadas" 
+              description="Se usa la fórmula por defecto del sistema." 
+            />
             <button onClick={openNewTemplate} className="mt-4 px-5 py-2 rounded-lg bg-accent/20 text-accent font-semibold text-sm hover:bg-accent/30">
               Crear primera plantilla
             </button>
@@ -438,7 +441,10 @@ const TemplatesTab = () => {
                 />
               ))}
               {activeCollabs.length === 0 && (
-                <p className="text-sm text-text-muted/60 text-center py-6">No hay colaboradores activos.</p>
+                <EmptyState 
+                  title="No hay colaboradores activos" 
+                  description="Debes crear y activar colaboradores para configurarles una plantilla individual." 
+                />
               )}
             </>
           )}

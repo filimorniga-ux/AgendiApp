@@ -75,8 +75,8 @@ export function QuickCreateProductModal({ barcode, onClose, onCreated }) {
   }
 
   return (
-    <div className="bc-modal-overlay" role="dialog" aria-modal="true" aria-label="Crear producto">
-      <div className="bc-modal bc-modal--wide">
+    <div className="bc-modal-overlay modal-backdrop" role="dialog" aria-modal="true" aria-label="Crear producto">
+      <div className="bc-modal bc-modal--wide modal-content">
         <div className="bc-modal__header bc-modal__header--create">
           <span className="bc-modal__icon">➕</span>
           <h2>Nuevo Producto</h2>

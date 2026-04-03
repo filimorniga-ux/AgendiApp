@@ -44,7 +44,7 @@ const SortableCollaboratorRow = ({ collaborator, sortBy, t, onEdit, onDelete }) 
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-bg-secondary rounded-lg border border-border-main p-3 sm:p-4 flex items-center gap-3 ${isDragging ? 'shadow-xl border-accent z-50 opacity-80' : ''}`}
+      className={`bg-bg-secondary rounded-lg border border-border-main p-3 sm:p-4 flex items-center gap-3 hover-lift transition-all duration-200 ${isDragging ? 'shadow-xl border-accent z-50 opacity-80' : ''}`}
     >
       {/* Drag Handle */}
       {sortBy === 'custom' && (
@@ -177,7 +177,20 @@ const ColaboradoresPage = () => {
     }
   };
 
-  if (loading) return null;
+  if (loading) return (
+    <div className="space-y-2 pb-24 sm:pb-6">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="bg-bg-secondary rounded-lg border border-border-main p-3 sm:p-4 flex items-center gap-3">
+          <div className="skeleton w-10 h-10 rounded-full flex-shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="skeleton h-4 w-40 rounded" />
+            <div className="skeleton h-3 w-24 rounded" />
+          </div>
+          <div className="skeleton w-9 h-9 rounded-md flex-shrink-0" />
+        </div>
+      ))}
+    </div>
+  );
   if (error) return <h1 className="text-2xl font-bold text-red-500 p-8">{error}</h1>;
 
   return (
@@ -217,20 +230,24 @@ const ColaboradoresPage = () => {
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={filteredCollabList.map(c => c.id)} strategy={verticalListSortingStrategy}>
           <div className="space-y-2 pb-24 sm:pb-6">
-            {filteredCollabList.map((c) => (
-              <SortableCollaboratorRow
-                key={c.id}
-                collaborator={c}
-                sortBy={sortBy}
-                t={t}
-                onEdit={handleOpenEditModal}
-                onDelete={handleDelete}
-              />
+            {filteredCollabList.map((c, i) => (
+              <div key={c.id} className={`animate-fadeInUp stagger-${Math.min(i + 1, 8)}`}>
+                <SortableCollaboratorRow
+                  collaborator={c}
+                  sortBy={sortBy}
+                  t={t}
+                  onEdit={handleOpenEditModal}
+                  onDelete={handleDelete}
+                />
+              </div>
             ))}
             {filteredCollabList.length === 0 && (
-              <div className="text-center text-text-muted p-8">
-                <i data-feather="users" className="w-12 h-12 mx-auto mb-3 opacity-30"></i>
-                <p>{t('collaborators.searchPlaceholder')}</p>
+              <div className="text-center text-text-muted p-12 animate-fadeInUp">
+                <div className="animate-float inline-block mb-4">
+                  <i data-feather="users" className="w-16 h-16 mx-auto opacity-20"></i>
+                </div>
+                <p className="font-semibold text-lg mb-1">Sin colaboradores</p>
+                <p className="text-sm opacity-60">Agrega tu primer colaborador con el botón de arriba.</p>
               </div>
             )}
           </div>

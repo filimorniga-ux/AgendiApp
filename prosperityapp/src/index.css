@@ -2,6 +2,7 @@
 /* ── Fuente local (Fontsource) — elimina round-trip a Google Fonts CDN ── */
 @import '@fontsource-variable/inter';
 @import "tailwindcss";
+@import "./styles/animations.css";
 
 /* --- Configuración de Tema (Tailwind v4 @theme) --- */
 @theme {
@@ -255,10 +256,34 @@
 
     @layer components {
       .btn-golden {
-        @apply bg-accent text-accent-text font-bold py-2 px-4 rounded-md transition-all duration-200;
+        @apply bg-accent text-accent-text font-bold py-2 px-4 rounded-md;
+        transition: transform 0.12s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        position: relative;
+        overflow: hidden;
       }
       .btn-golden:hover {
-        @apply brightness-90; 
+        @apply brightness-90;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px color-mix(in srgb, var(--color-accent) 40%, transparent);
+      }
+      .btn-golden:active {
+        transform: scale(0.97) translateY(0);
+        box-shadow: none;
+      }
+      .btn-golden::after {
+        content: '';
+        position: absolute;
+        inset: 50% auto auto 50%;
+        width: 8px; height: 8px;
+        margin: -4px;
+        background: rgba(255,255,255,0.35);
+        border-radius: 50%;
+        transform: scale(0);
+        opacity: 0;
+        pointer-events: none;
+      }
+      .btn-golden:active::after {
+        animation: ripple 0.5s ease-out forwards;
       }
     }
 

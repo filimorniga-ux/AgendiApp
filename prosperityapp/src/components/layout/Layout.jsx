@@ -141,7 +141,11 @@ const Layout = () => {
             padding: isMobile ? '0 16px 80px' : '1.5rem 2rem 2.5rem',
           }}
         >
-          {isLoading ? <GlobalLoader /> : <Outlet />}
+          {isLoading ? <GlobalLoader /> : (
+            <div key={location.pathname} className="animate-fadeInUp h-full">
+              <Outlet />
+            </div>
+          )}
         </div>
       </main>
 

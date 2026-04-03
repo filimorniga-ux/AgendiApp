@@ -65,8 +65,8 @@ export function StockEntryModal({ product, inventoryType, onClose, onSuccess }) 
   }
 
   return (
-    <div className="bc-modal-overlay" role="dialog" aria-modal="true" aria-label="Entrada de mercancía">
-      <div className="bc-modal">
+    <div className="bc-modal-overlay modal-backdrop" role="dialog" aria-modal="true" aria-label="Entrada de mercancía">
+      <div className="bc-modal modal-content">
         <div className="bc-modal__header bc-modal__header--entry">
           <span className="bc-modal__icon">📦</span>
           <h2>Entrada de Mercancía</h2>

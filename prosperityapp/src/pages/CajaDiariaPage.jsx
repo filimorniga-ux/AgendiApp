@@ -67,7 +67,8 @@ export default function CajaDiariaPage() {
 
       {/* CONTENT AREA */}
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 lg:pb-6 custom-scrollbar">
-        <div className="animate-slideUp fade-in-up">
+        {/* Content con transición al cambiar de tab */}
+        <div key={activeTab} className="animate-fadeInUp">
           {activeTab === 'current' && (
              <CurrentCashTab onArqueoClick={handleOpenSessionModal} />
           )}

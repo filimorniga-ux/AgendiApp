@@ -79,8 +79,8 @@ const PaymentSuccessModal = ({ isOpen, onClose, ticketData, voucherData = [], co
   const activeVoucher = voucherData.find(v => v.collaboratorId === activeTab);
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm">
-      <div className="bg-bg-secondary rounded-xl shadow-2xl border border-border-main w-full max-w-3xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm modal-backdrop">
+      <div className="bg-bg-secondary rounded-xl shadow-2xl border border-border-main w-full max-w-3xl max-h-[90vh] flex flex-col modal-content">
 
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="p-4 border-b border-border-main bg-bg-tertiary rounded-t-xl flex items-center justify-between">

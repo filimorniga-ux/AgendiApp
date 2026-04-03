@@ -95,7 +95,30 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
     } catch (err) { console.warn(err); toast.error(err.message); }
   };
 
-  if (loading) return null;
+  if (loading) return (
+    <div className="bg-bg-secondary rounded-lg border border-border-main overflow-x-auto">
+      <table className="w-full text-left min-w-[1200px]">
+        <thead className="bg-bg-main/50">
+          <tr>
+            {[...Array(10)].map((_, i) => (
+              <th key={i} className="p-3"><div className="skeleton h-3 w-20 rounded" /></th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {[...Array(6)].map((_, i) => (
+            <tr key={i} className="border-b border-border-main">
+              {[...Array(10)].map((_, j) => (
+                <td key={j} className="p-3">
+                  <div className={`skeleton h-4 rounded ${j === 0 ? 'w-36' : 'w-16'}`} />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
   if (error) return <h1 className="text-2xl font-bold text-red-500 p-8">{error}</h1>;
 
   return (
@@ -138,10 +161,12 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
             </tr>
           </thead>
           <tbody>
-            {(items || []).map(p => {
-              const lowStockClass = p.isLowStock ? 'bg-red-100 dark:bg-red-900/30' : 'hover:bg-bg-tertiary';
+            {(items || []).map((p, i) => {
+              const lowStockClass = p.isLowStock
+                ? 'bg-red-500/10 border-l-2 border-l-red-500 animate-pulseSoft'
+                : 'hover:bg-bg-tertiary transition-colors';
               return (
-                <tr key={p.id} className={`border-b border-border-main text-sm ${lowStockClass}`}>
+                <tr key={p.id} className={`border-b border-border-main text-sm animate-fadeInUp stagger-${Math.min(i + 1, 8)} ${lowStockClass}`}>
                   <td className="p-3 text-text-main font-semibold">{p.name} ({p.brand})</td>
                   <td className="p-3 text-center">
                     <div className="flex items-center justify-center gap-2">
@@ -187,7 +212,15 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
             })}
           </tbody>
         </table>
-        {items && items.length === 0 && (<p className="text-center text-text-muted p-8">{t('dashboard.noData')}</p>)}
+        {items && items.length === 0 && (
+          <div className="text-center text-text-muted p-12 animate-fadeInUp">
+            <div className="animate-float inline-block mb-4">
+              <i data-feather="package" className="w-16 h-16 mx-auto opacity-20"></i>
+            </div>
+            <p className="font-semibold text-lg mb-1">Sin productos</p>
+            <p className="text-sm opacity-60">{t('dashboard.noData')}</p>
+          </div>
+        )}
       </div>
       <TechProductModal
         isOpen={isModalOpen}

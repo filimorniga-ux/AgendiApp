@@ -179,8 +179,8 @@ const ContactImportModal = ({ isOpen, onClose, onImportComplete }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4">
-            <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 modal-backdrop">
+            <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-3xl max-h-[90vh] overflow-y-auto modal-content">
                 {/* Header */}
                 <div className="p-4 border-b border-border-main flex justify-between items-center">
                     <h3 className="text-xl font-bold text-text-main">{t('clients.importModal.title')}</h3>

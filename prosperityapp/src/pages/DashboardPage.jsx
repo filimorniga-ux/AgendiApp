@@ -11,6 +11,7 @@ import PrintPreviewModal from '../components/modals/PrintPreviewModal';
 import DashboardPrintTemplate from '../components/reports/DashboardPrintTemplate';
 import { useReactToPrint } from 'react-to-print';
 import { useTranslation } from 'react-i18next';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -40,13 +41,13 @@ const parseDate = (date) => {
 };
 
 // --- Componente de Tarjeta (Tema Corregido) ---
-const SummaryCard = ({ title, value, icon, colorClass = 'text-accent' }) => (
-  <div className="bg-bg-secondary p-3 sm:p-4 rounded-lg border border-border-main flex-1">
+const SummaryCard = ({ title, value, icon, colorClass = 'text-accent', stagger = '' }) => (
+  <div className={`bg-bg-secondary p-3 sm:p-4 rounded-lg border border-border-main flex-1 hover-lift animate-fadeInUp ${stagger}`}>
     <div className="flex items-center gap-2">
       <i data-feather={icon} className={`w-4 h-4 sm:w-5 sm:h-5 ${colorClass} flex-shrink-0`}></i>
       <p className="text-xs sm:text-sm text-text-muted truncate">{title}</p>
     </div>
-    <p className={`text-lg sm:text-2xl font-bold mt-1 sm:mt-2 ${colorClass}`}>{formatCurrency(value)}</p>
+    <p className={`text-lg sm:text-2xl font-bold mt-1 sm:mt-2 stat-value ${colorClass}`}>{formatCurrency(value)}</p>
   </div>
 );
 
@@ -150,28 +151,69 @@ const TabDiario = () => {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-          <SummaryCard title={t('dashboard.cards.services')} value={summary.totalServicios} icon="scissors" />
-          <SummaryCard title={t('dashboard.cards.sales')} value={summary.totalVentas} icon="shopping-bag" />
-          <SummaryCard title={t('dashboard.cards.expenses')} value={summary.totalGastos} icon="arrow-down-circle" colorClass="text-red-400" />
-          <SummaryCard title={t('dashboard.cards.techCost')} value={summary.totalCostoTecnico} icon="tool" colorClass="text-yellow-400" />
+          <SummaryCard title={t('dashboard.cards.services')} value={summary.totalServicios} icon="scissors" stagger="stagger-1" />
+          <SummaryCard title={t('dashboard.cards.sales')} value={summary.totalVentas} icon="shopping-bag" stagger="stagger-2" />
+          <SummaryCard title={t('dashboard.cards.expenses')} value={summary.totalGastos} icon="arrow-down-circle" colorClass="text-red-400" stagger="stagger-3" />
+          <SummaryCard title={t('dashboard.cards.techCost')} value={summary.totalCostoTecnico} icon="tool" colorClass="text-yellow-400" stagger="stagger-4" />
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-          <SummaryCard title={t('dashboard.cards.cash')} value={summary.totalEfectivo} icon="dollar-sign" colorClass="text-green-400" />
-          <SummaryCard title={t('dashboard.cards.cards')} value={summary.totalTarjetas} icon="credit-card" colorClass="text-green-400" />
-          <SummaryCard title={t('dashboard.cards.transfers')} value={summary.totalTransferencias} icon="smartphone" colorClass="text-green-400" />
-          <SummaryCard title={t('dashboard.cards.advances')} value={summary.totalAdelantos} icon="chevrons-down" colorClass="text-red-400" />
+          <SummaryCard title={t('dashboard.cards.cash')} value={summary.totalEfectivo} icon="dollar-sign" colorClass="text-green-400" stagger="stagger-1" />
+          <SummaryCard title={t('dashboard.cards.cards')} value={summary.totalTarjetas} icon="credit-card" colorClass="text-green-400" stagger="stagger-2" />
+          <SummaryCard title={t('dashboard.cards.transfers')} value={summary.totalTransferencias} icon="smartphone" colorClass="text-green-400" stagger="stagger-3" />
+          <SummaryCard title={t('dashboard.cards.advances')} value={summary.totalAdelantos} icon="chevrons-down" colorClass="text-red-400" stagger="stagger-4" />
         </div>
-        <div className="bg-bg-secondary p-6 rounded-lg border border-border-main">
-          <h3 className="text-xl font-bold text-text-main mb-4">{t('dashboard.ranking')}</h3>
-          <ul className="space-y-3">
-            {summary.ranking.map((collab, index) => (
-              <li key={collab.id} className="flex items-center justify-between p-3 bg-bg-tertiary rounded">
-                <span className="font-semibold text-text-main">#{index + 1} {collab.name}</span>
-                <span className="text-accent font-bold">{collab.serviceCount} {t('dashboard.cards.services')}</span>
-              </li>
-            ))}
-            {summary.ranking.length === 0 && <p className="text-text-muted">{t('dashboard.noData')}</p>}
-          </ul>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-bg-secondary p-6 rounded-lg border border-border-main animate-fadeInUp stagger-5">
+            <h3 className="text-xl font-bold text-text-main mb-4">{t('dashboard.ranking')}</h3>
+            <ul className="space-y-3">
+              {summary.ranking.map((collab, index) => (
+                <li key={collab.id} className={`flex items-center justify-between p-3 bg-bg-tertiary rounded hover-lift animate-fadeInUp stagger-${Math.min(index + 1, 8)}`}>
+                  <span className="font-semibold text-text-main">#{index + 1} {collab.name}</span>
+                  <span className="text-accent font-bold">{collab.serviceCount} {t('dashboard.cards.services')}</span>
+                </li>
+              ))}
+              {summary.ranking.length === 0 && (
+                <div className="flex flex-col items-center py-8 text-text-muted animate-fadeInUp">
+                  <i data-feather="award" className="w-12 h-12 mb-3 opacity-30 animate-float"></i>
+                  <p>{t('dashboard.noData')}</p>
+                </div>
+              )}
+            </ul>
+          </div>
+          
+          {/* Mini Gráfico de Barras */}
+          <div className="bg-bg-secondary p-6 rounded-lg border border-border-main animate-fadeInUp stagger-6 flex flex-col">
+            <h3 className="text-xl font-bold text-text-main mb-4">Resumen Financiero</h3>
+            <div className="flex-1 min-h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={[
+                  { name: 'Ingresos', valor: summary.totalServicios + summary.totalVentas, color: '#4ade80' },
+                  { name: 'Gastos', valor: summary.totalGastos, color: '#f87171' },
+                  { name: 'Adelantos', valor: summary.totalAdelantos, color: '#facc15' }
+                ]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <XAxis dataKey="name" stroke="#a0aec0" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#a0aec0" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value/1000}k`} />
+                  <Tooltip 
+                    cursor={{fill: 'rgba(255,255,255,0.05)'}}
+                    contentStyle={{ backgroundColor: '#1E1E24', borderColor: '#2d2d3a', borderRadius: '8px' }}
+                    itemStyle={{ color: '#fff' }}
+                    formatter={(value) => [new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value), '']}
+                  />
+                  <Bar dataKey="valor" radius={[4, 4, 0, 0]}>
+                    {
+                      [
+                        { name: 'Ingresos', valor: summary.totalServicios + summary.totalVentas, color: '#4ade80' },
+                        { name: 'Gastos', valor: summary.totalGastos, color: '#f87171' },
+                        { name: 'Adelantos', valor: summary.totalAdelantos, color: '#facc15' }
+                      ].map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))
+                    }
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       </div>
 
