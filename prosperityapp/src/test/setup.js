@@ -13,7 +13,7 @@ vi.mock('firebase/auth', async () => {
   return {
     ...actual,
     getAuth:          vi.fn(() => ({ currentUser: null })),
-    onAuthStateChanged: vi.fn((_auth, cb) => { cb(null); return () => {}; }),
+    onAuthStateChanged: vi.fn((_auth, cb) => { if (cb) cb(null); return () => {}; }),
     signInWithEmailAndPassword: vi.fn(),
     signOut:          vi.fn(),
     createUserWithEmailAndPassword: vi.fn(),
@@ -57,29 +57,35 @@ vi.mock('firebase/storage', async () => {
 
 // ── Mock Supabase (evita conexión real) ─────────────────────────────────
 const mockSupabaseQuery = {
-  select:  vi.fn().mockReturnThis(),
-  insert:  vi.fn().mockReturnThis(),
-  update:  vi.fn().mockReturnThis(),
-  delete:  vi.fn().mockReturnThis(),
-  upsert:  vi.fn().mockReturnThis(),
-  eq:      vi.fn().mockReturnThis(),
-  neq:     vi.fn().mockReturnThis(),
-  gt:      vi.fn().mockReturnThis(),
-  gte:     vi.fn().mockReturnThis(),
-  lt:      vi.fn().mockReturnThis(),
-  lte:     vi.fn().mockReturnThis(),
-  in:      vi.fn().mockReturnThis(),
-  order:   vi.fn().mockReturnThis(),
-  limit:   vi.fn().mockReturnThis(),
-  single:  vi.fn(() => Promise.resolve({ data: null, error: null })),
-  then:    vi.fn((cb) => Promise.resolve({ data: [], error: null }).then(cb)),
+  select:      vi.fn().mockReturnThis(),
+  insert:      vi.fn().mockReturnThis(),
+  update:      vi.fn().mockReturnThis(),
+  delete:      vi.fn().mockReturnThis(),
+  upsert:      vi.fn().mockReturnThis(),
+  eq:          vi.fn().mockReturnThis(),
+  neq:         vi.fn().mockReturnThis(),
+  gt:          vi.fn().mockReturnThis(),
+  gte:         vi.fn().mockReturnThis(),
+  lt:          vi.fn().mockReturnThis(),
+  lte:         vi.fn().mockReturnThis(),
+  in:          vi.fn().mockReturnThis(),
+  order:       vi.fn().mockReturnThis(),
+  limit:       vi.fn().mockReturnThis(),
+  single:      vi.fn(() => Promise.resolve({ data: null, error: null })),
+  maybeSingle: vi.fn(() => Promise.resolve({ data: null, error: null })),
+  then:        vi.fn((cb) => Promise.resolve({ data: [], error: null }).then(cb)),
 };
 
 const mockSupabaseClient = {
   from:    vi.fn(() => mockSupabaseQuery),
   auth: {
     getSession:      vi.fn(() => Promise.resolve({ data: { session: null }, error: null })),
-    onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+    onAuthStateChange: vi.fn((cb) => {
+      if (typeof cb === 'function') {
+        cb('SIGNED_IN', { user: null });
+      }
+      return { data: { subscription: { unsubscribe: vi.fn() } } };
+    }),
     signInWithPassword: vi.fn(() => Promise.resolve({ data: {}, error: null })),
     signOut:         vi.fn(() => Promise.resolve({ error: null })),
     getUser:         vi.fn(() => Promise.resolve({ data: { user: null }, error: null })),

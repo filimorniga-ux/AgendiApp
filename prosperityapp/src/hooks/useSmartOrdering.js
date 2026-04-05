@@ -215,7 +215,7 @@ export function useSmartOrdering() {
         return b.suggestedQty - a.suggestedQty;
       });
 
-      setSuggestions(filtered);
+      setSuggestions(filtered || []);
     } catch (err) {
       console.error('[useSmartOrdering]', err);
       setError(err.message || 'Error al calcular sugerencias');

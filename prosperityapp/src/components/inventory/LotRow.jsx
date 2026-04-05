@@ -37,13 +37,13 @@ export function LotRow({ productId, inventoryType, productName, sellMode, unitSi
 
       {/* Expanded content */}
       {isOpen && (
-        <div className="lot-row-content">
+        <div className="lot-row-content" data-testid="lot-row-content">
           {loading ? (
-            <div className="lot-row-loading">
+            <div className="lot-row-loading" data-testid="lot-row-loading">
               <div className="skeleton h-8 w-full rounded mb-2" />
               <div className="skeleton h-8 w-full rounded" />
             </div>
-          ) : lots.length === 0 ? (
+          ) : !lots || lots.length === 0 ? (
             <p className="lot-row-empty">Sin lotes registrados</p>
           ) : (
             <div className="lot-row-list">
