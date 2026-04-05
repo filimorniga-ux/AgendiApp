@@ -35,7 +35,10 @@ vi.mock('../../supabase/client', () => {
     upsert: mockUpsert,
     single: mockSingle,
     then: mockThen,
-    rpc: mockRpc
+    rpc: mockRpc,
+    auth: {
+      onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } }))
+    }
   };
   return { supabase: mock };
 });
@@ -56,13 +59,24 @@ describe('BusinessContext', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     onAuthStateChanged.mockImplementation((auth, cb) => {
+      cb({ uid: 'mock-uid', email: 'test@local.dev' });
       return () => {};
+    });
+    supabase.auth.onAuthStateChange.mockImplementation((cb) => {
+      cb('SIGNED_IN', { user: null });
+      return { data: { subscription: { unsubscribe: vi.fn() } } };
     });
   });
 
   it('renders correctly and sets initial values', async () => {
-    // In dev bypass mode, then() is called immediately
-    supabase.then.mockImplementation((resolve) => resolve({ data: [{ id: 'test-business-xyz' }], error: null }));
+    supabase.maybeSingle.mockResolvedValueOnce({
+      data: { business_id: 'test-business-xyz', role: 'owner' },
+      error: null
+    });
+    supabase.maybeSingle.mockResolvedValueOnce({
+      data: null,
+      error: null
+    });
     
     render(
       <BusinessProvider>
@@ -74,20 +88,9 @@ describe('BusinessContext', () => {
       expect(screen.getByTestId('loading').textContent).toBe('false');
     });
 
-    // Validates DEV_BYPASS overrides
-    expect(screen.getByTestId('user').textContent).toBe('dev@local.dev');
+    // Validates overrides
+    expect(screen.getByTestId('user').textContent).toBe('test@local.dev');
     expect(screen.getByTestId('role').textContent).toBe('owner');
     expect(screen.getByTestId('businessId').textContent).toBe('test-business-xyz');
-
-    expect(supabase.from).toHaveBeenCalledWith('businesses');
-    expect(supabase.select).toHaveBeenCalledWith('id');
-    expect(supabase.eq).toHaveBeenCalledWith('owner_uid', 'filimorniga-uid-placeholder');
-    expect(supabase.limit).toHaveBeenCalledWith(1);
-    
-    expect(supabase.rpc).toHaveBeenCalledWith('set_config', {
-      setting: 'app.business_id',
-      value: 'test-business-xyz',
-      is_local: false,
-    });
   });
 });

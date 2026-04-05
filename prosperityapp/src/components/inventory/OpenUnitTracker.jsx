@@ -39,8 +39,8 @@ export function OpenUnitTracker({ productId, unitSize, unitOfMeasure, lots }) {
   }, [fetchOpenUnits]);
 
   const activeLots = (lots || []).filter(l => l.status === 'active' && l.quantity_remaining > 0);
-  const inUseUnits = openUnits.filter(u => u.status === 'in_use');
-  const depletedUnits = openUnits.filter(u => u.status === 'depleted');
+  const inUseUnits = (openUnits || []).filter(u => u.status === 'in_use');
+  const depletedUnits = (openUnits || []).filter(u => u.status === 'depleted');
 
   // Abrir nueva unidad (descuenta 1 del lote con más stock)
   const handleOpenUnit = async () => {

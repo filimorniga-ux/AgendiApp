@@ -79,7 +79,12 @@ const mockSupabaseClient = {
   from:    vi.fn(() => mockSupabaseQuery),
   auth: {
     getSession:      vi.fn(() => Promise.resolve({ data: { session: null }, error: null })),
-    onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+    onAuthStateChange: vi.fn((cb) => {
+      if (typeof cb === 'function') {
+        cb('SIGNED_IN', { user: null });
+      }
+      return { data: { subscription: { unsubscribe: vi.fn() } } };
+    }),
     signInWithPassword: vi.fn(() => Promise.resolve({ data: {}, error: null })),
     signOut:         vi.fn(() => Promise.resolve({ error: null })),
     getUser:         vi.fn(() => Promise.resolve({ data: { user: null }, error: null })),
