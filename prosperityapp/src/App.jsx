@@ -31,8 +31,10 @@ const ConfiguracionPage   = lazy(() => import('./pages/ConfiguracionPage'));
 const PedidosPage         = lazy(() => import('./pages/PedidosPage'));
 const ReportsPage         = lazy(() => import('./pages/ReportsPage'));
 const MigrationPage       = lazy(() => import('./pages/MigrationPage'));
-const RecepcionPage       = lazy(() => import('./pages/RecepcionPage.jsx'));
-const WebsiteApp          = lazy(() => import('./pages/Website/App'));
+const RecepcionPage              = lazy(() => import('./pages/RecepcionPage.jsx'));
+const PedidoInteligentePage      = lazy(() => import('./pages/PedidoInteligentePage'));
+const HistorialInventarioPage    = lazy(() => import('./pages/HistorialInventarioPage'));
+const WebsiteApp                 = lazy(() => import('./pages/Website/App'));
 
 // Fallback de carga — spinner mínimo que no añade peso al bundle inicial
 const PageLoader = () => (
@@ -122,6 +124,8 @@ function App() {
                   <Route path="inventario"              element={<InventarioPage />} />
                   <Route path="inventario/auditoria"    element={<StockMovementsPage />} />
                   <Route path="recepcion"               element={<RecepcionPage />} />
+                  <Route path="pedido-inteligente"      element={<PedidoInteligentePage />} />
+                  <Route path="inventario/historial"    element={<HistorialInventarioPage />} />
                   <Route path="giftcards"               element={<GiftCardPage />} />
                   <Route path="configuracion"           element={<ConfiguracionPage />} />
                   <Route path="reportes"                element={<ReportsPage />} />

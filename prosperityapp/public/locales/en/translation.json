@@ -11,6 +11,8 @@
     "prices": "Price List",
     "inventory": "Inventory",
     "giftcards": "Gift Cards",
+    "smartOrder": "Smart Ordering",
+    "inventoryHistory": "Inventory History",
     "settings": "Settings",
     "theme": "Toggle Theme",
     "logout": "Log Out"

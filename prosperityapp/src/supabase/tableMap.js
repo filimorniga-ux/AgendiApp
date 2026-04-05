@@ -24,6 +24,10 @@ export const COLLECTION_TO_TABLE = {
   invoices:             'invoices',
   debts:                'debts',
   cashSessions:         'cash_sessions',
+  inventoryLots:        'inventory_lots',
+  openUnits:            'open_units',
+  purchaseOrders:       'purchase_orders',
+  purchaseOrderItems:   'purchase_order_items',
 };
 
 /**

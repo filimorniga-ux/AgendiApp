@@ -1,0 +1,304 @@
+/* ============================================================
+   Estilos: Sistema de Lotes de Inventario
+   - Accordion toggle
+   - Tarjetas de lote con barra de progreso
+   - Badges de estado
+   ============================================================ */
+
+/* --- Toggle del accordion --- */
+.lot-row-container {
+  margin-top: 4px;
+}
+
+.lot-row-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 12px;
+  background: var(--color-bg-main, #1a1a2e);
+  border: 1px solid var(--color-border, #2a2a4a);
+  border-radius: 8px;
+  color: var(--color-text-muted, #999);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lot-row-toggle:hover {
+  background: var(--color-bg-tertiary, #252550);
+  color: var(--color-text-main, #fff);
+  border-color: var(--color-accent, #d4a017);
+}
+
+.lot-row-toggle-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lot-row-toggle-label {
+  font-weight: 600;
+}
+
+.lot-row-toggle-count {
+  opacity: 0.6;
+}
+
+/* --- Contenido expandido --- */
+.lot-row-content {
+  padding: 8px 0 4px;
+  animation: lotSlideDown 0.25s ease-out;
+}
+
+@keyframes lotSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lot-row-loading {
+  padding: 8px 12px;
+}
+
+.lot-row-empty {
+  text-align: center;
+  color: var(--color-text-muted, #777);
+  font-size: 0.8rem;
+  padding: 12px;
+  opacity: 0.6;
+}
+
+.lot-row-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* --- Tarjeta de lote --- */
+.lot-card {
+  padding: 10px 12px;
+  background: var(--color-bg-secondary, #1e1e3a);
+  border: 1px solid var(--color-border, #2a2a4a);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.lot-card:hover {
+  border-color: var(--color-accent, #d4a017);
+  box-shadow: 0 0 12px rgba(212, 160, 23, 0.08);
+}
+
+.lot-card--depleted {
+  opacity: 0.5;
+  filter: grayscale(0.3);
+}
+
+/* Header */
+.lot-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.lot-card-id {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-main, #fff);
+}
+
+.lot-card-cost {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent, #d4a017);
+}
+
+/* Badges */
+.lot-badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lot-badge--active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.lot-badge--depleted {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Detalles */
+.lot-card-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 8px;
+}
+
+.lot-detail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: var(--color-text-muted, #999);
+}
+
+/* Barra de progreso */
+.lot-progress-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lot-progress-bar {
+  flex-grow: 1;
+  height: 6px;
+  background: var(--color-bg-main, #12122a);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.lot-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.lot-progress--good {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.lot-progress--warning {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.lot-progress--danger {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.lot-progress-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #999);
+  white-space: nowrap;
+  min-width: 90px;
+  text-align: right;
+}
+
+/* Notas */
+.lot-card-notes {
+  margin-top: 6px;
+  font-size: 0.7rem;
+  color: var(--color-text-muted, #888);
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* --- Open Unit Tracker --- */
+.open-unit-tracker {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--color-bg-main, #12122a);
+  border: 1px dashed var(--color-border, #2a2a4a);
+  border-radius: 10px;
+}
+
+.open-unit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.open-unit-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-main, #fff);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.open-unit-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--color-bg-secondary, #1e1e3a);
+  border: 1px solid var(--color-border, #2a2a4a);
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.open-unit-card--depleted {
+  opacity: 0.4;
+}
+
+.open-unit-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.open-unit-capacity {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-main, #fff);
+}
+
+.open-unit-date {
+  font-size: 0.68rem;
+  color: var(--color-text-muted, #999);
+}
+
+.open-unit-btn-deplete {
+  padding: 4px 12px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.open-unit-btn-deplete:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.open-unit-btn-open {
+  padding: 6px 14px;
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.open-unit-btn-open:hover {
+  background: rgba(34, 197, 94, 0.3);
+}

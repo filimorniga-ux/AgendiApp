@@ -15,6 +15,7 @@ import { StockEntryModal } from '../components/inventory/StockEntryModal';
 import { StockExitModal } from '../components/inventory/StockExitModal';
 import { QuickCreateProductModal } from '../components/inventory/QuickCreateProductModal';
 import { useBarcodeLookup } from '../hooks/useBarcodeLookup';
+import { LotRow } from '../components/inventory/LotRow';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -166,48 +167,56 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
                 ? 'bg-red-500/10 border-l-2 border-l-red-500 animate-pulseSoft'
                 : 'hover:bg-bg-tertiary transition-colors';
               return (
-                <tr key={p.id} className={`border-b border-border-main text-sm animate-fadeInUp stagger-${Math.min(i + 1, 8)} ${lowStockClass}`}>
-                  <td className="p-3 text-text-main font-semibold">{p.name} ({p.brand})</td>
-                  <td className="p-3 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <button onClick={() => handleOpenStockModal(p, 'salida', 'technicalInventory')} className="p-1 bg-red-200 hover:bg-red-300 dark:bg-red-700 dark:hover:bg-red-600 text-red-900 dark:text-white rounded-full">
-                        <i data-feather="minus" className="w-4 h-4"></i>
+                <React.Fragment key={p.id}>
+                  <tr className={`border-b border-border-main text-sm animate-fadeInUp stagger-${Math.min(i + 1, 8)} ${lowStockClass}`}>
+                    <td className="p-3 text-text-main font-semibold">{p.name} ({p.brand})</td>
+                    <td className="p-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <button onClick={() => handleOpenStockModal(p, 'salida', 'technicalInventory')} className="p-1 bg-red-200 hover:bg-red-300 dark:bg-red-700 dark:hover:bg-red-600 text-red-900 dark:text-white rounded-full">
+                          <i data-feather="minus" className="w-4 h-4"></i>
+                        </button>
+                        <span className={`font-bold text-lg ${p.isLowStock ? 'text-red-600 dark:text-red-400' : 'text-text-main'}`}>{p.stockUnits}</span>
+                        <button onClick={() => handleOpenStockModal(p, 'ingreso', 'technicalInventory')} className="p-1 bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 text-green-900 dark:text-white rounded-full">
+                          <i data-feather="plus" className="w-4 h-4"></i>
+                        </button>
+                      </div>
+                    </td>
+                    <td className="p-3 text-right text-text-muted">{p.minStock || 3}</td>
+                    <td className="p-3 text-right text-text-main">{p.sellMode === 'whole' ? 'Unidad' : `${p.unitSize} ${p.unitOfMeasure}`}</td>
+                    <td className="p-3 text-center">
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                        p.sellMode === 'whole'
+                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                          : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      }`}>
+                        {p.sellMode === 'whole' ? '📦 Completo' : '⚗️ Fraccionado'}
+                      </span>
+                    </td>
+                    <td className="p-3 text-right font-medium text-yellow-700 dark:text-yellow-400">{formatCurrency(p.facturaCost)}</td>
+                    <td className="p-3 text-right font-medium text-blue-700 dark:text-cyan-400">{formatCurrency(p.collabCost)}</td>
+                    <td className="p-3 text-right font-bold text-text-main">
+                      {p.sellMode === 'whole'
+                        ? formatCurrency(p.collabCost)
+                        : `${formatCurrency(p.costPerGram)}/${p.unitOfMeasure || 'g'}`
+                      }
+                    </td>
+                    <td className="p-3 text-text-muted text-xs">{formatDate(p.createdAt)}</td>
+                    <td className="p-3 text-right">
+                      <button onClick={() => handleOpenEditModal(p)} className="p-1 text-text-muted hover:text-accent">
+                        <i data-feather="edit" className="w-4 h-4"></i>
                       </button>
-                      <span className={`font-bold text-lg ${p.isLowStock ? 'text-red-600 dark:text-red-400' : 'text-text-main'}`}>{p.stockUnits}</span>
-                      <button onClick={() => handleOpenStockModal(p, 'ingreso', 'technicalInventory')} className="p-1 bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 text-green-900 dark:text-white rounded-full">
-                        <i data-feather="plus" className="w-4 h-4"></i>
+                      <button onClick={() => handleDelete(p)} className="p-1 text-text-muted hover:text-red-400">
+                        <i data-feather="trash-2" className="w-4 h-4"></i>
                       </button>
-                    </div>
-                  </td>
-                  <td className="p-3 text-right text-text-muted">{p.minStock || 3}</td>
-                  <td className="p-3 text-right text-text-main">{p.sellMode === 'whole' ? 'Unidad' : `${p.unitSize} ${p.unitOfMeasure}`}</td>
-                  <td className="p-3 text-center">
-                    <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
-                      p.sellMode === 'whole'
-                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                        : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                    }`}>
-                      {p.sellMode === 'whole' ? '📦 Completo' : '⚗️ Fraccionado'}
-                    </span>
-                  </td>
-                  <td className="p-3 text-right font-medium text-yellow-700 dark:text-yellow-400">{formatCurrency(p.facturaCost)}</td>
-                  <td className="p-3 text-right font-medium text-blue-700 dark:text-cyan-400">{formatCurrency(p.collabCost)}</td>
-                  <td className="p-3 text-right font-bold text-text-main">
-                    {p.sellMode === 'whole'
-                      ? formatCurrency(p.collabCost)
-                      : `${formatCurrency(p.costPerGram)}/${p.unitOfMeasure || 'g'}`
-                    }
-                  </td>
-                  <td className="p-3 text-text-muted text-xs">{formatDate(p.createdAt)}</td>
-                  <td className="p-3 text-right">
-                    <button onClick={() => handleOpenEditModal(p)} className="p-1 text-text-muted hover:text-accent">
-                      <i data-feather="edit" className="w-4 h-4"></i>
-                    </button>
-                    <button onClick={() => handleDelete(p)} className="p-1 text-text-muted hover:text-red-400">
-                      <i data-feather="trash-2" className="w-4 h-4"></i>
-                    </button>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
+                  {/* Fila expandible de lotes */}
+                  <tr className="border-b border-border-main/50">
+                    <td colSpan={10} className="px-3 py-1">
+                      <LotRow productId={p.id} inventoryType="technical" productName={p.name} sellMode={p.sellMode} unitSize={p.unitSize} unitOfMeasure={p.unitOfMeasure} />
+                    </td>
+                  </tr>
+                </React.Fragment>
               );
             })}
           </tbody>
@@ -335,34 +344,42 @@ const TabInventarioRetail = ({ handleOpenStockModal }) => {
             {(items || []).map(p => {
               const lowStockClass = p.isLowStock ? 'bg-red-100 dark:bg-red-900/30' : 'hover:bg-bg-tertiary';
               return (
-                <tr key={p.id} className={`border-b border-border-main text-sm ${lowStockClass}`}>
-                  <td className="p-3 text-text-main font-semibold">{p.name} ({p.brand})</td>
-                  <td className="p-3 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <button onClick={() => handleOpenStockModal(p, 'salida', 'retailInventory')} className="p-1 bg-red-200 hover:bg-red-300 dark:bg-red-700 dark:hover:bg-red-600 text-red-900 dark:text-white rounded-full">
-                        <i data-feather="minus" className="w-4 h-4"></i>
+                <React.Fragment key={p.id}>
+                  <tr className={`border-b border-border-main text-sm ${lowStockClass}`}>
+                    <td className="p-3 text-text-main font-semibold">{p.name} ({p.brand})</td>
+                    <td className="p-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <button onClick={() => handleOpenStockModal(p, 'salida', 'retailInventory')} className="p-1 bg-red-200 hover:bg-red-300 dark:bg-red-700 dark:hover:bg-red-600 text-red-900 dark:text-white rounded-full">
+                          <i data-feather="minus" className="w-4 h-4"></i>
+                        </button>
+                        <span className={`font-bold text-lg ${p.isLowStock ? 'text-red-600 dark:text-red-400' : 'text-text-main'}`}>{p.stock}</span>
+                        <button onClick={() => handleOpenStockModal(p, 'ingreso', 'retailInventory')} className="p-1 bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 text-green-900 dark:text-white rounded-full">
+                          <i data-feather="plus" className="w-4 h-4"></i>
+                        </button>
+                      </div>
+                    </td>
+                    <td className="p-3 text-right text-text-muted">{p.minStock || 3}</td>
+                    <td className="p-3 text-right font-medium text-yellow-700 dark:text-yellow-400">{formatCurrency(p.cost)}</td>
+                    <td className="p-3 text-right font-medium text-blue-700 dark:text-cyan-400">{formatCurrency(p.price)}</td>
+                    <td className="p-3 text-right font-medium text-green-700 dark:text-green-400">{formatCurrency(p.ganancia)}</td>
+                    <td className="p-3 text-right font-bold text-text-main">{formatCurrency(p.totalStockValue)}</td>
+                    <td className="p-3 text-text-muted text-xs">{formatDate(p.createdAt)}</td>
+                    <td className="p-3 text-right">
+                      <button onClick={() => handleOpenEditModal(p)} className="p-1 text-text-muted hover:text-accent">
+                        <i data-feather="edit" className="w-4 h-4"></i>
                       </button>
-                      <span className={`font-bold text-lg ${p.isLowStock ? 'text-red-600 dark:text-red-400' : 'text-text-main'}`}>{p.stock}</span>
-                      <button onClick={() => handleOpenStockModal(p, 'ingreso', 'retailInventory')} className="p-1 bg-green-200 hover:bg-green-300 dark:bg-green-700 dark:hover:bg-green-600 text-green-900 dark:text-white rounded-full">
-                        <i data-feather="plus" className="w-4 h-4"></i>
+                      <button onClick={() => handleDelete(p)} className="p-1 text-text-muted hover:text-red-400">
+                        <i data-feather="trash-2" className="w-4 h-4"></i>
                       </button>
-                    </div>
-                  </td>
-                  <td className="p-3 text-right text-text-muted">{p.minStock || 3}</td>
-                  <td className="p-3 text-right font-medium text-yellow-700 dark:text-yellow-400">{formatCurrency(p.cost)}</td>
-                  <td className="p-3 text-right font-medium text-blue-700 dark:text-cyan-400">{formatCurrency(p.price)}</td>
-                  <td className="p-3 text-right font-medium text-green-700 dark:text-green-400">{formatCurrency(p.ganancia)}</td>
-                  <td className="p-3 text-right font-bold text-text-main">{formatCurrency(p.totalStockValue)}</td>
-                  <td className="p-3 text-text-muted text-xs">{formatDate(p.createdAt)}</td>
-                  <td className="p-3 text-right">
-                    <button onClick={() => handleOpenEditModal(p)} className="p-1 text-text-muted hover:text-accent">
-                      <i data-feather="edit" className="w-4 h-4"></i>
-                    </button>
-                    <button onClick={() => handleDelete(p)} className="p-1 text-text-muted hover:text-red-400">
-                      <i data-feather="trash-2" className="w-4 h-4"></i>
-                    </button>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
+                  {/* Fila expandible de lotes */}
+                  <tr className="border-b border-border-main/50">
+                    <td colSpan={9} className="px-3 py-1">
+                      <LotRow productId={p.id} inventoryType="retail" productName={p.name} />
+                    </td>
+                  </tr>
+                </React.Fragment>
               );
             })}
           </tbody>
