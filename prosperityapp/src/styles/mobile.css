@@ -192,13 +192,11 @@
     padding-bottom: 64px; /* space for bottom nav */
   }
 
-  /* Sidebar becomes a drawer on mobile */
-  #sidebar,
-  .sidebar,
-  [class*="sidebar"] {
+  /* Sidebar becomes a drawer on mobile — ONLY target the sidebar container */
+  #sidebar {
     position: fixed;
     top: 0;
-    left: -280px; /* offscreen */
+    left: -280px; /* offscreen by default */
     width: 280px;
     height: 100%;
     z-index: 50;
@@ -206,14 +204,19 @@
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
   }
 
-  #sidebar.open,
-  .sidebar.open {
+  /* When sidebar is open, slide in */
+  #sidebar.sidebar-open {
     left: 0;
   }
 
   .sidebar-overlay {
     display: block;
+    pointer-events: none;
   }
+  .sidebar-overlay.active {
+    pointer-events: auto;
+  }
+
 
   /* Main content full width */
   main {

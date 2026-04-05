@@ -81,15 +81,7 @@ const Layout = () => {
         /* Mobile: slide-in drawer */
         <div
           id="sidebar"
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: sidebarOpen ? 0 : '-280px',
-            width: '280px',
-            height: '100%',
-            zIndex: 50,
-            transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          }}
+          className={sidebarOpen ? 'sidebar-open' : ''}
         >
           <Sidebar
             collapsed={false}
