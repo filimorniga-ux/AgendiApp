@@ -59,19 +59,9 @@ function MainApp() {
     }, []);
 
     useEffect(() => {
-        // REFINAMIENTO DE TEXTURA MODO NOCHE
-        const iconColor = isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)';
-        const watermarkTextColor = isDarkMode ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)';
-        const encodeSvg = (svg) => `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-        const watermarkText = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 150"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Inter, sans-serif" font-weight="900" font-size="120" fill="${watermarkTextColor}">AGENDIAPP</text></svg>`;
-        const svgScissors = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="8.59" y1="8.59" x2="15.42" y2="15.42"></line><line x1="8.59" y1="15.41" x2="15.42" y2="8.59"></line></svg>`;
-
+        // MANTENEMOS SOLO UN COLOR BASE LIMPIO Y ELEGANTE
         setBgStyle({
-            backgroundImage: `url("${encodeSvg(watermarkText)}"), url("${encodeSvg(svgScissors)}")`,
-            backgroundPosition: 'center center, 10% 20%',
-            backgroundSize: '1000px, 300px',
-            backgroundRepeat: 'no-repeat, repeat',
-            backgroundColor: isDarkMode ? '#0f172a' : '#f8fafc',
+            backgroundColor: isDarkMode ? '#020617' : '#f8fafc',
         });
     }, [isDarkMode]);
 
@@ -179,34 +169,34 @@ function MainApp() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder={t.auth.email}
-                            className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-[#f6e05e]"
+                            className={`w-full p-4 rounded-xl outline-none transition-all ${isDarkMode ? 'bg-white/5 border border-white/10 text-white placeholder-slate-400 focus:bg-white/10 focus:border-[#f6e05e]/50 focus:ring-1 focus:ring-[#f6e05e]/50' : 'bg-slate-100 border border-transparent text-slate-900 focus:bg-white focus:border-[#f6e05e] focus:ring-2 focus:ring-[#f6e05e]'}`}
                         />
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder={t.auth.pass}
-                            className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-[#f6e05e]"
+                            className={`w-full p-4 rounded-xl outline-none transition-all ${isDarkMode ? 'bg-white/5 border border-white/10 text-white placeholder-slate-400 focus:bg-white/10 focus:border-[#f6e05e]/50 focus:ring-1 focus:ring-[#f6e05e]/50' : 'bg-slate-100 border border-transparent text-slate-900 focus:bg-white focus:border-[#f6e05e] focus:ring-2 focus:ring-[#f6e05e]'}`}
                         />
-                        <button className="w-full py-4 rounded-xl font-bold bg-[#f6e05e] text-black hover:opacity-90 transition-opacity">{t.auth.submit_login}</button>
+                        <button className="w-full py-4 rounded-xl font-bold bg-[#f6e05e] text-[#0f172a] shadow-[0_4px_14px_rgba(246,224,94,0.39)] hover:shadow-[0_6px_20px_rgba(246,224,94,0.5)] transition-all hover:-translate-y-0.5">{t.auth.submit_login}</button>
 
-                        <div className="relative py-2">
-                            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-300 dark:border-slate-700"></span></div>
-                            <div className="relative flex justify-center"><span className="bg-white dark:bg-[#1a202c] px-4 text-xs text-slate-500 uppercase">O</span></div>
+                        <div className="relative py-2 mt-4">
+                            <div className="absolute inset-0 flex items-center"><span className={`w-full border-t ${isDarkMode ? 'border-white/10' : 'border-slate-300'}`}></span></div>
+                            <div className="relative flex justify-center"><span className={`px-4 text-xs uppercase ${isDarkMode ? 'bg-slate-950 text-white/50' : 'bg-white text-slate-500'}`}>O</span></div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                            <button type="button" onClick={handleGoogleLogin} className="w-full py-3 rounded-xl font-bold border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-center gap-2 transition-colors dark:text-white">
+                        <div className="grid grid-cols-2 gap-3 mt-4">
+                            <button type="button" onClick={handleGoogleLogin} className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${isDarkMode ? 'border border-white/10 bg-white/5 hover:bg-white/10 text-white' : 'border border-slate-300 bg-white hover:bg-slate-50 text-slate-700'}`}>
                                 <Icons.Google />
                                 {t.auth.google}
                             </button>
-                            <button type="button" onClick={handleAppleLogin} className="w-full py-3 rounded-xl font-bold bg-black text-white hover:bg-slate-900 flex items-center justify-center gap-2 transition-colors">
+                            <button type="button" onClick={handleAppleLogin} className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${isDarkMode ? 'border border-white/10 bg-white/5 hover:bg-white/10 text-white' : 'bg-slate-900 hover:bg-black text-white'}`}>
                                 <Icons.Apple />
                                 {t.auth.apple}
                             </button>
                         </div>
 
-                        <button type="button" onClick={() => { setShowLoginModal(false); setShowRegisterModal(true); }} className="w-full text-sm text-slate-500 hover:text-[#f6e05e]">{t.auth.switch_reg}</button>
+                        <button type="button" onClick={() => { setShowLoginModal(false); setShowRegisterModal(true); }} className={`w-full text-sm mt-2 transition-colors ${isDarkMode ? 'text-white/50 hover:text-[#f6e05e]' : 'text-slate-500 hover:text-[#f6e05e]'}`}>{t.auth.switch_reg}</button>
                     </form>
                 </AuthModal>
             )}
@@ -219,34 +209,34 @@ function MainApp() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder={t.auth.email}
-                            className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-[#f6e05e]"
+                            className={`w-full p-4 rounded-xl outline-none transition-all ${isDarkMode ? 'bg-white/5 border border-white/10 text-white placeholder-slate-400 focus:bg-white/10 focus:border-[#f6e05e]/50 focus:ring-1 focus:ring-[#f6e05e]/50' : 'bg-slate-100 border border-transparent text-slate-900 focus:bg-white focus:border-[#f6e05e] focus:ring-2 focus:ring-[#f6e05e]'}`}
                         />
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder={t.auth.pass}
-                            className="w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-[#f6e05e]"
+                            className={`w-full p-4 rounded-xl outline-none transition-all ${isDarkMode ? 'bg-white/5 border border-white/10 text-white placeholder-slate-400 focus:bg-white/10 focus:border-[#f6e05e]/50 focus:ring-1 focus:ring-[#f6e05e]/50' : 'bg-slate-100 border border-transparent text-slate-900 focus:bg-white focus:border-[#f6e05e] focus:ring-2 focus:ring-[#f6e05e]'}`}
                         />
-                        <button className="w-full py-4 rounded-xl font-bold bg-[#f6e05e] text-black hover:opacity-90 transition-opacity">{t.auth.submit_register}</button>
+                        <button className="w-full py-4 rounded-xl font-bold bg-[#f6e05e] text-[#0f172a] shadow-[0_4px_14px_rgba(246,224,94,0.39)] hover:shadow-[0_6px_20px_rgba(246,224,94,0.5)] transition-all hover:-translate-y-0.5">{t.auth.submit_register}</button>
 
-                        <div className="relative py-2">
-                            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-300 dark:border-slate-700"></span></div>
-                            <div className="relative flex justify-center"><span className="bg-white dark:bg-[#1a202c] px-4 text-xs text-slate-500 uppercase">O</span></div>
+                        <div className="relative py-2 mt-4">
+                            <div className="absolute inset-0 flex items-center"><span className={`w-full border-t ${isDarkMode ? 'border-white/10' : 'border-slate-300'}`}></span></div>
+                            <div className="relative flex justify-center"><span className={`px-4 text-xs uppercase ${isDarkMode ? 'bg-slate-950 text-white/50' : 'bg-white text-slate-500'}`}>O</span></div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                            <button type="button" onClick={handleGoogleLogin} className="w-full py-3 rounded-xl font-bold border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-center gap-2 transition-colors dark:text-white">
+                        <div className="grid grid-cols-2 gap-3 mt-4">
+                            <button type="button" onClick={handleGoogleLogin} className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${isDarkMode ? 'border border-white/10 bg-white/5 hover:bg-white/10 text-white' : 'border border-slate-300 bg-white hover:bg-slate-50 text-slate-700'}`}>
                                 <Icons.Google />
                                 {t.auth.google}
                             </button>
-                            <button type="button" onClick={handleAppleLogin} className="w-full py-3 rounded-xl font-bold bg-black text-white hover:bg-slate-900 flex items-center justify-center gap-2 transition-colors">
+                            <button type="button" onClick={handleAppleLogin} className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${isDarkMode ? 'border border-white/10 bg-white/5 hover:bg-white/10 text-white' : 'bg-slate-900 hover:bg-black text-white'}`}>
                                 <Icons.Apple />
                                 {t.auth.apple}
                             </button>
                         </div>
 
-                        <button type="button" onClick={() => { setShowRegisterModal(false); setShowLoginModal(true); }} className="w-full text-sm text-slate-500 hover:text-[#f6e05e]">{t.auth.switch_log}</button>
+                        <button type="button" onClick={() => { setShowRegisterModal(false); setShowLoginModal(true); }} className={`w-full text-sm mt-2 transition-colors ${isDarkMode ? 'text-white/50 hover:text-[#f6e05e]' : 'text-slate-500 hover:text-[#f6e05e]'}`}>{t.auth.switch_log}</button>
                     </form>
                 </AuthModal>
             )}

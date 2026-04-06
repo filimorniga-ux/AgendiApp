@@ -1,6 +1,7 @@
 import React from 'react';
 
 export const Icons = {
+    Menu: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>,
     Check: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>,
     Cross: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>,
     Calculator: () => <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" strokeWidth="2" /><line x1="8" y1="6" x2="16" y2="6" strokeWidth="2" /><line x1="16" y1="14" x2="16" y2="14.01" strokeWidth="3" /><line x1="12" y1="14" x2="12" y2="14.01" strokeWidth="3" /><line x1="8" y1="14" x2="8" y2="14.01" strokeWidth="3" /><line x1="16" y1="18" x2="16" y2="18.01" strokeWidth="3" /><line x1="12" y1="18" x2="12" y2="18.01" strokeWidth="3" /><line x1="8" y1="18" x2="8" y2="18.01" strokeWidth="3" /></svg>,
