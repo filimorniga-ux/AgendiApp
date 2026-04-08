@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Outlet, useParams } from 'react-router-dom';
+import { Outlet, useParams, Link, NavLink } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 
 const PublicLayout = () => {
@@ -10,12 +10,17 @@ const PublicLayout = () => {
 
   useEffect(() => {
     const fetchBusiness = async () => {
+      if (!slug) {
+        setError(true);
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       setError(false);
       try {
         const { data, error } = await supabase
           .from('businesses')
-          .select('*')
+          .select('id, name, slug')
           .eq('slug', slug)
           .single();
         
@@ -28,7 +33,7 @@ const PublicLayout = () => {
         setLoading(false);
       }
     };
-    if (slug) fetchBusiness();
+    fetchBusiness();
   }, [slug]);
 
   if (loading) {
@@ -45,7 +50,7 @@ const PublicLayout = () => {
         <div className="text-center p-8 bg-bg-secondary rounded-2xl border border-border-main max-w-md">
           <h2 className="text-2xl font-bold mb-4">Comercio no encontrado</h2>
           <p className="text-text-muted mb-6">La URL introducida no corresponde a un comercio activo en nuestra plataforma.</p>
-          <a href="/" className="btn-golden py-2 px-6">Ir a inicio</a>
+          <Link to="/" className="btn-golden py-2 px-6 inline-block">Ir a inicio</Link>
         </div>
       </div>
     );
@@ -54,9 +59,27 @@ const PublicLayout = () => {
   return (
     <div className="min-h-screen bg-bg-main text-text-main font-sans">
       {/* Navbar simplificado público */}
-      <nav className="bg-bg-secondary border-b border-border-main p-4 sticky top-0 z-50 shadow-md">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <nav className="bg-bg-secondary border-b border-border-main sticky top-0 z-50 shadow-md">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-4">
           <h1 className="text-xl font-bold text-accent capitalize">{business.name}</h1>
+          <div className="flex space-x-4">
+            <NavLink
+              to="reservar"
+              className={({ isActive }) =>
+                `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-bg-tertiary text-text-main' : 'text-text-muted hover:text-text-main'}`
+              }
+            >
+              Agendar Cita
+            </NavLink>
+            <NavLink
+              to="precios"
+              className={({ isActive }) =>
+                `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-bg-tertiary text-text-main' : 'text-text-muted hover:text-text-main'}`
+              }
+            >
+              Servicios y Precios
+            </NavLink>
+          </div>
         </div>
       </nav>
 

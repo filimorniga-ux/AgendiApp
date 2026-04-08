@@ -3,12 +3,15 @@ import os
 from playwright.sync_api import sync_playwright
 
 def run_cuj(page):
-    page.goto("http://localhost:5173") # default vite port
+    # Setup test condition
+    page.goto("http://localhost:5173/p/some-slug") # Go to public layout
     page.wait_for_timeout(3000) # wait for load
 
     os.makedirs("/home/jules/verification/screenshots", exist_ok=True)
     os.makedirs("/home/jules/verification/videos", exist_ok=True)
 
+    # We expect a mock business error since there is no local SB instance with that slug loaded easily.
+    # We should at least see the "Ir a inicio" link functioning now.
     page.screenshot(path="/home/jules/verification/screenshots/verification.png")
     page.wait_for_timeout(1000)
 
