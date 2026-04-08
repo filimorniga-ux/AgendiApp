@@ -51,6 +51,7 @@ const PublicAgenda = () => {
           .select('id, name')
           .eq('business_id', business.id)
           .eq('phone', clientInfo.phone)
+          .limit(1)
           .maybeSingle();
         existingClient = cData;
       }
