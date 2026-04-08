@@ -11,6 +11,7 @@ import OfflineIndicator from './components/OfflineIndicator';
 // Layout — siempre presente, no lazy (es el shell)
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import RoleGuard from './components/auth/RoleGuard';
 
 // ── Lazy imports — cada módulo se carga sólo cuando se navega a él ──────────
 const AgendaCalendario    = lazy(() => import('./components/agenda/AgendaCalendario'));
@@ -35,6 +36,11 @@ const RecepcionPage              = lazy(() => import('./pages/RecepcionPage.jsx'
 const PedidoInteligentePage      = lazy(() => import('./pages/PedidoInteligentePage'));
 const HistorialInventarioPage    = lazy(() => import('./pages/HistorialInventarioPage'));
 const WebsiteApp                 = lazy(() => import('./pages/Website/App'));
+
+// Módulos Públicos (Clientes)
+const PublicLayout               = lazy(() => import('./components/public/PublicLayout'));
+const PublicAgenda               = lazy(() => import('./pages/Public/PublicAgenda'));
+const PublicPrices               = lazy(() => import('./pages/Public/PublicPrices'));
 
 // Fallback de carga — spinner mínimo que no añade peso al bundle inicial
 const PageLoader = () => (
@@ -104,32 +110,41 @@ function App() {
               <Routes>
                 <Route path="/" element={<Navigate to="/app" replace />} />
 
+                {/* Rutas Públicas de Clientes (Multi-tenant) */}
+                <Route path="/p/:slug" element={<PublicLayout />}>
+                  <Route index element={<Navigate to="reservar" replace />} />
+                  <Route path="reservar" element={<PublicAgenda />} />
+                  <Route path="precios" element={<PublicPrices />} />
+                </Route>
+
                 <Route path="/app" element={
                   <ProtectedRoute>
                     <Layout />
                   </ProtectedRoute>
                 }>
                   <Route index element={<AgendaCalendario />} />
-                  <Route path="dashboard"               element={<DashboardPage />} />
-                  <Route path="caja"                    element={<CajaDiariaPage />} />
-                  <Route path="pedidos"                 element={<PedidosPage />} />
-                  <Route path="clientes"                element={<ClientesPage />} />
-                  <Route path="clientes/:id"            element={<ClientDetailPage />} />
-                  <Route path="colaboradores"           element={<ColaboradoresPage />} />
                   <Route path="nomina"                  element={<NominasPage />} />
                   <Route path="nomina/historial"        element={<PayrollHistoryPage />} />
                   <Route path="nomina/historial/:id"    element={<PayrollDetailPage />} />
-                  <Route path="cierres"                 element={<CierresMensualesPage />} />
                   <Route path="precios"                 element={<PreciosPage />} />
-                  <Route path="inventario"              element={<InventarioPage />} />
-                  <Route path="inventario/auditoria"    element={<StockMovementsPage />} />
-                  <Route path="recepcion"               element={<RecepcionPage />} />
-                  <Route path="pedido-inteligente"      element={<PedidoInteligentePage />} />
-                  <Route path="inventario/historial"    element={<HistorialInventarioPage />} />
-                  <Route path="giftcards"               element={<GiftCardPage />} />
-                  <Route path="configuracion"           element={<ConfiguracionPage />} />
-                  <Route path="reportes"                element={<ReportsPage />} />
-                  <Route path="migration"               element={<MigrationPage />} />
+                  
+                  {/* Rutas exclusivas para Dueños/Admins */}
+                  <Route path="dashboard"               element={<RoleGuard><DashboardPage /></RoleGuard>} />
+                  <Route path="caja"                    element={<RoleGuard><CajaDiariaPage /></RoleGuard>} />
+                  <Route path="pedidos"                 element={<RoleGuard><PedidosPage /></RoleGuard>} />
+                  <Route path="clientes"                element={<RoleGuard><ClientesPage /></RoleGuard>} />
+                  <Route path="clientes/:id"            element={<RoleGuard><ClientDetailPage /></RoleGuard>} />
+                  <Route path="colaboradores"           element={<RoleGuard><ColaboradoresPage /></RoleGuard>} />
+                  <Route path="cierres"                 element={<RoleGuard><CierresMensualesPage /></RoleGuard>} />
+                  <Route path="inventario"              element={<RoleGuard><InventarioPage /></RoleGuard>} />
+                  <Route path="inventario/auditoria"    element={<RoleGuard><StockMovementsPage /></RoleGuard>} />
+                  <Route path="recepcion"               element={<RoleGuard><RecepcionPage /></RoleGuard>} />
+                  <Route path="pedido-inteligente"      element={<RoleGuard><PedidoInteligentePage /></RoleGuard>} />
+                  <Route path="inventario/historial"    element={<RoleGuard><HistorialInventarioPage /></RoleGuard>} />
+                  <Route path="giftcards"               element={<RoleGuard><GiftCardPage /></RoleGuard>} />
+                  <Route path="configuracion"           element={<RoleGuard><ConfiguracionPage /></RoleGuard>} />
+                  <Route path="reportes"                element={<RoleGuard><ReportsPage /></RoleGuard>} />
+                  <Route path="migration"               element={<RoleGuard><MigrationPage /></RoleGuard>} />
                   <Route path="*"                       element={<PlaceholderPage title="404: Página no encontrada" />} />
                 </Route>
 
