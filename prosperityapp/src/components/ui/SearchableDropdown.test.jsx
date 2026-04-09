@@ -1,82 +1,179 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '../../test/utils';
-import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '../../test/utils';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SearchableDropdown from './SearchableDropdown';
 
-describe('SearchableDropdown Component', () => {
-  const dummyItems = [
-    { id: '1', name: 'Miguel Perdomo', price: 1000 },
-    { id: '2', name: 'Lia Martinez', stock: 5 },
-    { id: '3', name: 'Andres Felipe', stockUnits: 10 }
-  ];
+// Mock feather icons since it runs outside typical context
+vi.mock('feather-icons', () => ({
+    default: {
+        replace: vi.fn(),
+    },
+}));
 
-  it('renders correctly with placeholder', () => {
-    render(<SearchableDropdown items={dummyItems} placeholder="Find User..." onSelect={() => {}} />);
-    expect(screen.getByPlaceholderText('Find User...')).toBeInTheDocument();
-  });
+const mockItems = [
+    { id: '1', name: 'Item A', price: 100, stock: 10 },
+    { id: '2', name: 'Item B', price: 200, stockUnits: 5 },
+    { id: '3', name: 'Other C', price: 300, stock: 0 },
+];
 
-  it('opens menu on focus and filters items', () => {
-    render(<SearchableDropdown items={dummyItems} placeholder="Buscar..." onSelect={() => {}} />);
-    const input = screen.getByPlaceholderText('Buscar...');
-    
-    // Default closed
-    expect(screen.queryByText('Miguel Perdomo')).not.toBeInTheDocument();
-    
-    fireEvent.focus(input);
-    expect(screen.getByText('Miguel Perdomo')).toBeInTheDocument();
-    
-    // Menu is opened via React Portal, it attaches to document.body
-    fireEvent.change(input, { target: { value: 'Lia' } });
-    
-    expect(screen.getByText('Lia Martinez')).toBeInTheDocument();
-    expect(screen.queryByText('Miguel Perdomo')).not.toBeInTheDocument();
-  });
+describe('SearchableDropdown', () => {
+    let mockOnSelect;
+    let mockOnManualInput;
 
-  it('selects an item and closes the menu', () => {
-    const handleSelect = vi.fn();
-    render(<SearchableDropdown items={dummyItems} placeholder="Buscar..." onSelect={handleSelect} />);
-    
-    const input = screen.getByPlaceholderText('Buscar...');
-    fireEvent.focus(input);
-    
-    const item = screen.getByText('Andres Felipe');
-    fireEvent.mouseDown(item); // The component uses onMouseDown to select
-    
-    expect(handleSelect).toHaveBeenCalledWith(dummyItems[2]);
-    expect(input.value).toBe('Andres Felipe');
-    
-    // Menu should be closed
-    expect(screen.queryByText('Lia Martinez')).not.toBeInTheDocument();
-  });
+    beforeEach(() => {
+        mockOnSelect = vi.fn();
+        mockOnManualInput = vi.fn();
+        vi.clearAllMocks();
+    });
 
-  it('handles allowManual input correctly', () => {
-    const handleManualInput = vi.fn();
-    render(<SearchableDropdown items={dummyItems} placeholder="Buscar..." onSelect={() => {}} allowManual={true} onManualInput={handleManualInput} />);
-    
-    const input = screen.getByPlaceholderText('Buscar...');
-    fireEvent.focus(input);
-    
-    fireEvent.change(input, { target: { value: 'Nuevo Usuario' } });
-    
-    expect(handleManualInput).toHaveBeenCalledWith('Nuevo Usuario');
-    expect(screen.getByText('Usar "Nuevo Usuario" como nuevo')).toBeInTheDocument();
-  });
+    it('renders with placeholder', () => {
+        render(
+            <SearchableDropdown
+                items={mockItems}
+                placeholder="Search..."
+                onSelect={mockOnSelect}
+            />
+        );
 
-  it('closes the dropdown via document click outside', async () => {
-    const handleSelect = vi.fn();
-    render(
-      <div>
-        <div data-testid="outside">Outside</div>
-        <SearchableDropdown items={dummyItems} placeholder="Buscar..." onSelect={handleSelect} />
-      </div>
-    );
+        expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument();
+    });
 
-    const input = screen.getByPlaceholderText('Buscar...');
-    fireEvent.focus(input);
-    expect(screen.getByText('Miguel Perdomo')).toBeInTheDocument();
+    it('opens dropdown on focus and shows all items', () => {
+        render(
+            <SearchableDropdown
+                items={mockItems}
+                placeholder="Search..."
+                onSelect={mockOnSelect}
+            />
+        );
 
-    fireEvent.mouseDown(screen.getByTestId('outside'));
+        const input = screen.getByPlaceholderText('Search...');
+        fireEvent.focus(input);
 
-    expect(screen.queryByText('Miguel Perdomo')).not.toBeInTheDocument();
-  });
+        // Since it uses portal, it should render somewhere in document.body
+        expect(screen.getByText('Item A')).toBeInTheDocument();
+        expect(screen.getByText('Item B')).toBeInTheDocument();
+        expect(screen.getByText('Other C')).toBeInTheDocument();
+    });
+
+    it('filters items based on input', () => {
+        render(
+            <SearchableDropdown
+                items={mockItems}
+                placeholder="Search..."
+                onSelect={mockOnSelect}
+            />
+        );
+
+        const input = screen.getByPlaceholderText('Search...');
+        fireEvent.focus(input);
+        fireEvent.change(input, { target: { value: 'Item' } });
+
+        expect(screen.getByText('Item A')).toBeInTheDocument();
+        expect(screen.getByText('Item B')).toBeInTheDocument();
+        // 'Other C' shouldn't be matched
+        expect(screen.queryByText('Other C')).not.toBeInTheDocument();
+    });
+
+    it('selects an item and updates input value', () => {
+        render(
+            <SearchableDropdown
+                items={mockItems}
+                placeholder="Search..."
+                onSelect={mockOnSelect}
+            />
+        );
+
+        const input = screen.getByPlaceholderText('Search...');
+        fireEvent.focus(input);
+
+        const itemA = screen.getByText('Item A');
+        // Dropdown uses onMouseDown
+        fireEvent.mouseDown(itemA);
+
+        expect(mockOnSelect).toHaveBeenCalledWith(mockItems[0]);
+        expect(input.value).toBe('Item A');
+        // Menu should be closed
+        expect(screen.queryByText('Item B')).not.toBeInTheDocument();
+    });
+
+    it('closes on outside click', () => {
+        render(
+            <div>
+                <div data-testid="outside">Outside Element</div>
+                <SearchableDropdown
+                    items={mockItems}
+                    placeholder="Search..."
+                    onSelect={mockOnSelect}
+                />
+            </div>
+        );
+
+        const input = screen.getByPlaceholderText('Search...');
+        fireEvent.focus(input);
+
+        expect(screen.getByText('Item A')).toBeInTheDocument();
+
+        // Click outside
+        fireEvent.mouseDown(document.body);
+
+        expect(screen.queryByText('Item A')).not.toBeInTheDocument();
+    });
+
+    it('clears selection on clear button click', () => {
+        render(
+            <SearchableDropdown
+                items={mockItems}
+                placeholder="Search..."
+                onSelect={mockOnSelect}
+                initialValue={mockItems[0]}
+            />
+        );
+
+        const input = screen.getByPlaceholderText('Search...');
+        expect(input.value).toBe('Item A');
+
+        // Look for the clear button (which is rendered when selectedItem is present)
+        const clearButton = screen.getByRole('button');
+        fireEvent.mouseDown(clearButton);
+
+        expect(mockOnSelect).toHaveBeenCalledWith(null);
+        expect(input.value).toBe('');
+    });
+
+    it('handles manual input when allowManual is true', () => {
+        render(
+            <SearchableDropdown
+                items={mockItems}
+                placeholder="Search..."
+                onSelect={mockOnSelect}
+                allowManual={true}
+                onManualInput={mockOnManualInput}
+            />
+        );
+
+        const input = screen.getByPlaceholderText('Search...');
+        fireEvent.focus(input);
+        fireEvent.change(input, { target: { value: 'New Item' } });
+
+        expect(mockOnManualInput).toHaveBeenCalledWith('New Item');
+        expect(screen.getByText('Usar "New Item" como nuevo')).toBeInTheDocument();
+    });
+
+    it('handles disabled state', () => {
+        render(
+            <SearchableDropdown
+                items={mockItems}
+                placeholder="Search..."
+                onSelect={mockOnSelect}
+                disabled={true}
+            />
+        );
+
+        const input = screen.getByPlaceholderText('Search...');
+        expect(input).toBeDisabled();
+
+        fireEvent.focus(input);
+        expect(screen.queryByText('Item A')).not.toBeInTheDocument(); // Menu doesn't open
+    });
 });
