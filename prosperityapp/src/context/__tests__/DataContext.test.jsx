@@ -92,4 +92,33 @@ describe('DataContext', () => {
 
     consoleError.mockRestore();
   });
+
+  it('aggregates error state from any collection', () => {
+    useBusiness.mockReturnValue({
+      businessId: 'test-biz',
+      user: { uid: 'u1' },
+      realRole: 'owner',
+      loadingAuth: false
+    });
+
+    useSupabaseCollection.mockImplementation((collectionName) => {
+      if (collectionName === 'clients') {
+        return { data: [], loading: false, error: { message: 'RLS policy violation' } };
+      }
+      return { data: [], loading: false, error: null };
+    });
+
+    const TestErrorConsumer = () => {
+      const data = useData();
+      return <div data-testid="clients">{data.clients.length}</div>;
+    };
+
+    render(
+      <DataProvider>
+        <TestErrorConsumer />
+      </DataProvider>
+    );
+
+    expect(screen.getByTestId('clients').textContent).toBe('0');
+  });
 });

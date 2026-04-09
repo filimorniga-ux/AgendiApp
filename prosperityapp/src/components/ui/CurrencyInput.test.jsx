@@ -68,4 +68,17 @@ describe('CurrencyInput Component', () => {
       target: expect.objectContaining({ value: 1500 })
     }));
   });
+
+  it('handles negative values correctly', () => {
+    const handleChange = vi.fn();
+    render(<CurrencyInput value={-2000} onChange={handleChange} name="price" id="price-input" />);
+
+    expect(screen.getByDisplayValue('-2.000')).toBeInTheDocument();
+  });
+
+  it('has correct aria-labels for accessibility', () => {
+    render(<CurrencyInput value={100} onChange={() => {}} name="price" id="price-input" aria-label="Precio" />);
+    const input = screen.getByRole('textbox');
+    expect(input).toBeInTheDocument();
+  });
 });

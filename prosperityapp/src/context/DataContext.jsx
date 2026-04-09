@@ -25,13 +25,13 @@ export const DataProvider = ({ children }) => {
   // ── Colecciones Supabase ────────────────────────────────────────
   // useSupabaseCollection lee businessId desde BusinessContext (proveído
   // por BusinessProvider, que es el PADRE de DataProvider en el árbol)
-  const { data: clients,            loading: loadingClients }   = useSupabaseCollection('clients');
-  const { data: collaborators,      loading: loadingCollabs }   = useSupabaseCollection('collaborators', [], { column: 'display_order', ascending: true });
-  const { data: services,           loading: loadingServices }  = useSupabaseCollection('services');
-  const { data: technicalInventory, loading: loadingTech }      = useSupabaseCollection('technical_inventory');
-  const { data: retailInventory,    loading: loadingRetail }    = useSupabaseCollection('retail_inventory');
-  const { data: config,             loading: loadingConfig }    = useSupabaseCollection('config');
-  const { data: movements,          loading: loadingMovements } = useSupabaseCollection('movements');
+  const { data: clients,            loading: loadingClients, error: errorClients }   = useSupabaseCollection('clients');
+  const { data: collaborators,      loading: loadingCollabs, error: errorCollabs }   = useSupabaseCollection('collaborators', [], { column: 'display_order', ascending: true });
+  const { data: services,           loading: loadingServices, error: errorServices }  = useSupabaseCollection('services');
+  const { data: technicalInventory, loading: loadingTech, error: errorTech }      = useSupabaseCollection('technical_inventory');
+  const { data: retailInventory,    loading: loadingRetail, error: errorRetail }    = useSupabaseCollection('retail_inventory');
+  const { data: config,             loading: loadingConfig, error: errorConfig }    = useSupabaseCollection('config');
+  const { data: movements,          loading: loadingMovements, error: errorMovements } = useSupabaseCollection('movements');
 
   const appointmentsConstraints = useMemo(() => {
     if (!user || !userRole) return [];
@@ -39,7 +39,12 @@ export const DataProvider = ({ children }) => {
     return [{ field: 'stylist_id', op: 'eq', value: user.uid }];
   }, [user, userRole]);
 
-  const { data: appointments, loading: loadingAppointments } = useSupabaseCollection('appointments', appointmentsConstraints);
+  const { data: appointments, loading: loadingAppointments, error: errorAppointments } = useSupabaseCollection('appointments', appointmentsConstraints);
+
+  const error =
+    errorClients || errorCollabs || errorServices ||
+    errorTech || errorRetail || errorConfig ||
+    errorMovements || errorAppointments || null;
 
   const isLoading =
     loadingClients || loadingCollabs || loadingServices ||
@@ -48,6 +53,7 @@ export const DataProvider = ({ children }) => {
 
   const value = useMemo(() => ({
     isLoading,
+    error,
     clients, collaborators, services, technicalInventory,
     retailInventory, config, movements, appointments,
     user, userRole, realRole,
@@ -56,7 +62,7 @@ export const DataProvider = ({ children }) => {
     businessId,
     currentLocale, currentCurrencySymbol, setCurrentCurrency,
   }), [
-    isLoading, clients, collaborators, services, technicalInventory,
+    isLoading, error, clients, collaborators, services, technicalInventory,
     retailInventory, config, movements, appointments,
     user, userRole, realRole, simulatedRole, loadingAuth,
     businessId, currentLocale, currentCurrencySymbol,
