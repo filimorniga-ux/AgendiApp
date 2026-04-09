@@ -3,45 +3,21 @@ import { test, expect } from '@playwright/test';
 // ── Tarea 18: Agendamiento y Reportes Mensuales ────────────────────────────
 test.describe('Agendamiento (Calendario) E2E Flow', () => {
   test('T18.1 - debería cargar la página del Calendario / Agenda', async ({ page }) => {
-    // Intentar varias rutas posibles para el calendario
     await page.goto('/app');
     await page.waitForTimeout(2000);
 
-    // Buscar link de navegación al calendario
-    const calendarLink = page.locator('a, button, nav').filter({ hasText: /Agenda|Calendario|Calendar|Citas/i }).first();
-    if (await calendarLink.isVisible()) {
-      await calendarLink.click();
-      await page.waitForTimeout(2000);
-
-      const title = page.locator('h1, h2').filter({ hasText: /Agenda|Calendario|Calendar/i }).first();
-      await expect(title).toBeVisible({ timeout: 10000 });
-
-      await page.screenshot({ path: 'tests/e2e/screenshots/calendar-page.png' });
-    } else {
-      // Intentar navegación directa
-      await page.goto('/app/agenda');
-      await page.waitForTimeout(2000);
-      await expect(page.locator('body')).toBeVisible();
-    }
+    const title = page.locator('h1, h2').filter({ hasText: /Calendario de Citas|Agenda/i }).first();
+    await expect(title).toBeVisible({ timeout: 10000 });
+    await page.screenshot({ path: 'tests/e2e/screenshots/calendar-page.png' });
   });
 
   test('T18.2 - el calendario debe mostrar la vista mensual o semanal', async ({ page }) => {
-    // Probar rutas candidatas para el calendario
-    const candidateRoutes = ['/app/agenda', '/app/calendario', '/app/citas'];
+    await page.goto('/app');
+    await page.waitForTimeout(1500);
 
-    for (const route of candidateRoutes) {
-      await page.goto(route);
-      await page.waitForTimeout(1500);
-
-      const calView = page.locator('.fc, .calendar, [class*="calendar"], [class*="agenda"]').first();
-      if (await calView.isVisible()) {
-        await expect(calView).toBeVisible();
-        await page.screenshot({ path: 'tests/e2e/screenshots/calendar-view.png' });
-        return; // encontramos el calendario
-      }
-    }
-    // Si no encontró calendar en ninguna ruta, test pasa soft (no bloquea suite)
-    console.warn('T18.2: No se encontró vista de calendario en las rutas candidatas');
+    const calView = page.locator('.fc, .calendar, [class*="calendar"], [class*="agenda"]').first();
+    await expect(calView).toBeVisible();
+    await page.screenshot({ path: 'tests/e2e/screenshots/calendar-view.png' });
   });
 });
 
@@ -51,7 +27,7 @@ test.describe('Reportes Mensuales E2E Flow', () => {
     await page.goto('/app/reportes');
     await page.waitForTimeout(2000);
 
-    const title = page.locator('h1, h2').filter({ hasText: /Reportes|Reports/i }).first();
+    const title = page.locator('h1, h2').filter({ hasText: /Centro de Reportes/i }).first();
     await expect(title).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({ path: 'tests/e2e/screenshots/reports-page.png' });
@@ -61,8 +37,7 @@ test.describe('Reportes Mensuales E2E Flow', () => {
     await page.goto('/app/reportes');
     await page.waitForTimeout(2000);
 
-    // Algún selector de período (mes, trimestre, año)
-    const periodControl = page.locator('input[type="month"], input[type="date"], select').first();
+    const periodControl = page.locator('select').filter({ hasText: /Hoy|Esta Semana|Este Mes|Este Año|Personalizado/i }).first();
     await expect(periodControl).toBeVisible({ timeout: 8000 });
   });
 
@@ -70,21 +45,17 @@ test.describe('Reportes Mensuales E2E Flow', () => {
     await page.goto('/app/reportes');
     await page.waitForTimeout(2000);
 
-    const exportBtn = page.locator('button').filter({ hasText: /Exportar|Export|Excel|PDF/i }).first();
-    if (await exportBtn.isVisible()) {
-      await expect(exportBtn).toBeVisible();
-    }
-    // El test pasa si el botón está o no (no todas las páginas lo tendrán)
+    const exportBtn = page.locator('button[title="Exportar a Excel"]').first();
+    await expect(exportBtn).toBeVisible();
   });
 
   test('T18.6 - debería cargar la página de Cierres Mensuales para validación cruzada', async ({ page }) => {
-    await page.goto('/app/cierres-mensuales');
+    await page.goto('/app/cierres');
     await page.waitForTimeout(2000);
 
-    const title = page.locator('h2').filter({ hasText: /Cierre|Cierre Mensual|closings/i }).first();
+    const title = page.locator('h2').filter({ hasText: /Cierres Mensuales/i }).first();
     await expect(title).toBeVisible({ timeout: 10000 });
 
-    // Validar que el selector de mes esté presente para cambiar período
     const monthPicker = page.locator('input[type="month"]').first();
     await expect(monthPicker).toBeVisible();
 
@@ -92,7 +63,7 @@ test.describe('Reportes Mensuales E2E Flow', () => {
   });
 
   test('T18.7 - el selector de mes en cierres permite navegar por meses anteriores', async ({ page }) => {
-    await page.goto('/app/cierres-mensuales');
+    await page.goto('/app/cierres');
     await page.waitForTimeout(2000);
 
     const monthPicker = page.locator('input[type="month"]').first();
