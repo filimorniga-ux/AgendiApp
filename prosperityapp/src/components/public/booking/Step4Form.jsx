@@ -4,16 +4,21 @@ const Step4Form = ({ onNext, onBack, loading }) => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    email: ''
+    email: '',
+    wantsAccount: false,
+    password: '',
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (formData.wantsAccount && formData.password.length < 6) {
+      return; // HTML5 validation will handle this
+    }
     onNext(formData);
   };
 
@@ -77,10 +82,51 @@ const Step4Form = ({ onNext, onBack, loading }) => {
            />
         </div>
 
+        {/* Opción de crear cuenta */}
+        <div className="border-t border-border-main pt-4">
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              name="wantsAccount"
+              checked={formData.wantsAccount}
+              onChange={handleChange}
+              disabled={loading}
+              className="mt-1 w-4 h-4 rounded border-border-main text-accent focus:ring-accent bg-bg-tertiary"
+            />
+            <div>
+              <span className="text-sm font-medium text-text-main group-hover:text-accent transition-colors">
+                Crear cuenta gratuita
+              </span>
+              <p className="text-xs text-text-muted mt-0.5">
+                Podrás ver tu historial de visitas, servicios y próximas citas
+              </p>
+            </div>
+          </label>
+        </div>
+
+        {formData.wantsAccount && (
+          <div className="animate-fade-in">
+            <label htmlFor="password" className="block text-sm font-medium text-text-muted mb-1">Contraseña *</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required={formData.wantsAccount}
+              minLength={6}
+              disabled={loading}
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Mínimo 6 caracteres"
+              className="w-full bg-bg-tertiary border border-border-main rounded-lg px-4 py-3 text-text-main focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+            />
+            <p className="text-xs text-text-muted mt-1">Tu correo electrónico será requerido para crear la cuenta</p>
+          </div>
+        )}
+
         <div className="pt-4">
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (formData.wantsAccount && !formData.email)}
             className={`w-full py-3 px-4 rounded-lg font-bold text-lg flex items-center justify-center transition-all
               ${loading ? 'bg-bg-tertiary text-text-muted cursor-wait' : 'btn-golden shadow-[0_0_15px_rgba(212,168,83,0.3)]'}`}
           >

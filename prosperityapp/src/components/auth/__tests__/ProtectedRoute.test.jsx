@@ -3,27 +3,17 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ProtectedRoute from '../ProtectedRoute';
 import { useBusiness } from '../../../context/BusinessContext';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { supabase } from '../../../supabase/client';
 
 vi.mock('../../../context/BusinessContext', () => ({
   useBusiness: vi.fn(),
 }));
 
-vi.mock('../../../firebase/config', () => ({
-  auth: {},
-}));
-
-vi.mock('firebase/auth', () => ({
-  signInWithEmailAndPassword: vi.fn(),
-  GoogleAuthProvider: vi.fn(),
-  signInWithPopup: vi.fn(),
-}));
-
 vi.mock('../../../supabase/client', () => ({
   supabase: {
     auth: {
       signInWithPassword: vi.fn(),
+      signInWithOAuth: vi.fn(),
     },
   },
 }));
@@ -35,10 +25,10 @@ describe('ProtectedRoute', () => {
     vi.clearAllMocks();
   });
 
-  it('renders children if user is logged in (Firebase)', () => {
+  it('renders children if user is logged in (Supabase user)', () => {
     useBusiness.mockReturnValue({
       user: { email: 'admin@test.com' },
-      supabaseUser: null,
+      supabaseUser: { email: 'admin@test.com' },
       loadingAuth: false,
     });
 
@@ -51,7 +41,7 @@ describe('ProtectedRoute', () => {
     expect(screen.getByTestId('child-content')).toBeInTheDocument();
   });
 
-  it('renders children if user is logged in (Supabase)', () => {
+  it('renders children if supabaseUser is present', () => {
     useBusiness.mockReturnValue({
       user: null,
       supabaseUser: { email: 'collab@test.com' },
@@ -75,11 +65,10 @@ describe('ProtectedRoute', () => {
     });
 
     const { container } = render(<ProtectedRoute><div /></ProtectedRoute>);
-    // The spinner has animate-spin class
     expect(container.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
-  it('shows login form if no user', () => {
+  it('shows unified login form if no user', () => {
     useBusiness.mockReturnValue({
       user: null,
       supabaseUser: null,
@@ -88,32 +77,14 @@ describe('ProtectedRoute', () => {
 
     render(<ProtectedRoute><div /></ProtectedRoute>);
     expect(screen.getByText('Inicia sesión para continuar')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Administrador' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Colaborador' })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Correo electrónico')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Contraseña')).toBeInTheDocument();
+    // No more dual tabs — single unified login
+    expect(screen.queryByRole('button', { name: 'Administrador' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Colaborador' })).not.toBeInTheDocument();
   });
 
-  it('calls Firebase signInWithEmailAndPassword in owner mode', async () => {
-    useBusiness.mockReturnValue({
-      user: null,
-      supabaseUser: null,
-      loadingAuth: false,
-    });
-    signInWithEmailAndPassword.mockResolvedValue({});
-
-    render(<ProtectedRoute><div /></ProtectedRoute>);
-
-    // Default is owner
-    fireEvent.change(screen.getByPlaceholderText('Correo electrónico'), { target: { value: 'owner@test.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Contraseña'), { target: { value: 'password123' } });
-
-    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
-
-    await waitFor(() => {
-      expect(signInWithEmailAndPassword).toHaveBeenCalledWith(expect.anything(), 'owner@test.com', 'password123');
-    });
-  });
-
-  it('calls Supabase signInWithPassword in collaborator mode', async () => {
+  it('calls Supabase signInWithPassword on form submit', async () => {
     useBusiness.mockReturnValue({
       user: null,
       supabaseUser: null,
@@ -123,16 +94,45 @@ describe('ProtectedRoute', () => {
 
     render(<ProtectedRoute><div /></ProtectedRoute>);
 
-    // Switch to collaborator
-    fireEvent.click(screen.getByRole('button', { name: 'Colaborador' }));
-
-    fireEvent.change(screen.getByPlaceholderText('Correo electrónico'), { target: { value: 'collab@test.com' } });
+    fireEvent.change(screen.getByPlaceholderText('Correo electrónico'), { target: { value: 'user@test.com' } });
     fireEvent.change(screen.getByPlaceholderText('Contraseña'), { target: { value: 'password123' } });
-
     fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
 
     await waitFor(() => {
-      expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({ email: 'collab@test.com', password: 'password123' });
+      expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({ email: 'user@test.com', password: 'password123' });
     });
+  });
+
+  it('shows error on invalid credentials', async () => {
+    useBusiness.mockReturnValue({
+      user: null,
+      supabaseUser: null,
+      loadingAuth: false,
+    });
+    supabase.auth.signInWithPassword.mockResolvedValue({
+      data: null,
+      error: { message: 'Invalid login credentials' },
+    });
+
+    render(<ProtectedRoute><div /></ProtectedRoute>);
+
+    fireEvent.change(screen.getByPlaceholderText('Correo electrónico'), { target: { value: 'bad@test.com' } });
+    fireEvent.change(screen.getByPlaceholderText('Contraseña'), { target: { value: 'wrong' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Correo o contraseña incorrectos. Verifica tus datos.')).toBeInTheDocument();
+    });
+  });
+
+  it('has Google OAuth button', () => {
+    useBusiness.mockReturnValue({
+      user: null,
+      supabaseUser: null,
+      loadingAuth: false,
+    });
+
+    render(<ProtectedRoute><div /></ProtectedRoute>);
+    expect(screen.getByRole('button', { name: 'Continuar con Google' })).toBeInTheDocument();
   });
 });

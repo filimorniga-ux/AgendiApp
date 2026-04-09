@@ -41,6 +41,8 @@ const WebsiteApp                 = lazy(() => import('./pages/Website/App'));
 const PublicLayout               = lazy(() => import('./components/public/PublicLayout'));
 const PublicAgenda               = lazy(() => import('./pages/Public/PublicAgenda'));
 const PublicPrices               = lazy(() => import('./pages/Public/PublicPrices'));
+const PublicClientLogin          = lazy(() => import('./pages/Public/PublicClientLogin'));
+const PublicHistory              = lazy(() => import('./pages/Public/PublicHistory'));
 
 // Fallback de carga — spinner mínimo que no añade peso al bundle inicial
 const PageLoader = () => (
@@ -115,6 +117,8 @@ function App() {
                   <Route index element={<Navigate to="reservar" replace />} />
                   <Route path="reservar" element={<PublicAgenda />} />
                   <Route path="precios" element={<PublicPrices />} />
+                  <Route path="login" element={<PublicClientLogin />} />
+                  <Route path="historial" element={<PublicHistory />} />
                 </Route>
 
                 <Route path="/app" element={

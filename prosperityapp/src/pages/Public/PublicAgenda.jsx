@@ -59,7 +59,7 @@ const PublicAgenda = () => {
       if (existingClient) {
         clientId = existingClient.id;
       } else {
-        // Crear cliente
+        // Crear cliente con fuente de captación
         const { data: newClient, error: cError } = await supabase
           .from('clients')
           .insert({
@@ -67,6 +67,7 @@ const PublicAgenda = () => {
             name: clientInfo.name,
             phone: clientInfo.phone,
             email: clientInfo.email || null,
+            source: 'public_booking',
             status: 'active'
           })
           .select()
@@ -76,7 +77,29 @@ const PublicAgenda = () => {
         clientId = newClient.id;
       }
 
-      // 2. Crear Cita
+      // 2. Si el cliente quiere crear cuenta, registrar en Supabase Auth
+      if (clientInfo.wantsAccount && clientInfo.email && clientInfo.password) {
+        try {
+          const { data: authData, error: authErr } = await supabase.auth.signUp({
+            email: clientInfo.email,
+            password: clientInfo.password,
+            options: { data: { name: clientInfo.name, phone: clientInfo.phone } },
+          });
+
+          if (!authErr && authData?.user?.id) {
+            // Vincular auth_user_id al registro del cliente
+            await supabase
+              .from('clients')
+              .update({ auth_user_id: authData.user.id, email: clientInfo.email })
+              .eq('id', clientId);
+          }
+        } catch (accErr) {
+          // No bloquear la reserva si falla la creación de cuenta
+          console.warn('Account creation failed, booking will proceed:', accErr);
+        }
+      }
+
+      // 3. Crear Cita
       const [hours, minutes] = selectedTime.split(':').map(Number);
       const startTime = new Date(selectedDate);
       startTime.setHours(hours, minutes, 0, 0);
@@ -104,7 +127,9 @@ const PublicAgenda = () => {
       if (aptError) throw aptError;
 
       setIsSuccess(true);
-      toast.success('¡Reserva creada con éxito!');
+      toast.success(clientInfo.wantsAccount 
+        ? '¡Reserva creada y cuenta activada! Ya puedes ver tu historial.' 
+        : '¡Reserva creada con éxito!');
 
     } catch (error) {
       console.error('Error al crear reserva:', error);

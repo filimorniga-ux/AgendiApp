@@ -32,7 +32,7 @@ describe('BusinessContext', () => {
     });
   });
 
-  it('provides dev user via DEV_BYPASS mode', async () => {
+  it('starts with null user when no auth session exists', async () => {
     await act(async () => {
       render(
         <BusinessProvider>
@@ -41,14 +41,13 @@ describe('BusinessContext', () => {
       );
     });
 
-    // DEV_BYPASS sets user immediately with hardcoded email
+    // With no session, loading finishes and user is null
     await waitFor(() => {
       expect(screen.getByTestId('loading').textContent).toBe('false');
     });
 
-    expect(screen.getByTestId('user').textContent).toBe('dev@local.dev');
-    // Role is set to 'owner' in bypass mode
-    expect(screen.getByTestId('role').textContent).toBe('owner');
+    expect(screen.getByTestId('user').textContent).toBe('null');
+    expect(screen.getByTestId('role').textContent).toBe('null');
   });
 
   it('exports BusinessContext and BusinessProvider correctly', () => {

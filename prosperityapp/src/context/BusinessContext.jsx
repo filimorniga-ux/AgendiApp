@@ -6,6 +6,7 @@ export const BusinessContext = createContext({
   user:          null,
   supabaseUser:  null,
   realRole:      null,
+  isClient:      false,
   loadingAuth:   true,
   businessPlan:  'free',
   signOutAll:    async () => {},
@@ -14,6 +15,7 @@ export const BusinessContext = createContext({
 export const BusinessProvider = ({ children }) => {
   const [supabaseUser, setSupabaseUser] = useState(null);
   const [realRole,     setRealRole]     = useState(null);
+  const [isClient,     setIsClient]     = useState(false);
   const [loadingAuth,  setLoadingAuth]  = useState(true);
   const [businessId,   setBusinessId]   = useState(null);
   const [businessPlan, setBusinessPlan] = useState('free');
@@ -22,6 +24,7 @@ export const BusinessProvider = ({ children }) => {
     await supabase.auth.signOut().catch(() => {});
     setSupabaseUser(null);
     setRealRole(null);
+    setIsClient(false);
     setBusinessId(null);
   };
 
@@ -33,7 +36,7 @@ export const BusinessProvider = ({ children }) => {
         setSupabaseUser(sbUser);
 
         if (sbUser) {
-          // Look up this Supabase user in the collaborators table
+          // ── Priority 1: Check collaborators table (staff/admin) ──
           const { data: collab } = await supabase
             .from('collaborators')
             .select('id, business_id, role')
@@ -43,13 +46,13 @@ export const BusinessProvider = ({ children }) => {
           if (collab?.business_id) {
             setRealRole(collab.role || 'staff');
             setBusinessId(collab.business_id);
+            setIsClient(false);
             
-            // fetch business plan for collaborator
             const { data: bData } = await supabase.from('businesses').select('plan').eq('id', collab.business_id).single();
             setBusinessPlan(bData?.plan || 'free');
 
           } else {
-            // Check if owner by email
+            // ── Priority 2: Check users table (owner) ──
             let { data: appUser } = await supabase
               .from('users')
               .select('business_id, role')
@@ -59,36 +62,55 @@ export const BusinessProvider = ({ children }) => {
             if (appUser?.business_id) {
               setRealRole(appUser.role || 'owner');
               setBusinessId(appUser.business_id);
+              setIsClient(false);
 
-              // fetch business plan for owner
               const { data: bData } = await supabase.from('businesses').select('plan').eq('id', appUser.business_id).single();
               setBusinessPlan(bData?.plan || 'free');
-            } else {
-              // Check if business already exists for this owner using legacy owner_uid logic if needed
-              // or create a new business
-              const { data: newBiz } = await supabase
-                .from('businesses')
-                .upsert(
-                  { owner_uid: sbUser.id, name: 'Mi Salón' },
-                  { onConflict: 'owner_uid', ignoreDuplicates: false }
-                )
-                .select()
-                .single();
 
-              if (newBiz) {
-                await supabase.from('users').upsert(
-                  { business_id: newBiz.id, firebase_uid: sbUser.id, email: sbUser.email, role: 'owner' },
-                  { onConflict: 'firebase_uid' }
-                );
-                setBusinessId(newBiz.id);
-                setRealRole('owner');
-                setBusinessPlan(newBiz.plan || 'free');
+            } else {
+              // ── Priority 3: Check clients table (end-user client) ──
+              const { data: clientRecord } = await supabase
+                .from('clients')
+                .select('id, business_id')
+                .eq('auth_user_id', sbUser.id)
+                .maybeSingle();
+
+              if (clientRecord?.business_id) {
+                setRealRole('client');
+                setBusinessId(clientRecord.business_id);
+                setIsClient(true);
+                
+                const { data: bData } = await supabase.from('businesses').select('plan').eq('id', clientRecord.business_id).single();
+                setBusinessPlan(bData?.plan || 'free');
+
+              } else {
+                // ── Priority 4: Auto-seed new business for new owner ──
+                const { data: newBiz } = await supabase
+                  .from('businesses')
+                  .upsert(
+                    { owner_uid: sbUser.id, name: 'Mi Salón' },
+                    { onConflict: 'owner_uid', ignoreDuplicates: false }
+                  )
+                  .select()
+                  .single();
+
+                if (newBiz) {
+                  await supabase.from('users').upsert(
+                    { business_id: newBiz.id, firebase_uid: sbUser.id, email: sbUser.email, role: 'owner' },
+                    { onConflict: 'firebase_uid' }
+                  );
+                  setBusinessId(newBiz.id);
+                  setRealRole('owner');
+                  setIsClient(false);
+                  setBusinessPlan(newBiz.plan || 'free');
+                }
               }
             }
           }
         } else {
           setRealRole(null);
           setBusinessId(null);
+          setIsClient(false);
         }
 
         setLoadingAuth(false);
@@ -101,12 +123,10 @@ export const BusinessProvider = ({ children }) => {
   }, []);
 
   return (
-    // Conservamos `user` apuntando a `supabaseUser` para que la app no rompa dependencias de legacy context ref
-    <BusinessContext.Provider value={{ businessId, businessPlan, user: supabaseUser, supabaseUser, realRole, loadingAuth, signOutAll }}>
+    <BusinessContext.Provider value={{ businessId, businessPlan, user: supabaseUser, supabaseUser, realRole, isClient, loadingAuth, signOutAll }}>
       {children}
     </BusinessContext.Provider>
   );
 };
 
 export const useBusiness = () => useContext(BusinessContext);
-

@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { useBusiness } from '../../context/BusinessContext';
-import { auth } from '../../firebase/config';
 import { supabase } from '../../supabase/client';
-import {
-  signInWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
-} from 'firebase/auth';
 
 // ── Bypass de autenticación para desarrollo ───────────────────────────────────
 const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
@@ -19,7 +13,6 @@ const ProtectedRoute = ({ children }) => {
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loginMode,    setLoginMode]    = useState('owner'); // 'owner' | 'collaborator'
   const [error,        setError]        = useState('');
   const [loading,      setLoading]      = useState(false);
 
@@ -31,55 +24,45 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // Logged in (either Firebase owner or Supabase collaborator)
+  // Logged in via Supabase Auth
   if (user || supabaseUser) return children;
 
-  // ── Login handlers ────────────────────────────────────────────────────────
-  const handleOwnerLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-        setError('Credenciales incorrectas. ¿Eres un colaborador? Cambia de pestaña arriba.');
-      } else {
-        setError('Correo o contraseña incorrectos');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCollaboratorLogin = async (e) => {
+  // ── Login handler (unified: owner + collaborator via Supabase Auth) ────────
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
       const { error: sbErr } = await supabase.auth.signInWithPassword({ email, password });
-      if (sbErr) throw sbErr;
-    } catch (err) {
-      if (err.message && err.message.includes('Invalid login credentials')) {
-        setError('Credenciales incorrectas. ¿Eres el administrador? Cambia de pestaña arriba.');
-      } else {
-        setError('Correo o contraseña de colaborador incorrectos');
+      if (sbErr) {
+        if (sbErr.message?.includes('Invalid login credentials')) {
+          setError('Correo o contraseña incorrectos. Verifica tus datos.');
+        } else {
+          setError(sbErr.message || 'Error al iniciar sesión');
+        }
       }
+      // BusinessContext.onAuthStateChange will handle role detection automatically
+    } catch (err) {
+      setError('Error inesperado al iniciar sesión');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogle = async () => {
+  const handleGoogleLogin = async () => {
     setError('');
     try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
+      const { error: oauthErr } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/app',
+        },
+      });
+      if (oauthErr) setError('Error al iniciar sesión con Google');
     } catch {
       setError('Error al iniciar sesión con Google');
     }
   };
-
-  const handleSubmit = loginMode === 'owner' ? handleOwnerLogin : handleCollaboratorLogin;
 
   return (
     <div className="min-h-screen bg-bg-main flex items-center justify-center p-4">
@@ -88,27 +71,12 @@ const ProtectedRoute = ({ children }) => {
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-text-main">AgendiApp</h1>
           <p className="text-text-muted text-sm mt-1">Inicia sesión para continuar</p>
+          <p className="text-text-muted text-xs mt-2 opacity-60">
+            Administradores, colaboradores y clientes usan el mismo acceso
+          </p>
         </div>
 
-        {/* Mode Toggle */}
-        <div className="flex rounded-lg border border-border-main overflow-hidden mb-6">
-          <button
-            type="button"
-            onClick={() => { setLoginMode('owner'); setError(''); }}
-            className={`flex-1 py-2 text-sm font-semibold transition-colors ${loginMode === 'owner' ? 'bg-accent text-accent-text' : 'text-text-muted hover:bg-bg-tertiary'}`}
-          >
-            Administrador
-          </button>
-          <button
-            type="button"
-            onClick={() => { setLoginMode('collaborator'); setError(''); }}
-            className={`flex-1 py-2 text-sm font-semibold transition-colors ${loginMode === 'collaborator' ? 'bg-accent text-accent-text' : 'text-text-muted hover:bg-bg-tertiary'}`}
-          >
-            Colaborador
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="email"
             placeholder="Correo electrónico"
@@ -155,31 +123,21 @@ const ProtectedRoute = ({ children }) => {
           </button>
         </form>
 
-        {/* Google signin — only for owners */}
-        {loginMode === 'owner' && (
-          <>
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border-main"></div>
-              </div>
-              <div className="relative flex justify-center text-xs text-text-muted">
-                <span className="bg-bg-secondary px-2">o</span>
-              </div>
-            </div>
-            <button
-              onClick={handleGoogle}
-              className="w-full py-2.5 border border-border-main rounded-lg text-text-main text-sm hover:bg-bg-main transition-colors"
-            >
-              Continuar con Google
-            </button>
-          </>
-        )}
-
-        {loginMode === 'collaborator' && (
-          <p className="text-xs text-text-muted text-center mt-4">
-            Tu administrador debe haberte proporcionado un correo y contraseña de acceso.
-          </p>
-        )}
+        {/* Google OAuth via Supabase */}
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border-main"></div>
+          </div>
+          <div className="relative flex justify-center text-xs text-text-muted">
+            <span className="bg-bg-secondary px-2">o</span>
+          </div>
+        </div>
+        <button
+          onClick={handleGoogleLogin}
+          className="w-full py-2.5 border border-border-main rounded-lg text-text-main text-sm hover:bg-bg-main transition-colors"
+        >
+          Continuar con Google
+        </button>
       </div>
     </div>
   );
