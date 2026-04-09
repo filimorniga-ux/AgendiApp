@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 const SubscriptionPage = () => {
     const { t } = useTranslation();
     const { userRole, isLoading, config } = useData();
-    const { realRole, businessId, businessPlan } = useBusiness();
+    const { realRole, businessId, businessPlan, user } = useBusiness();
     const [isCreatingCheckout, setIsCreatingCheckout] = React.useState(false);
 
     useEffect(() => {
@@ -30,8 +30,9 @@ const SubscriptionPage = () => {
     const handleUpgradeToPro = async (provider = 'mercadopago') => {
         setIsCreatingCheckout(true);
         try {
+            const userEmail = user?.email || "";
             const { data, error } = await supabase.functions.invoke('create-checkout', {
-                body: { plan: 'pro', businessId, provider }
+                body: { plan: 'pro', businessId, provider, userEmail }
             });
 
             if (error) throw error;
@@ -47,7 +48,7 @@ const SubscriptionPage = () => {
             }
         } catch (error) {
             console.error(error);
-            toast.error("Error al conectar con Mercado Pago");
+            toast.error("Error al conectar con el proveedor de pago");
         } finally {
             setIsCreatingCheckout(false);
         }

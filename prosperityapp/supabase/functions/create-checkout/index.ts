@@ -13,8 +13,11 @@ serve(async (req) => {
     }
 
     try {
-        const { plan, businessId, provider = 'mercadopago' } = await req.json();
+        const { plan, businessId, provider = 'mercadopago', userEmail } = await req.json();
         
+        // Use req origin for dynamic URLs
+        const origin = req.headers.get('origin') || 'https://agendiapp.com';
+
         if (!plan || !businessId) {
             throw new Error("El plan y businessId son obligatorios.");
         }
@@ -43,7 +46,7 @@ serve(async (req) => {
                 throw new Error("Plan inválido para Stripe.");
             }
 
-            const session = await stripe.checkout.sessions.create({
+            const sessionConfig: any = {
                 payment_method_types: ['card'],
                 line_items: [
                     {
@@ -61,10 +64,19 @@ serve(async (req) => {
                     },
                 ],
                 mode: 'subscription',
-                success_url: "https://agendiapp.com/app/suscripcion?status=success",
-                cancel_url: "https://agendiapp.com/app/suscripcion?status=cancel",
+                success_url: `${origin}/app/suscripcion?status=success`,
+                cancel_url: `${origin}/app/suscripcion?status=cancel`,
                 client_reference_id: businessId, // Fundamental: ID the negocio para procesar en Webhook
-            });
+                metadata: {
+                    plan: plan,
+                }
+            };
+
+            if (userEmail) {
+                sessionConfig.customer_email = userEmail;
+            }
+
+            const session = await stripe.checkout.sessions.create(sessionConfig);
 
             return new Response(
                 JSON.stringify({ url: session.url }),
@@ -106,8 +118,8 @@ serve(async (req) => {
                         transaction_amount: transactionAmount,
                         currency_id: "CLP" // Configurado para CLP local
                     },
-                    back_url: "https://agendiapp.com/app/suscripcion?status=success",
-                    payer_email: "test_user_ex@testuser.com",
+                    back_url: `${origin}/app/suscripcion?status=success`,
+                    payer_email: userEmail || "test_user_ex@testuser.com",
                     external_reference: businessId // ID del negocio
                 })
             });

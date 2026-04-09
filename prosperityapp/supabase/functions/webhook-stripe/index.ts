@@ -51,19 +51,21 @@ serve(async (req) => {
                 Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '' // <- Service role para saltar RLS
             );
 
-            // Actualizar plan a PRO. (Nota: Esto podría ser dinamico si vendes multiples planes)
-            // Ya que el usuario pagó via Stripe, asuminos el upgrade a PRO.
+            // Read plan from metadata or fallback to 'pro'
+            const chosenPlan = session.metadata?.plan || 'pro';
+
+            // Actualizar plan
             const { error: updateError } = await supabaseAdmin
                 .from('businesses')
-                .update({ plan: 'pro' })
+                .update({ plan: chosenPlan })
                 .eq('id', businessId);
 
             if (updateError) {
-                console.error("Error updating business plan in DB:", updateError);
+                console.error(`Error updating business plan to ${chosenPlan} in DB:`, updateError);
                 return new Response("Database Error", { status: 500 });
             }
 
-            console.log("Plan actualizado correctamente a PRO");
+            console.log(`Plan actualizado correctamente a ${chosenPlan}`);
         }
 
         return new Response(JSON.stringify({ received: true }), { status: 200 });

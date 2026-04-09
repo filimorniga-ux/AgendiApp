@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
-import { useDocument } from '../hooks/useDocument';
+import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import { useParams, Link } from 'react-router-dom';
 import DetailModal from '../components/modals/DetailModal';
 import { parseDate } from '../lib/dateUtils';
@@ -29,7 +29,8 @@ const PayrollRow = ({ label, value, className = '', isClickable = false, onClick
 const PayrollDetailPage = () => {
   const { t } = useTranslation();
   const { id: closingId } = useParams();
-  const { document: closing, loading } = useDocument('payrollClosings', closingId);
+  const { data: closingsData, loading } = useSupabaseCollection('payroll_closings', [{ field: 'id', op: 'eq', value: closingId }]);
+  const closing = closingsData?.[0] || null;
   const { isLoading: isDataLoading } = useData();
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
