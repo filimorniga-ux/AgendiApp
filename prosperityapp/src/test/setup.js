@@ -1,59 +1,7 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
-// ── Mock Firebase (evita inicialización real con env vars vacías) ──────
-vi.mock('../firebase/config', () => ({
-  db:      {},
-  auth:    { currentUser: null, onAuthStateChanged: vi.fn(() => () => {}) },
-  storage: {},
-}));
-
-vi.mock('firebase/auth', async () => {
-  const actual = await vi.importActual('firebase/auth');
-  return {
-    ...actual,
-    getAuth:          vi.fn(() => ({ currentUser: null })),
-    onAuthStateChanged: vi.fn((_auth, cb) => { if (cb) cb(null); return () => {}; }),
-    signInWithEmailAndPassword: vi.fn(),
-    signOut:          vi.fn(),
-    createUserWithEmailAndPassword: vi.fn(),
-  };
-});
-
-vi.mock('firebase/firestore', async () => {
-  const actual = await vi.importActual('firebase/firestore');
-  return {
-    ...actual,
-    getFirestore: vi.fn(() => ({})),
-    collection:   vi.fn(),
-    doc:          vi.fn(),
-    getDocs:      vi.fn(() => Promise.resolve({ docs: [] })),
-    getDoc:       vi.fn(() => Promise.resolve({ exists: () => false, data: () => ({}) })),
-    setDoc:       vi.fn(() => Promise.resolve()),
-    addDoc:       vi.fn(() => Promise.resolve({ id: 'mock-id' })),
-    updateDoc:    vi.fn(() => Promise.resolve()),
-    deleteDoc:    vi.fn(() => Promise.resolve()),
-    onSnapshot:   vi.fn((_q, cb) => { cb({ docs: [] }); return () => {}; }),
-    query:        vi.fn((...args) => args[0]),
-    where:        vi.fn(),
-    orderBy:      vi.fn(),
-    limit:        vi.fn(),
-    serverTimestamp: vi.fn(() => new Date().toISOString()),
-    Timestamp:    { fromDate: vi.fn((d) => d), now: vi.fn(() => new Date()) },
-  };
-});
-
-vi.mock('firebase/storage', async () => {
-  const actual = await vi.importActual('firebase/storage');
-  return {
-    ...actual,
-    getStorage:    vi.fn(() => ({})),
-    ref:           vi.fn(),
-    uploadBytesResumable: vi.fn(() => ({ on: vi.fn(), snapshot: { ref: {} } })),
-    getDownloadURL: vi.fn(() => Promise.resolve('https://mock-url.com/file.jpg')),
-    deleteObject:  vi.fn(() => Promise.resolve()),
-  };
-});
+// ── Firebase mocks removed. ──────────────────────────────────────────────
 
 // ── Mock Supabase (evita conexión real) ─────────────────────────────────
 const mockSupabaseQuery = {

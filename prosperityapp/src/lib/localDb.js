@@ -31,24 +31,24 @@ localDb.version(1).stores({
   offline_queue:        '++id, table, operation, status, createdAt',
 });
 
-// ── Schema v2: tablas adicionales para pedidos, contabilidad y cierres ────────
-localDb.version(2).stores({
-  clients:                  '++_localId, id, business_id, firebaseId',
-  collaborators:            '++_localId, id, business_id, firebaseId',
-  services:                 '++_localId, id, business_id, firebaseId',
-  technical_inventory:      '++_localId, id, business_id, firebaseId',
-  retail_inventory:         '++_localId, id, business_id, firebaseId',
+// ── Schema v3: Eliminación de firebaseId tras migración a Supabase ────────
+localDb.version(3).stores({
+  clients:                  '++_localId, id, business_id',
+  collaborators:            '++_localId, id, business_id',
+  services:                 '++_localId, id, business_id',
+  technical_inventory:      '++_localId, id, business_id',
+  retail_inventory:         '++_localId, id, business_id',
   config:                   '++_localId, id, business_id',
-  movements:                '++_localId, id, business_id, firebaseId',
-  appointments:             '++_localId, id, business_id, firebaseId',
+  movements:                '++_localId, id, business_id',
+  appointments:             '++_localId, id, business_id',
   offline_queue:            '++id, table, operation, status, createdAt',
-  // Nuevas tablas v2
-  suppliers:                '++_localId, id, business_id, firebaseId',
-  invoices:                 '++_localId, id, business_id, firebaseId',
-  debts:                    '++_localId, id, business_id, firebaseId',
-  gift_cards:               '++_localId, id, business_id, firebaseId',
+  // Nuevas tablas v2 y v3
+  suppliers:                '++_localId, id, business_id',
+  invoices:                 '++_localId, id, business_id',
+  debts:                    '++_localId, id, business_id',
+  gift_cards:               '++_localId, id, business_id',
   payroll_closings:         '++_localId, id, business_id',
-  monthly_closings:         '++_localId, id, business_id, firebaseId',
+  monthly_closings:         '++_localId, id, business_id',
   monthly_closing_records:  '++_localId, id, business_id',
   work_shifts:              '++_localId, id, business_id',
   stock_movements:          '++_localId, id, business_id',

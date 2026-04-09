@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './index.css';
-import {
-    onAuthStateChanged,
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    signOut,
-    GoogleAuthProvider,
-    signInWithPopup,
-    OAuthProvider
-} from 'firebase/auth';
-// CORRECCIÓN AQUÍ: Ya no importamos initialAuthToken
-import { auth } from "../../firebase/config";
+import { supabase } from '../../supabase/client';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
@@ -25,6 +15,8 @@ import { Contact } from './components/sections/Contact';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { AuthModal } from './components/auth/AuthModal';
 import { Icons } from './components/ui/Icons';
+
+import { HelmetProvider, Helmet } from 'react-helmet-async';
 
 function MainApp() {
     const { t } = useLanguage();
@@ -43,19 +35,15 @@ function MainApp() {
 
     // LÓGICA LIMPIA DE AUTENTICACIÓN REAL
     useEffect(() => {
-        if (auth) {
-            // Escuchamos el estado real de Firebase (Prosperity)
-            const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-                setUser(currentUser);
-                setLoadingAuth(false);
-                if (currentUser) {
-                    console.info("✅ Usuario autenticado:", currentUser.email);
-                }
-            });
-            return () => unsubscribe();
-        } else {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
             setLoadingAuth(false);
-        }
+            if (currentUser) {
+                console.info("✅ Usuario autenticado:", currentUser.email);
+            }
+        });
+        return () => subscription.unsubscribe();
     }, []);
 
     useEffect(() => {
@@ -66,18 +54,16 @@ function MainApp() {
     }, [isDarkMode]);
 
     const handleLogout = async () => {
-        if (auth) {
-            await signOut(auth);
-            setUser(null);
-        }
+        await supabase.auth.signOut();
+        setUser(null);
     };
 
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
-        if (!auth) return;
 
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) throw error;
             setShowLoginModal(false); // Cerrar modal al éxito
             navigate('/app'); // Redirección al Dashboard
         } catch (error) {
@@ -88,10 +74,10 @@ function MainApp() {
 
     const handleRegisterSubmit = async (e) => {
         e.preventDefault();
-        if (!auth) return;
 
         try {
-            await createUserWithEmailAndPassword(auth, email, password);
+            const { error } = await supabase.auth.signUp({ email, password });
+            if (error) throw error;
             setShowRegisterModal(false);
             navigate('/app'); // Redirección al Dashboard
         } catch (error) {
@@ -101,25 +87,22 @@ function MainApp() {
     };
 
     const handleGoogleLogin = async () => {
-        if (!auth) return;
         try {
-            const provider = new GoogleAuthProvider();
-            await signInWithPopup(auth, provider);
-            setShowLoginModal(false);
-            setShowRegisterModal(false);
-            navigate('/app'); // Redirección al Dashboard
+            const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+            if (error) throw error;
+            // Note: OAuth redirection leaves the page, so modal close logic is skipped.
         } catch (error) {
             console.warn("Google Auth Error:", error);
         }
     };
 
-    const handleAppleLogin = () => {
-        if (auth) {
-            const provider = new OAuthProvider('apple.com');
-            signInWithPopup(auth, provider).catch((error) => {
-                console.warn("Apple Sign In not configured in Firebase Console yet.", error);
-                alert("Apple Sign In requiere dominio verificado. Usa Google o Email por ahora.");
-            });
+    const handleAppleLogin = async () => {
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({ provider: 'apple' });
+            if (error) throw error;
+        } catch (error) {
+            console.warn("Apple Sign In Error:", error);
+            alert("Error al iniciar sesión con Apple.");
         }
     };
 
@@ -134,6 +117,15 @@ function MainApp() {
 
     return (
         <div style={bgStyle} className={`font-sans antialiased min-h-screen transition-colors duration-500 bg-fixed selection:bg-[#f6e05e] selection:text-black`}>
+            <Helmet>
+                <title>AgendiApp — Software y Aplicación para Barberías, Peluquerías y Spa de Uñas</title>
+                <meta name="description" content="Automatiza tus reservas, controla comisiones y digitaliza tu inventario fácilmente con el mejor software de peluquerías, barberías y spa de uñas. Sistema de reservas de belleza líder." />
+                <meta name="keywords" content="aplicación para barberías, software de peluquerías, spa de uñas, software de gestión de spa y uñas, sistema de reservas de belleza, SaaS peluquerías, agendamiento online" />
+                <meta property="og:title" content="AgendiApp — El Software Premium para tu Negocio de Belleza" />
+                <meta property="og:description" content="Sistema de reservas de belleza enfocado en peluquerías, barberías y spa de uñas. Atrae más clientes y gestiona todo en un solo lugar." />
+                <meta property="og:type" content="website" />
+                <link rel="canonical" href="https://agendiapp.com/" />
+            </Helmet>
             <Header
                 isDarkMode={isDarkMode}
                 toggleTheme={() => setIsDarkMode(!isDarkMode)}
@@ -246,8 +238,10 @@ function MainApp() {
 
 export default function App() {
     return (
-        <LanguageProvider>
-            <MainApp />
-        </LanguageProvider>
+        <HelmetProvider>
+            <LanguageProvider>
+                <MainApp />
+            </LanguageProvider>
+        </HelmetProvider>
     );
 }

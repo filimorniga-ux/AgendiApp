@@ -31,10 +31,10 @@ const GiftCardPage        = lazy(() => import('./pages/GiftCardPage'));
 const ConfiguracionPage   = lazy(() => import('./pages/ConfiguracionPage'));
 const PedidosPage         = lazy(() => import('./pages/PedidosPage'));
 const ReportsPage         = lazy(() => import('./pages/ReportsPage'));
-const MigrationPage       = lazy(() => import('./pages/MigrationPage'));
 const RecepcionPage              = lazy(() => import('./pages/RecepcionPage.jsx'));
 const PedidoInteligentePage      = lazy(() => import('./pages/PedidoInteligentePage'));
 const HistorialInventarioPage    = lazy(() => import('./pages/HistorialInventarioPage'));
+const SubscriptionPage           = lazy(() => import('./pages/SubscriptionPage'));
 const WebsiteApp                 = lazy(() => import('./pages/Website/App'));
 
 // Módulos Públicos (Clientes)
@@ -144,7 +144,7 @@ function App() {
                   <Route path="giftcards"               element={<RoleGuard><GiftCardPage /></RoleGuard>} />
                   <Route path="configuracion"           element={<RoleGuard><ConfiguracionPage /></RoleGuard>} />
                   <Route path="reportes"                element={<RoleGuard><ReportsPage /></RoleGuard>} />
-                  <Route path="migration"               element={<RoleGuard><MigrationPage /></RoleGuard>} />
+                  <Route path="suscripcion"             element={<RoleGuard allowedRoles={['owner']}><SubscriptionPage /></RoleGuard>} />
                   <Route path="*"                       element={<PlaceholderPage title="404: Página no encontrada" />} />
                 </Route>
 

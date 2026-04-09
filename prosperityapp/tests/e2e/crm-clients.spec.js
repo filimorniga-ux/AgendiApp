@@ -4,10 +4,7 @@ import { test, expect } from '@playwright/test';
 test.describe('CRM Clientes E2E Flow', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/app/clientes');
-    // Espera el título de la página (usa traducción key o texto directo)
-    await expect(
-      page.locator('h2').filter({ hasText: /Directorio de Clientes|Clientes/i }).first()
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#client-cards-container')).toBeVisible({ timeout: 15000 });
   });
 
   // ── T10.1: Layout y elementos base ────────────────────────────────────
@@ -17,7 +14,7 @@ test.describe('CRM Clientes E2E Flow', () => {
     await expect(searchInput).toBeVisible();
 
     // Botón Nuevo Cliente (.btn-golden)
-    const addBtn = page.locator('button.btn-golden, button').filter({ hasText: /Nuevo Cliente|addBtn/i }).first();
+    const addBtn = page.locator('button.btn-golden, button').filter({ hasText: /Agregar Cliente|Nuevo Cliente|addBtn/i }).first();
     await expect(addBtn).toBeVisible();
 
     // Botón Importar
@@ -33,7 +30,7 @@ test.describe('CRM Clientes E2E Flow', () => {
 
   // ── T10.2: Abrir modal Nuevo Cliente ──────────────────────────────────
   test('T10.2 - debería abrir el modal de Nuevo Cliente', async ({ page }) => {
-    const addBtn = page.locator('button.btn-golden, button').filter({ hasText: /Nuevo Cliente|addBtn/i }).first();
+    const addBtn = page.locator('button.btn-golden, button').filter({ hasText: /Agregar Cliente|Nuevo Cliente|addBtn/i }).first();
     await addBtn.click();
 
     // El modal debe aparecer
@@ -45,14 +42,14 @@ test.describe('CRM Clientes E2E Flow', () => {
 
   // ── T10.3: Cerrar modal con Escape ────────────────────────────────────
   test('T10.3 - debería cerrar el modal con Escape o botón Cancelar', async ({ page }) => {
-    const addBtn = page.locator('button.btn-golden, button').filter({ hasText: /Nuevo Cliente|addBtn/i }).first();
+    const addBtn = page.locator('button.btn-golden, button').filter({ hasText: /Agregar Cliente|Nuevo Cliente|addBtn/i }).first();
     await addBtn.click();
 
     const modalTitle = page.locator('h2, h3').filter({ hasText: /Añadir Cliente|Nuevo Cliente|addClient/i }).first();
     await expect(modalTitle).toBeVisible({ timeout: 5000 });
 
     // Primero intentamos botón Cancelar, si no hay usamos Escape
-    const cancelBtn = page.locator('button').filter({ hasText: /Cancelar|Cerrar|cancel|close/i }).first();
+    const cancelBtn = page.locator('.modal-content button, [role="dialog"] button').filter({ hasText: /^Cancelar$|^Cerrar$|cancel/i }).first();
     if (await cancelBtn.isVisible()) {
       await cancelBtn.click();
     } else {

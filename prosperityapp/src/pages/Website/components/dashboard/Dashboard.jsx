@@ -25,7 +25,7 @@ const RoleBadge = ({ role }) => {
 
 export const Dashboard = ({ user, isDarkMode }) => {
     const { t } = useLanguage();
-    const { userRole, updateRoleSimulation, realRole, businessId } = useData(); // Use global context
+    const { userRole, updateRoleSimulation, realRole, businessId, clients, collaborators, config } = useData(); // Use global context
     const navigate = useNavigate();
 
     // Verificar si el usuario actual es el super admin
@@ -124,30 +124,7 @@ export const Dashboard = ({ user, isDarkMode }) => {
         }
     }, [user, userRole]); // Dependencia userRole
 
-    // Función para simular venta (Escribe en la DB real)
-    const simulateSale = async () => {
-        try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const localBusinessId = businessId || urlParams.get('business_id');
-
-            let payload = {
-                client_name: "Cliente Casual",
-                service_name: "Corte Rápido",
-                date: new Date().toISOString(),
-                starts_at: new Date().toISOString(),
-                status: "completed",
-                price: 45.00, // Precio real
-                cost: 10.00,
-                stylist_id: user.uid
-            };
-            if (localBusinessId) payload.business_id = localBusinessId;
-
-            await supabase.from('appointments').insert(payload);
-            alert("💰 ¡Venta de $45 registrada en Supabase!");
-        } catch (e) {
-            console.warn("Error guardando venta: ", e);
-        }
-    };
+    // 3. (Removido: Función para simular venta - Solo para desarrollo)
 
     // --- VISTAS (COMPONENTES VISUALES) ---
 
@@ -163,32 +140,43 @@ export const Dashboard = ({ user, isDarkMode }) => {
                     <div className={`text-3xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'} ${loadingStats ? 'opacity-50' : ''}`}>
                         ${revenue.toFixed(2)}
                     </div>
-                    <button onClick={simulateSale} className="mt-4 text-xs font-bold px-3 py-2 rounded-lg bg-[#f6e05e]/20 text-[#f6e05e] hover:bg-[#f6e05e] hover:text-black transition-all w-full">
-                        + {t.dashboard.admin_section.simulate_sale}
-                    </button>
                 </div>
 
-                {/* PIN de Seguridad (Estático por ahora) */}
+                {/* PIN de Seguridad */}
                 <div className={`p-6 rounded-2xl border relative overflow-hidden ${isDarkMode ? 'bg-red-900/20 border-red-500/30' : 'bg-red-50 border-red-200'}`}>
                     <div className="flex items-center justify-between mb-4 relative z-10">
                         <h3 className={`font-bold ${isDarkMode ? 'text-red-200' : 'text-red-800'}`}>{t.dashboard.admin_section.pin_control}</h3>
                         <div className="text-red-500"><Icons.Lock /></div>
                     </div>
-                    <div className={`text-4xl font-black relative z-10 tracking-widest ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>****</div>
+                    <div className={`text-3xl font-black relative z-10 tracking-widest ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                        {config?.find(c => c.key === 'security_pin')?.value ? 'Ajustado' : '****'}
+                    </div>
                     <p className={`text-sm mt-2 relative z-10 ${isDarkMode ? 'text-red-200/70' : 'text-red-800/70'}`}>{t.dashboard.admin_section.pin_desc}</p>
                 </div>
 
-                {/* Gestión de Personal (Visual) */}
+                {/* Gestión de Personal (Data Real) */}
                 <div className={`p-6 rounded-2xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
                     <div className="flex items-center justify-between mb-4">
                         <h3 className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>{t.dashboard.admin_section.manage_staff}</h3>
                         <Icons.UserGroup />
                     </div>
                     <div className="flex -space-x-2">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="w-10 h-10 rounded-full bg-slate-500 border-2 border-slate-800 flex items-center justify-center text-xs text-white">S{i}</div>
-                        ))}
-                        <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-800 flex items-center justify-center text-xs text-white">+</div>
+                        {collaborators && collaborators.length > 0 ? (
+                            <>
+                                {collaborators.slice(0, 3).map((collab, index) => (
+                                    <div key={collab.id || index} title={collab.name} className="w-10 h-10 rounded-full bg-slate-500 border-2 border-slate-800 flex items-center justify-center text-xs text-white uppercase overflow-hidden">
+                                        {collab.avatar_url ? <img src={collab.avatar_url} alt={collab.name} className="w-full h-full object-cover" /> : collab.name?.substring(0, 2) || 'S'}
+                                    </div>
+                                ))}
+                                {collaborators.length > 3 && (
+                                    <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-800 flex items-center justify-center text-xs text-white font-bold">
+                                        +{collaborators.length - 3}
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <span className={`text-sm ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>Sin personal activo</span>
+                        )}
                     </div>
                 </div>
             </div>
@@ -204,34 +192,39 @@ export const Dashboard = ({ user, isDarkMode }) => {
         </div>
     );
 
-    const ClientView = () => (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className={`p-8 rounded-2xl bg-gradient-to-r from-[#f6e05e] to-[#f6c05e] text-[#1a202c] shadow-lg`}>
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h3 className="font-bold text-xl mb-1">{t.dashboard.client_section.book_now}</h3>
-                        <p className="opacity-80 text-sm max-w-xs">Reserva tu próxima cita en segundos.</p>
+    const ClientView = () => {
+        const currentClient = clients?.find(c => c.email === user?.email);
+        const points = currentClient?.points || 0;
+
+        return (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className={`p-8 rounded-2xl bg-gradient-to-r from-[#f6e05e] to-[#f6c05e] text-[#1a202c] shadow-lg`}>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h3 className="font-bold text-xl mb-1">{t.dashboard.client_section.book_now}</h3>
+                            <p className="opacity-80 text-sm max-w-xs">Reserva tu próxima cita en segundos.</p>
+                        </div>
+                        <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm"><Icons.Calendar /></div>
                     </div>
-                    <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm"><Icons.Calendar /></div>
+                    <button
+                        onClick={() => navigate('/app')}
+                        className="mt-6 bg-[#1a202c] text-white px-6 py-2 rounded-lg font-bold text-sm hover:shadow-lg hover:scale-105 transition-all"
+                    >
+                        Reservar Ahora
+                    </button>
                 </div>
-                <button
-                    onClick={() => navigate('/app/agenda')}
-                    className="mt-6 bg-[#1a202c] text-white px-6 py-2 rounded-lg font-bold text-sm hover:shadow-lg hover:scale-105 transition-all"
-                >
-                    Reservar Ahora
-                </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className={`p-6 rounded-2xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>{t.dashboard.client_section.loyalty}</h3>
-                        <Icons.Star />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className={`p-6 rounded-2xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>{t.dashboard.client_section.loyalty}</h3>
+                            <Icons.Star />
+                        </div>
+                        <div className={`text-4xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{points} <span className="text-sm font-normal opacity-50">pts</span></div>
                     </div>
-                    <div className={`text-4xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>0 <span className="text-sm font-normal opacity-50">pts</span></div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     // --- RENDER PRINCIPAL ---
 

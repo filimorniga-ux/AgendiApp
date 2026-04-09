@@ -3,11 +3,12 @@ import React, { useState, useMemo, useEffect } from 'react';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
 import { sbUpdate } from '../supabase/db';
-import { handleSeedDatabase } from '../firebase/seedDatabase';
+
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import AppearanceTab from './Settings/AppearanceTab';
 import TicketEditorTab from './Settings/TicketEditorTab';
+import ClientAcquisitionTab from './Settings/ClientAcquisitionTab';
 import { useStorage } from '../hooks/useStorage';
 
 const ConfiguracionPage = () => {
@@ -189,11 +190,11 @@ const ConfiguracionPage = () => {
 
   const settingsTabs = [
     { id: 'appearance', icon: 'pen-tool', label: t('settings.tabs.appearance') },
+    { id: 'client-acquisition', icon: 'link', label: 'Reserva & Códigos QR' },
     { id: 'company', icon: 'briefcase', label: t('settings.tabs.company') },
     { id: 'ticket', icon: 'file-text', label: 'Ticket de Venta' },
     { id: 'accounting', icon: 'dollar-sign', label: t('settings.tabs.accounting') },
     { id: 'security', icon: 'lock', label: t('settings.tabs.security') },
-    { id: 'maintenance', icon: 'database', label: t('settings.tabs.maintenance') },
   ];
 
   return (
@@ -236,6 +237,11 @@ const ConfiguracionPage = () => {
           {/* --- APARIENCIA --- */}
           <div className={`space-y-8 ${activeTab === 'appearance' ? '' : 'hidden'}`}>
             <AppearanceTab />
+          </div>
+
+          {/* --- CÓDIGO QR / RESERVAS --- */}
+          <div className={`space-y-8 ${activeTab === 'client-acquisition' ? '' : 'hidden'}`}>
+            <ClientAcquisitionTab />
           </div>
 
           {/* --- TICKET DE VENTA --- */}
@@ -503,20 +509,6 @@ const ConfiguracionPage = () => {
               </div>
             </div>
           )}
-
-          {/* --- MANTENIMIENTO --- */}
-          <div className={`space-y-8 ${activeTab === 'maintenance' ? '' : 'hidden'}`}>
-            <div className="bg-bg-secondary p-6 rounded-lg border border-red-500/50 shadow-sm">
-              <h3 className="text-xl font-bold text-red-500 mb-4 flex items-center gap-2">
-                <i data-feather="alert-triangle" className="w-6 h-6"></i>
-                {t('settings.maintenance.dangerZone')}
-              </h3>
-              <p className="text-text-muted mb-6">{t('settings.maintenance.resetWarning')}</p>
-              <button onClick={handleSeedDatabase} className="bg-red-600 text-white font-bold py-3 px-6 rounded-md hover:bg-red-700 transition-colors shadow-md">
-                {t('settings.maintenance.resetBtn')}
-              </button>
-            </div>
-          </div>
 
         </div>
       </div>

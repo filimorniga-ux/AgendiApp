@@ -59,8 +59,8 @@ const LiveClock = ({ collapsed }) => {
  *   isMobile           — bool
  *   onClose            — fn()   called when user closes on mobile
  */
-// Módulos solo disponibles para colaboradores
-const COLLABORATOR_MODULES = ['/app', '/app/nomina', '/app/precios'];
+// Módulos solo disponibles para staff
+const STAFF_MODULES = ['/app', '/app/nomina', '/app/precios'];
 
 const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClose }) => {
   const { toggleTheme, isDark } = useContext(ThemeContext);
@@ -68,8 +68,6 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
   const { userRole, config } = useData();
   const { realRole, signOutAll } = useBusiness();
   const navigate = useNavigate();
-
-  const isCollaborator = realRole === 'collaborator';
 
   // ── Logo y nombre del negocio (reactivo al config del contexto) ──────────
   const settings = config?.[0] || {};
@@ -93,16 +91,19 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
     { to: '/app/inventario/historial',   icon: 'book',          tKey: 'sidebar.inventoryHistory' },
     { to: '/app/giftcards',     icon: 'credit-card', tKey: 'sidebar.giftcards' },
     { to: '/app/reportes',      icon: 'file-text',   tKey: 'reports.title' },
+    { to: '/app/suscripcion',   icon: 'star',        tKey: 'sidebar.subscription' },
     { to: '/app/configuracion', icon: 'settings',    tKey: 'sidebar.settings' },
   ];
 
   const adminRoles = ['admin', 'owner'];
+  const staffRoles = ['staff'];
   const restrictedPaths = ['/nomina', '/inventario', '/caja', '/colaboradores', '/cierres', '/precios', '/giftcards'];
 
   const modulesData = allModules.filter(module => {
-    // Modo colaborador: solo ve 3 módulos
-    if (isCollaborator) return COLLABORATOR_MODULES.includes(module.to);
-    if (adminRoles.includes(userRole)) return true;
+    if (adminRoles.includes(realRole)) return true;
+    if (staffRoles.includes(realRole)) return STAFF_MODULES.includes(module.to);
+    
+    // Fallback if role is empty/unknown but we want basic access
     return !restrictedPaths.some(path => module.to.includes(path));
   });
 
