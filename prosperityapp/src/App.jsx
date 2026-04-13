@@ -110,7 +110,7 @@ function App() {
           <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/" element={<Navigate to="/app" replace />} />
+                <Route path="/" element={<WebsiteApp />} />
 
                 {/* Rutas Públicas de Clientes (Multi-tenant) */}
                 <Route path="/p/:slug" element={<PublicLayout />}>
@@ -152,7 +152,7 @@ function App() {
                   <Route path="*"                       element={<PlaceholderPage title="404: Página no encontrada" />} />
                 </Route>
 
-                <Route path="/website/*" element={<WebsiteApp />} />
+                <Route path="/website/*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
           </BrowserRouter>
