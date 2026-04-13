@@ -130,7 +130,7 @@ export const Pricing: React.FC<PricingProps> = ({ isDarkMode, onRegisterClick })
                             </div>
                             <div className={`text-xs mt-2 space-y-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                                 <p>{t.pricing.enterprise_base}: <span className="font-bold">${getPrice(basePrice)}{t.pricing.monthly_equiv}</span></p>
-                                <p>{t.pricing.enterprise_extra}: <span className="font-bold">${getPrice(extraBranchPrice)}{t.pricing.per_branch}</span></p>
+                                <p>{t.pricing.enterprise_extra}: <span className="font-bold">${getPrice(extraBranchPrice ?? 15)}{t.pricing.per_branch}</span></p>
                             </div>
                             {/* Branch Calculator */}
                             <div className={`mt-4 p-3 rounded-xl ${isDarkMode ? 'bg-white/5 border border-white/10' : 'bg-slate-50 border border-slate-200'}`}>
