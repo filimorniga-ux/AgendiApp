@@ -88,7 +88,10 @@ function MainApp() {
 
     const handleGoogleLogin = async () => {
         try {
-            const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin + '/app' }
+            });
             if (error) throw error;
             // Note: OAuth redirection leaves the page, so modal close logic is skipped.
         } catch (error) {
@@ -98,7 +101,10 @@ function MainApp() {
 
     const handleAppleLogin = async () => {
         try {
-            const { error } = await supabase.auth.signInWithOAuth({ provider: 'apple' });
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'apple',
+                options: { redirectTo: window.location.origin + '/app' }
+            });
             if (error) throw error;
         } catch (error) {
             console.warn("Apple Sign In Error:", error);
