@@ -1,27 +1,56 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { AnimatedSection } from '../ui/AnimatedSection';
 
 export const Hero = ({ isDarkMode, onRegisterClick }) => {
     const { t } = useLanguage();
-    
-    // Video local optimizado (sin audio, faststart, bitrate reducido)
-    // WebM (VP9) es preferido por ser más ligero; MP4 (H.264) como fallback universal.
+    const videoRef = useRef(null);
+    const sectionRef = useRef(null);
+    const [videoLoaded, setVideoLoaded] = useState(false);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        const section = sectionRef.current;
+        if (!video || !section) return;
+
+        // Lazy-load: only start loading video when hero is visible
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting && !videoLoaded) {
+                    // Add sources dynamically to avoid preload
+                    const webm = document.createElement('source');
+                    webm.src = '/videos/hero-bg.webm';
+                    webm.type = 'video/webm';
+                    const mp4 = document.createElement('source');
+                    mp4.src = '/videos/hero-bg.mp4';
+                    mp4.type = 'video/mp4';
+                    video.appendChild(webm);
+                    video.appendChild(mp4);
+                    video.load();
+                    video.play().catch(() => {}); // Autoplay may be blocked
+                    setVideoLoaded(true);
+                    observer.disconnect();
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        observer.observe(section);
+        return () => observer.disconnect();
+    }, [videoLoaded]);
 
     return (
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-            {/* Background Video */}
+        <section ref={sectionRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
+            {/* Background Video — lazy loaded, lightweight 3.9MB */}
             <div className="absolute inset-0 w-full h-full z-0 overflow-hidden bg-slate-950">
                 <video 
-                    autoPlay 
+                    ref={videoRef}
                     loop 
                     muted 
-                    playsInline 
-                    className="absolute inset-0 w-full h-full object-cover opacity-60"
-                >
-                    <source src="/videos/hero-landing.webm" type="video/webm" />
-                    <source src="/videos/hero-landing.mp4" type="video/mp4" />
-                </video>
+                    playsInline
+                    preload="none"
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${videoLoaded ? 'opacity-60' : 'opacity-0'}`}
+                />
                 {/* Gradient Overlay para máxima legibilidad, enfatizando el "Dark / Gold luxury" */}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent z-10"></div>
                 {/* Acento Gold Sutil de fondo */}
