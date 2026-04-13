@@ -5,7 +5,7 @@ import path from 'path';
 export default async function globalSetup(config) {
   const { baseURL, storageState } = config.projects[0].use;
   
-  const email = process.env.TEST_USER_EMAIL || 'test@agendiapp.com';
+  const email = process.env.TEST_USER_EMAIL || 'test@agendiapp.app';
   const password = process.env.TEST_USER_PASSWORD || 'TestPassword123!';
 
   // Validate if test user credentials are provided

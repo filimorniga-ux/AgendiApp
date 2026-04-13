@@ -5,4 +5,4 @@ Allow: /p/
 Disallow: /app/
 Disallow: /api/
 
-Sitemap: https://agendiapp.com/sitemap.xml
+Sitemap: https://agendiapp.app/sitemap.xml

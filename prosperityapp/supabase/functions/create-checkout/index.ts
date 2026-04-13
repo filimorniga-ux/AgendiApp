@@ -16,7 +16,7 @@ serve(async (req) => {
         const { plan, businessId, provider = 'mercadopago', userEmail } = await req.json();
         
         // Use req origin for dynamic URLs
-        const origin = req.headers.get('origin') || 'https://agendiapp.com';
+        const origin = req.headers.get('origin') || 'https://agendiapp.app';
 
         if (!plan || !businessId) {
             throw new Error("El plan y businessId son obligatorios.");

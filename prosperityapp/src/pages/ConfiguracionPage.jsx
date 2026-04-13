@@ -387,7 +387,7 @@ const ConfiguracionPage = () => {
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-text-main">URL pública (slug)</label>
                   <div className="flex items-center gap-1">
-                    <span className="text-xs text-text-muted whitespace-nowrap">agendiapp.com/p/</span>
+                    <span className="text-xs text-text-muted whitespace-nowrap">agendiapp.app/p/</span>
                     <input
                       type="text"
                       value={businessSlug}

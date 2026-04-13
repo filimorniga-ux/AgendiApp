@@ -124,7 +124,7 @@ function MainApp() {
                 <meta property="og:title" content="AgendiApp — El Software Premium para tu Negocio de Belleza" />
                 <meta property="og:description" content="Sistema de reservas de belleza enfocado en peluquerías, barberías y spa de uñas. Atrae más clientes y gestiona todo en un solo lugar." />
                 <meta property="og:type" content="website" />
-                <link rel="canonical" href="https://agendiapp.com/" />
+                <link rel="canonical" href="https://agendiapp.app/" />
             </Helmet>
             <Header
                 isDarkMode={isDarkMode}
