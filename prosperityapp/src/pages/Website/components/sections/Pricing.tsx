@@ -3,7 +3,24 @@ import { useLanguage } from '../../context/LanguageContext';
 import { AnimatedSection } from '../ui/AnimatedSection';
 import { Icons } from '../ui/Icons';
 
-export const Pricing = ({ isDarkMode, onRegisterClick }) => {
+interface PricingProps {
+    isDarkMode: boolean;
+    onRegisterClick: () => void;
+}
+
+interface PlanConfig {
+    key: string;
+    title: string;
+    desc: string;
+    basePrice: number;
+    extraBranchPrice?: number;
+    features: string[];
+    cta: string;
+    recommended: boolean;
+    icon: string;
+}
+
+export const Pricing: React.FC<PricingProps> = ({ isDarkMode, onRegisterClick }) => {
     const { t } = useLanguage();
     const [isAnnual, setIsAnnual] = useState(true);
     const [branchCount, setBranchCount] = useState(2);
@@ -44,14 +61,14 @@ export const Pricing = ({ isDarkMode, onRegisterClick }) => {
         },
     ];
 
-    const getPrice = (base) => {
+    const getPrice = (base: number): string => {
         if (isAnnual) {
             return (base * (1 - DISCOUNT)).toFixed(0);
         }
         return base.toFixed(0);
     };
 
-    const getAnnualTotal = (base) => {
+    const getAnnualTotal = (base: number): string => {
         return (base * 12 * (1 - DISCOUNT)).toFixed(0);
     };
 
@@ -61,7 +78,7 @@ export const Pricing = ({ isDarkMode, onRegisterClick }) => {
         return (first + extras).toFixed(0);
     };
 
-    const PlanCard = ({ plan }) => {
+    const PlanCard = ({ plan }: { plan: PlanConfig }) => {
         const { title, desc, basePrice, features, cta, recommended, icon, key, extraBranchPrice } = plan;
         const monthlyPrice = getPrice(basePrice);
         const isEnterprise = key === 'enterprise';
@@ -162,7 +179,7 @@ export const Pricing = ({ isDarkMode, onRegisterClick }) => {
 
                 {/* Features */}
                 <ul className="space-y-3.5 mb-8 flex-1">
-                    {features.map((f, i) => (
+                    {features.map((f: string, i: number) => (
                         <li key={i} className="flex items-start gap-3 text-sm">
                             <span className="text-[#f6e05e] mt-0.5 drop-shadow-[0_0_8px_rgba(246,224,94,0.5)] flex-shrink-0"><Icons.Check /></span>
                             <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>{f}</span>
