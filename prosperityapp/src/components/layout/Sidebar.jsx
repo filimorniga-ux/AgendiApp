@@ -125,7 +125,13 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
     <NavLink
       to={to}
       end={end}
-      onClick={isMobile && onClose ? onClose : undefined}
+      preventScrollReset
+      onClick={(e) => {
+        // Close mobile drawer on navigation
+        if (isMobile && onClose) onClose();
+        // Prevent browser from auto-scrolling the sidebar by blurring after click
+        requestAnimationFrame(() => e.currentTarget?.blur());
+      }}
       title={collapsed ? label : undefined}
       className={({ isActive }) =>
         `sidebar-link flex items-center gap-3 rounded-md transition-all duration-150 font-medium

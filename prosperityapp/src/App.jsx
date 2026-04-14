@@ -12,6 +12,7 @@ import OfflineIndicator from './components/OfflineIndicator';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RoleGuard from './components/auth/RoleGuard';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // ── Lazy imports — cada módulo se carga sólo cuando se navega a él ──────────
 const AgendaCalendario    = lazy(() => import('./components/agenda/AgendaCalendario'));
@@ -108,6 +109,7 @@ function App() {
           <PWAInstallBanner />
           <OfflineIndicator />
           <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<WebsiteApp />} />
@@ -155,6 +157,7 @@ function App() {
                 <Route path="/website/*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
+            </ErrorBoundary>
           </BrowserRouter>
         </DataProvider>
       </BusinessProvider>
