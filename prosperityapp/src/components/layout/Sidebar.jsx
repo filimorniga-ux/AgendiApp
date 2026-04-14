@@ -113,11 +113,12 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
     try {
       await signOutAll();
       toast.success(t('common.logoutSuccess') || 'Sesión cerrada correctamente');
-      window.location.href = '/';
     } catch (error) {
       console.warn('Error al cerrar sesión:', error);
-      toast.error(t('common.error') || 'Error al cerrar sesión');
+      // Still redirect even on error — user wants OUT
     }
+    // ALWAYS redirect — no matter what
+    window.location.href = '/';
   };
 
   // ── Link item (handles collapsed icon-only mode) ─────────────────────────

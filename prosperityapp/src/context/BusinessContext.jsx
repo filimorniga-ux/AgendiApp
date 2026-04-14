@@ -21,17 +21,32 @@ export const BusinessProvider = ({ children }) => {
   const [businessPlan, setBusinessPlan] = useState('free');
 
   const signOutAll = async () => {
+    // 1. Try Supabase signOut (may fail on expired/missing token — that's OK)
     try {
       await supabase.auth.signOut();
     } catch (err) {
-      console.warn("SignOut error:", err);
-    } finally {
-      setSupabaseUser(null);
-      setRealRole(null);
-      setIsClient(false);
-      setBusinessId(null);
-      // Opcional: limpiar localStorage si hay algo persistido manualmente
-      localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_URL.split('/')[2].split('.')[0] + '-auth-token');
+      console.warn("SignOut API error (non-blocking):", err);
+    }
+
+    // 2. Always reset local state
+    setSupabaseUser(null);
+    setRealRole(null);
+    setIsClient(false);
+    setBusinessId(null);
+
+    // 3. Clean up ALL Supabase auth tokens from localStorage (safe)
+    try {
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+    } catch (e) {
+      // localStorage access can fail in incognito/restricted environments
+      console.warn("localStorage cleanup error (non-blocking):", e);
     }
   };
 
