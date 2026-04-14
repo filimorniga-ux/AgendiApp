@@ -1,5 +1,5 @@
 import React from 'react';
-import QRCode from 'react-qr-code';
+import { QRCode } from 'react-qr-code';
 import { useTranslation } from 'react-i18next';
 import { useData } from '../../context/DataContext';
 
