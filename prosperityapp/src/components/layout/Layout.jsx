@@ -115,14 +115,21 @@ const Layout = () => {
         {isMobile && (
           <div className="mobile-topbar">
             <button
-              className="mobile-menu-toggle"
               onClick={() => setSidebarOpen(true)}
-              aria-label="Abrir menú"
-              aria-expanded={sidebarOpen}
-              style={{ position: 'relative', top: 'auto', left: 'auto', display: 'flex' }}
+              className="mobile-menu-toggle shadow-sm"
+              aria-label="Open Sidebar"
             >
-              <Menu size={20} />
+              <Menu size={20} className="text-text-main" />
             </button>
+
+            <div className="flex-1 flex justify-center">
+              <h1 className="text-lg font-black text-text-main tracking-tight uppercase">
+                {brandName || 'AgendiApp'}
+              </h1>
+            </div>
+
+            {/* Placeholder to balance the centered title */}
+            <div style={{ width: 40 }} />
           </div>
         )}
 

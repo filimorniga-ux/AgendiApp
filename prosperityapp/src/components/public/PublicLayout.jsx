@@ -4,7 +4,6 @@ import { supabase } from '../../supabase/client';
 
 const PublicLayout = () => {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

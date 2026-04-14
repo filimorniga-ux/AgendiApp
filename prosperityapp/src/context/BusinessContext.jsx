@@ -96,8 +96,8 @@ export const BusinessProvider = ({ children }) => {
 
                 if (newBiz) {
                   await supabase.from('users').upsert(
-                    { business_id: newBiz.id, firebase_uid: sbUser.id, email: sbUser.email, role: 'owner' },
-                    { onConflict: 'firebase_uid' }
+                    { business_id: newBiz.id, auth_user_id: sbUser.id, email: sbUser.email, role: 'owner' },
+                    { onConflict: 'auth_user_id' }
                   );
                   setBusinessId(newBiz.id);
                   setRealRole('owner');

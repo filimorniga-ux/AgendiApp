@@ -14,10 +14,9 @@ import ClientAcquisitionTab from './Settings/ClientAcquisitionTab';
 import { useStorage } from '../hooks/useStorage';
 
 const ConfiguracionPage = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { config, collaborators, isLoading, businessId } = useData();
-  const { businessId: bId } = useBusiness();
-  const { uploadFile, progress, isUploading } = useStorage();
+  const { uploadFile } = useStorage();
   const [whatsappPhone, setWhatsappPhone] = useState('');
   const [businessSlug, setBusinessSlug] = useState('');
 
@@ -172,8 +171,7 @@ const ConfiguracionPage = () => {
     }
   };
 
-  // Maintain handleSave for backwards compatibility
-  const handleSave = () => handleSaveSettings('security');
+
 
   const handlePinChange = async () => {
     setPinError('');

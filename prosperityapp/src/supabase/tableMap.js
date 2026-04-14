@@ -39,7 +39,6 @@ const FIELD_ALIASES = {
   stock_current:   'stockUnits',
   stock_min:       'minStock',
   is_active:       'isActive',
-  firebase_id:     'firebaseId',
 
   // technical_inventory nuevos campos
   unit_size:       'unitSize',

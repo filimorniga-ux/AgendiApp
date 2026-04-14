@@ -15,23 +15,7 @@ import Dexie from 'dexie';
 
 export const localDb = new Dexie('AgendiAppDB');
 
-// ── Schema v1 ────────────────────────────────────────────────────────────────
-// Los campos indexados (++ primary key, &unique, etc.) van en el schema.
-// El resto de columnas se almacenan automáticamente sin declarar.
-localDb.version(1).stores({
-  clients:              '++_localId, id, business_id, firebaseId',
-  collaborators:        '++_localId, id, business_id, firebaseId',
-  services:             '++_localId, id, business_id, firebaseId',
-  technical_inventory:  '++_localId, id, business_id, firebaseId',
-  retail_inventory:     '++_localId, id, business_id, firebaseId',
-  config:               '++_localId, id, business_id',
-  movements:            '++_localId, id, business_id, firebaseId',
-  appointments:         '++_localId, id, business_id, firebaseId',
-  // Cola de operaciones offline pendientes de sincronizar
-  offline_queue:        '++id, table, operation, status, createdAt',
-});
-
-// ── Schema v3: Eliminación de firebaseId tras migración a Supabase ────────
+// ── Schema v3 (Current): Eliminación de firebaseId tras migración a Supabase ──
 localDb.version(3).stores({
   clients:                  '++_localId, id, business_id',
   collaborators:            '++_localId, id, business_id',
@@ -42,7 +26,6 @@ localDb.version(3).stores({
   movements:                '++_localId, id, business_id',
   appointments:             '++_localId, id, business_id',
   offline_queue:            '++id, table, operation, status, createdAt',
-  // Nuevas tablas v2 y v3
   suppliers:                '++_localId, id, business_id',
   invoices:                 '++_localId, id, business_id',
   debts:                    '++_localId, id, business_id',

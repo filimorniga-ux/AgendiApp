@@ -45,8 +45,8 @@ export const Dashboard = ({ user, isDarkMode }) => {
             try {
                 const { data: userSnap, error: fetchError } = await supabase
                     .from('users')
-                    .select('firebase_uid')
-                    .eq('firebase_uid', user.uid)
+                    .select('auth_user_id')
+                    .eq('auth_user_id', user.id)
                     .single();
 
                 if (fetchError && fetchError.code !== 'PGRST116') {
@@ -56,7 +56,7 @@ export const Dashboard = ({ user, isDarkMode }) => {
                 if (!userSnap) {
                     console.info("🆕 Creando perfil de usuario nuevo...");
                     await supabase.from('users').insert({
-                        firebase_uid: user.uid,
+                        auth_user_id: user.id,
                         email: user.email,
                         role: 'client', // Por defecto todos son clientes
                     });
