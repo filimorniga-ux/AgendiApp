@@ -8,7 +8,7 @@ const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
 const ProtectedRoute = ({ children }) => {
   if (DEV_BYPASS) return children;
 
-  const { user, supabaseUser, loadingAuth } = useBusiness();
+  const { user, supabaseUser, loadingAuth, noBusinessFound, signOutAll } = useBusiness();
 
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
@@ -20,6 +20,43 @@ const ProtectedRoute = ({ children }) => {
     return (
       <div className="flex items-center justify-center h-screen bg-bg-main">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
+      </div>
+    );
+  }
+
+  // ── Authenticated but no business/role found → block access ──
+  if ((user || supabaseUser) && noBusinessFound) {
+    return (
+      <div className="min-h-screen bg-bg-main flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-bg-secondary border border-border-main rounded-2xl p-8 shadow-2xl text-center">
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚫</div>
+          <h1 className="text-xl font-bold text-text-main mb-2">Acceso no autorizado</h1>
+          <p className="text-text-muted text-sm mb-4">
+            Tu cuenta <strong className="text-text-main">{supabaseUser?.email}</strong> no está
+            asociada a ningún comercio registrado en AgendiApp.
+          </p>
+          <p className="text-text-muted text-xs mb-6">
+            Si eres dueño de un comercio, necesitas suscribirte primero.
+            Si eres colaborador, pide a tu administrador que te registre.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <button
+              onClick={async () => {
+                await signOutAll();
+                window.location.href = '/';
+              }}
+              className="btn-golden px-6 py-2.5 font-semibold"
+            >
+              Cerrar sesión
+            </button>
+            <a
+              href="/"
+              className="px-6 py-2.5 border border-border-main rounded-lg text-text-main text-sm hover:bg-bg-main transition-colors inline-flex items-center"
+            >
+              Ir al inicio
+            </a>
+          </div>
+        </div>
       </div>
     );
   }

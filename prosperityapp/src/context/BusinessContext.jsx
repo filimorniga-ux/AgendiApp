@@ -2,23 +2,25 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../supabase/client';
 
 export const BusinessContext = createContext({
-  businessId:    null,
-  user:          null,
-  supabaseUser:  null,
-  realRole:      null,
-  isClient:      false,
-  loadingAuth:   true,
-  businessPlan:  'free',
-  signOutAll:    async () => {},
+  businessId:       null,
+  user:             null,
+  supabaseUser:     null,
+  realRole:         null,
+  isClient:         false,
+  loadingAuth:      true,
+  businessPlan:     'free',
+  noBusinessFound:  false,
+  signOutAll:       async () => {},
 });
 
 export const BusinessProvider = ({ children }) => {
-  const [supabaseUser, setSupabaseUser] = useState(null);
-  const [realRole,     setRealRole]     = useState(null);
-  const [isClient,     setIsClient]     = useState(false);
-  const [loadingAuth,  setLoadingAuth]  = useState(true);
-  const [businessId,   setBusinessId]   = useState(null);
-  const [businessPlan, setBusinessPlan] = useState('free');
+  const [supabaseUser,    setSupabaseUser]    = useState(null);
+  const [realRole,        setRealRole]        = useState(null);
+  const [isClient,        setIsClient]        = useState(false);
+  const [loadingAuth,     setLoadingAuth]     = useState(true);
+  const [businessId,      setBusinessId]      = useState(null);
+  const [businessPlan,    setBusinessPlan]    = useState('free');
+  const [noBusinessFound, setNoBusinessFound] = useState(false);
 
   const signOutAll = async () => {
     // 1. Try Supabase signOut (may fail on expired/missing token — that's OK)
@@ -56,41 +58,95 @@ export const BusinessProvider = ({ children }) => {
       async (event, session) => {
         const sbUser = session?.user ?? null;
         setSupabaseUser(sbUser);
+        setNoBusinessFound(false); // Reset on every auth change
 
         if (sbUser) {
+          let resolved = false;
+
+          // ── Helper to load business plan ──
+          const loadPlan = async (bizId) => {
+            try {
+              const { data: bData } = await supabase
+                .from('businesses')
+                .select('plan')
+                .eq('id', bizId)
+                .single();
+              setBusinessPlan(bData?.plan || 'free');
+            } catch {
+              setBusinessPlan('free');
+            }
+          };
+
           // ── Priority 1: Check collaborators table (staff/admin) ──
-          const { data: collab } = await supabase
-            .from('collaborators')
-            .select('id, business_id, role')
-            .eq('auth_user_id', sbUser.id)
-            .maybeSingle();
-
-          if (collab?.business_id) {
-            setRealRole(collab.role || 'staff');
-            setBusinessId(collab.business_id);
-            setIsClient(false);
-            
-            const { data: bData } = await supabase.from('businesses').select('plan').eq('id', collab.business_id).single();
-            setBusinessPlan(bData?.plan || 'free');
-
-          } else {
-            // ── Priority 2: Check users table (owner) ──
-            let { data: appUser } = await supabase
-              .from('users')
-              .select('business_id, role')
-              .eq('email', sbUser.email)
+          try {
+            const { data: collab } = await supabase
+              .from('collaborators')
+              .select('id, business_id, role')
+              .eq('auth_user_id', sbUser.id)
               .maybeSingle();
 
-            if (appUser?.business_id) {
-              setRealRole(appUser.role || 'owner');
-              setBusinessId(appUser.business_id);
+            if (collab?.business_id) {
+              setRealRole(collab.role || 'staff');
+              setBusinessId(collab.business_id);
               setIsClient(false);
+              await loadPlan(collab.business_id);
+              resolved = true;
+            }
+          } catch (err) {
+            console.warn('[BusinessContext] collaborators lookup failed:', err);
+          }
 
-              const { data: bData } = await supabase.from('businesses').select('plan').eq('id', appUser.business_id).single();
-              setBusinessPlan(bData?.plan || 'free');
+          // ── Priority 2: Check users table (owner) — by auth_user_id first, then email ──
+          if (!resolved) {
+            try {
+              let appUser = null;
 
-            } else {
-              // ── Priority 3: Check clients table (end-user client) ──
+              // 2a. Search by auth_user_id (most reliable)
+              const { data: byId } = await supabase
+                .from('users')
+                .select('business_id, role')
+                .eq('auth_user_id', sbUser.id)
+                .maybeSingle();
+
+              if (byId?.business_id) {
+                appUser = byId;
+              } else {
+                // 2b. Fallback: search by firebase_uid (legacy)
+                const { data: byUid } = await supabase
+                  .from('users')
+                  .select('business_id, role')
+                  .eq('firebase_uid', sbUser.id)
+                  .maybeSingle();
+
+                if (byUid?.business_id) {
+                  appUser = byUid;
+                } else {
+                  // 2c. Fallback: search by email
+                  const { data: byEmail } = await supabase
+                    .from('users')
+                    .select('business_id, role')
+                    .eq('email', sbUser.email)
+                    .maybeSingle();
+
+                  if (byEmail?.business_id) appUser = byEmail;
+                }
+              }
+
+              if (appUser?.business_id) {
+                setRealRole(appUser.role || 'owner');
+                setBusinessId(appUser.business_id);
+                setIsClient(false);
+                await loadPlan(appUser.business_id);
+                resolved = true;
+              }
+            } catch (err) {
+              console.warn('[BusinessContext] users lookup failed:', err);
+            }
+          }
+
+          // ── Priority 3: Check clients table (end-user client) ──
+          if (!resolved) {
+            try {
               const { data: clientRecord } = await supabase
                 .from('clients')
                 .select('id, business_id')
@@ -101,38 +157,29 @@ export const BusinessProvider = ({ children }) => {
                 setRealRole('client');
                 setBusinessId(clientRecord.business_id);
                 setIsClient(true);
-                
-                const { data: bData } = await supabase.from('businesses').select('plan').eq('id', clientRecord.business_id).single();
-                setBusinessPlan(bData?.plan || 'free');
-
-              } else {
-                // ── Priority 4: Auto-seed new business for new owner ──
-                const { data: newBiz } = await supabase
-                  .from('businesses')
-                  .upsert(
-                    { owner_uid: sbUser.id, name: 'Mi Salón' },
-                    { onConflict: 'owner_uid', ignoreDuplicates: false }
-                  )
-                  .select()
-                  .single();
-
-                if (newBiz) {
-                  await supabase.from('users').upsert(
-                    { business_id: newBiz.id, auth_user_id: sbUser.id, email: sbUser.email, role: 'owner' },
-                    { onConflict: 'auth_user_id' }
-                  );
-                  setBusinessId(newBiz.id);
-                  setRealRole('owner');
-                  setIsClient(false);
-                  setBusinessPlan(newBiz.plan || 'free');
-                }
+                await loadPlan(clientRecord.business_id);
+                resolved = true;
               }
+            } catch (err) {
+              console.warn('[BusinessContext] clients lookup failed:', err);
             }
           }
+
+          // ── No business found — user is NOT registered ──
+          if (!resolved) {
+            console.warn('[BusinessContext] User is authenticated but has no business/role. Blocking access.');
+            setRealRole(null);
+            setBusinessId(null);
+            setIsClient(false);
+            setNoBusinessFound(true);
+          }
+
         } else {
+          // Logged out
           setRealRole(null);
           setBusinessId(null);
           setIsClient(false);
+          setNoBusinessFound(false);
         }
 
         setLoadingAuth(false);
@@ -145,7 +192,10 @@ export const BusinessProvider = ({ children }) => {
   }, []);
 
   return (
-    <BusinessContext.Provider value={{ businessId, businessPlan, user: supabaseUser, supabaseUser, realRole, isClient, loadingAuth, signOutAll }}>
+    <BusinessContext.Provider value={{
+      businessId, businessPlan, user: supabaseUser, supabaseUser,
+      realRole, isClient, loadingAuth, noBusinessFound, signOutAll
+    }}>
       {children}
     </BusinessContext.Provider>
   );
