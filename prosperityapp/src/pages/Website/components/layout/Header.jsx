@@ -19,7 +19,13 @@ export const Header = ({ isDarkMode, toggleTheme, user, onLoginClick, onRegister
     }, []);
 
     return (
-        <header className={`fixed top-0 z-50 w-full transition-all duration-500 border-b border-transparent ${scrolled || user ? 'py-3 bg-slate-950/60 backdrop-blur-2xl border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]' : 'py-6 bg-transparent'}`}>
+        <header className={`fixed top-0 z-50 w-full transition-all duration-500 border-b ${
+            scrolled || user 
+                ? isDarkMode 
+                    ? 'py-2 bg-slate-950/80 backdrop-blur-xl border-white/10 shadow-2xl' 
+                    : 'py-2 bg-white/80 backdrop-blur-xl border-slate-200 shadow-sm'
+                : 'py-5 bg-transparent border-transparent'
+        }`}>
             <nav className="container mx-auto px-6 flex justify-between items-center max-w-7xl">
                 <div className="flex items-center gap-3 group cursor-pointer">
                     <img src={LOGO_URL} alt="AgendiApp" className="w-10 h-10 rounded-full shadow-lg group-hover:rotate-12 transition-transform duration-300" />

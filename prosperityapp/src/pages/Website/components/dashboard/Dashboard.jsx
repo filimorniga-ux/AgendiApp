@@ -12,6 +12,7 @@ const SUPER_ADMIN_EMAIL = "filimorniga@gmail.com";
 
 const RoleBadge = ({ role }) => {
     let color = '';
+    if (role === 'owner') color = 'bg-[#f6e05e]/10 text-[#f6e05e] border-[#f6e05e]/30';
     if (role === 'admin') color = 'bg-red-500/10 text-red-500 border-red-500/20';
     if (role === 'staff') color = 'bg-blue-500/10 text-blue-500 border-blue-500/20';
     if (role === 'client') color = 'bg-green-500/10 text-green-500 border-green-500/20';
@@ -233,18 +234,18 @@ export const Dashboard = ({ user, isDarkMode }) => {
     }
 
     return (
-        <div className={`max-w-7xl mx-auto px-6 py-8 transition-all duration-300`}>
+        <div className={`max-w-7xl mx-auto px-6 pt-28 pb-12 transition-all duration-300`}>
             <div className={`flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8`}>
                 <div>
                     <h1 className={`text-3xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
                         {t.dashboard.welcome} <span className="text-[#f6e05e]">{user.displayName || user.email?.split('@')[0]}</span>
                     </h1>
-                    <div className="mt-2 flex items-center gap-2">
-                        <span className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Tu Rol Real:</span>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <span className={`text-sm font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Tu Rol Real:</span>
                         <RoleBadge role={realRole || 'client'} />
                         {/* Mostrar indicador si estamos simulando */}
                         {realRole !== userRole && (
-                            <span className="text-xs text-[#f6e05e] border border-[#f6e05e] px-2 py-0.5 rounded ml-2">
+                            <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-md border ${isDarkMode ? 'bg-[#f6e05e]/20 text-[#f6e05e] border-[#f6e05e]/30' : 'bg-[#f6e05e] text-black border-transparent'}`}>
                                 Simulando: {userRole}
                             </span>
                         )}
@@ -255,10 +256,11 @@ export const Dashboard = ({ user, isDarkMode }) => {
                     {/* BOTÓN PARA IR A LA APP OPERATIVA */}
                     <button
                         onClick={() => navigate('/app')}
-                        className="px-6 py-3 rounded-lg bg-[#f6e05e] text-black font-bold hover:bg-[#f6e05e]/90 transition-colors flex items-center gap-2"
+                        className="group px-6 py-3 rounded-xl bg-[#f6e05e] text-black font-bold hover:shadow-[0_0_30px_-5px_rgba(246,224,94,0.4)] transition-all flex items-center justify-center gap-3 relative overflow-hidden"
                     >
-                        <span>🏢</span>
-                        Ir a la App
+                        <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
+                        <span className="text-xl">🏢</span>
+                        <span className="relative">{t.dashboard?.go_to_app || 'Ir a la App'}</span>
                     </button>
 
                     {/* SELECTOR DE VISTA: SOLO VISIBLE PARA EL SUPER ADMIN */}
