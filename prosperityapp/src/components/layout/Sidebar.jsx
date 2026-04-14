@@ -154,8 +154,11 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
       >
         {/* Logo / Avatar */}
         <div
-          className="flex-shrink-0 rounded-full overflow-hidden bg-bg-tertiary flex items-center justify-center border-2 border-accent/30"
-          style={{ width: 40, height: 40 }}
+          className={`flex-shrink-0 rounded-full overflow-hidden flex items-center justify-center transition-all duration-500
+            ${realRole === 'owner' 
+              ? 'bg-gradient-to-br from-[#f6e05e] to-[#d4a853] border-2 border-white/40 shadow-[0_0_15px_rgba(246,224,94,0.4)]' 
+              : 'bg-bg-tertiary border-2 border-accent/30'}`}
+          style={{ width: 44, height: 44 }}
         >
           {logoUrl ? (
             <img
@@ -165,7 +168,7 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
             />
           ) : (
             /* Placeholder con inicial */
-            <span className="text-accent font-bold text-lg select-none">
+            <span className={`font-black text-xl select-none ${realRole === 'owner' ? 'text-[#1a202c]' : 'text-accent'}`}>
               {brandName.charAt(0).toUpperCase()}
             </span>
           )}
@@ -174,10 +177,17 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
         {/* Nombre del negocio (oculto cuando colapsado) */}
         {!collapsed && (
           <div className="flex-1 min-w-0 overflow-hidden">
-            <h1 className="text-base font-bold text-text-main leading-tight truncate">
+            <h1 className="text-[17px] font-black tracking-tight text-text-main leading-none truncate mb-1">
               {brandName}
             </h1>
-            <p className="text-accent text-xs truncate">Suite</p>
+            <div className="flex items-center gap-1.5">
+              <span className={`text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md
+                ${realRole === 'owner' 
+                  ? 'bg-[#f6e05e]/20 text-[#f6e05e] border border-[#f6e05e]/30 shadow-[0_0_10px_rgba(246,224,94,0.1)]' 
+                  : 'bg-accent/10 text-accent border border-accent/20'}`}>
+                {realRole === 'owner' ? 'Owner Premium' : realRole || 'Suite'}
+              </span>
+            </div>
           </div>
         )}
 
@@ -271,17 +281,17 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
           <button
             onClick={handleLogout}
             title="Cerrar Sesión"
-            className="p-2 rounded-full hover:bg-red-500/20 text-red-500 transition-colors"
+            className="p-3 rounded-xl hover:bg-red-500 bg-red-500/10 text-red-500 hover:text-white transition-all duration-200 border border-red-500/20 shadow-lg shadow-red-500/5"
           >
             <Icon name="log-out" size={18} />
           </button>
         ) : (
           <button
             onClick={handleLogout}
-            className="w-full p-2.5 rounded-md bg-red-500/10 border border-red-500/30 text-red-500 hover:bg-red-500/20 transition-colors flex items-center justify-center gap-2"
+            className="w-full p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group shadow-lg shadow-red-500/5 hover:shadow-red-500/20"
           >
-            <Icon name="log-out" size={16} />
-            <span className="font-semibold text-sm">{t('sidebar.logout') || 'Cerrar Sesión'}</span>
+            <Icon name="log-out" size={16} className="group-hover:translate-x-0.5 transition-transform" />
+            <span className="font-bold text-sm tracking-tight">{t('sidebar.logout') || 'Cerrar Sesión'}</span>
           </button>
         )}
 

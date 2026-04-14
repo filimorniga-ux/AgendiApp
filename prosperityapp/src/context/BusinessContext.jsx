@@ -21,11 +21,18 @@ export const BusinessProvider = ({ children }) => {
   const [businessPlan, setBusinessPlan] = useState('free');
 
   const signOutAll = async () => {
-    await supabase.auth.signOut().catch(() => {});
-    setSupabaseUser(null);
-    setRealRole(null);
-    setIsClient(false);
-    setBusinessId(null);
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.warn("SignOut error:", err);
+    } finally {
+      setSupabaseUser(null);
+      setRealRole(null);
+      setIsClient(false);
+      setBusinessId(null);
+      // Opcional: limpiar localStorage si hay algo persistido manualmente
+      localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_URL.split('/')[2].split('.')[0] + '-auth-token');
+    }
   };
 
   useEffect(() => {

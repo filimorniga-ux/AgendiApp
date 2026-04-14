@@ -137,7 +137,7 @@ const NominasPage = () => {
   const [isPreviewOpen, setIsPreviewOpen]  = useState(false);
 
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle: `Nomina_${new Date().toISOString().split('T')[0]}`,
   });
 

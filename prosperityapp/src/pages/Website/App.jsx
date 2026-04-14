@@ -12,7 +12,7 @@ import { Tutorials } from './components/sections/Tutorials';
 import { Pricing } from './components/sections/Pricing';
 import { Testimonials } from './components/sections/Testimonials';
 import { Contact } from './components/sections/Contact';
-import { Dashboard } from './components/dashboard/Dashboard';
+// Dashboard component removed — authenticated users redirect directly to /app
 import { AuthModal } from './components/auth/AuthModal';
 import { Icons } from './components/ui/Icons';
 
@@ -41,10 +41,14 @@ function MainApp() {
             setLoadingAuth(false);
             if (currentUser) {
                 console.info("✅ Usuario autenticado:", currentUser.email);
+                // Si estamos en la raíz y ya hay usuario, lo mandamos a la app real
+                if (window.location.pathname === '/' || window.location.pathname === '') {
+                    navigate('/app');
+                }
             }
         });
         return () => subscription.unsubscribe();
-    }, []);
+    }, [navigate]);
 
     useEffect(() => {
         // MANTENEMOS SOLO UN COLOR BASE LIMPIO Y ELEGANTE
@@ -143,7 +147,10 @@ function MainApp() {
 
             <main>
                 {user ? (
-                    <Dashboard user={user} isDarkMode={isDarkMode} />
+                    // Authenticated users go straight to /app — no intermediate page
+                    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: isDarkMode ? '#020617' : '#f8fafc' }}>
+                        <div className="w-10 h-10 border-4 border-[#f6e05e] border-t-transparent rounded-full animate-spin"></div>
+                    </div>
                 ) : (
                     <>
                         <Hero isDarkMode={isDarkMode} onRegisterClick={scrollToPricing} />

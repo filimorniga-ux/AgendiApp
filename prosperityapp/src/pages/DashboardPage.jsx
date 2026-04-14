@@ -1,5 +1,6 @@
 // ===== INICIO: src/pages/DashboardPage.jsx (Con i18n) =====
 import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { useBusiness } from '../context/BusinessContext';
 import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
 import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
@@ -40,14 +41,30 @@ const parseDate = (date) => {
   return new Date(0);
 };
 
+// --- Componente de Badge de Rol (Premium) ---
+const RoleBadge = ({ role }) => {
+  const isOwner = role === 'owner';
+  return (
+    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest shadow-sm transition-all duration-500
+      ${isOwner 
+        ? 'bg-gradient-to-r from-[#f6e05e]/20 to-[#d4a853]/20 text-[#d4a853] border-[#f6e05e]/30 shadow-[0_0_15px_rgba(246,224,94,0.1)]' 
+        : 'bg-bg-tertiary text-text-muted border-border-main'}`}>
+      <div className={`w-1.5 h-1.5 rounded-full ${isOwner ? 'bg-[#f6e05e] animate-pulse shadow-[0_0_8px_#f6e05e]' : 'bg-text-muted'}`} />
+      {role ? (isOwner ? 'Owner Premium' : role) : 'Cargando...'}
+    </div>
+  );
+};
+
 // --- Componente de Tarjeta (Tema Corregido) ---
 const SummaryCard = ({ title, value, icon, colorClass = 'text-accent', stagger = '' }) => (
-  <div className={`bg-bg-secondary p-3 sm:p-4 rounded-lg border border-border-main flex-1 hover-lift animate-fadeInUp ${stagger}`}>
-    <div className="flex items-center gap-2">
-      <i data-feather={icon} className={`w-4 h-4 sm:w-5 sm:h-5 ${colorClass} flex-shrink-0`}></i>
-      <p className="text-xs sm:text-sm text-text-muted truncate">{title}</p>
+  <div className={`bg-bg-secondary p-4 sm:p-5 rounded-2xl border border-border-main flex-1 hover-lift transition-all duration-300 shadow-lg shadow-black/5 animate-fadeInUp ${stagger}`}>
+    <div className="flex items-center justify-between mb-3">
+      <div className={`p-2 rounded-xl ${colorClass.replace('text-', 'bg-').replace('400', '500/10')} border ${colorClass.replace('text-', 'border-').replace('400', '500/20')}`}>
+        <i data-feather={icon} className={`w-4 h-4 sm:w-5 sm:h-5 ${colorClass} flex-shrink-0`}></i>
+      </div>
+      <p className="text-[10px] sm:text-xs font-bold text-text-muted uppercase tracking-wider">{title}</p>
     </div>
-    <p className={`text-lg sm:text-2xl font-bold mt-1 sm:mt-2 stat-value ${colorClass}`}>{formatCurrency(value)}</p>
+    <p className={`text-xl sm:text-2xl font-black tracking-tight stat-value ${colorClass}`}>{formatCurrency(value)}</p>
   </div>
 );
 
@@ -104,7 +121,7 @@ const TabDiario = () => {
   }, [movements, collaborators, todayStr]);
 
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle: `Resumen_Diario_${todayStr}`,
   });
 
@@ -307,7 +324,7 @@ const TabNominas = () => {
   }, [movements, selectedDates]);
 
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle: `Analisis_Nomina_${new Date().toISOString().split('T')[0]}`,
   });
 
@@ -450,7 +467,7 @@ const TabCierres = () => {
   }, [closings]);
 
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle: `Analisis_Cierres_${new Date().toISOString().split('T')[0]}`,
   });
 
@@ -582,7 +599,7 @@ const TabClientes = () => {
   }, []);
 
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle: `Analisis_Clientes_${new Date().toISOString().split('T')[0]}`,
   });
 
@@ -763,39 +780,47 @@ const TabClientes = () => {
   );
 }
 
-// --- Componente Principal de la Página (Con i18n) ---
 const DashboardPage = () => {
   const { t } = useTranslation();
+  const { realRole } = useBusiness();
   const [activeTab, setActiveTab] = useState('diario');
 
   return (
-    <>
-      <h1 className="text-2xl sm:text-3xl font-bold text-text-main mb-4 sm:mb-6">{t('dashboard.title')}</h1>
+    <div className="max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl sm:text-4xl font-black text-text-main tracking-tight">{t('dashboard.title')}</h1>
+            <RoleBadge role={realRole} />
+          </div>
+          <p className="text-text-muted text-sm font-medium">Gestiona el rendimiento de tu negocio en tiempo real</p>
+        </div>
+      </div>
 
       {/* Tab nav — scrollable en mobile */}
-      <div className="mb-4 sm:mb-6 bg-bg-secondary p-2 sm:p-4 rounded-lg border border-border-main overflow-x-auto hide-scrollbar">
-        <div className="flex rounded-md bg-bg-main p-1 min-w-max sm:min-w-0">
+      <div className="mb-4 sm:mb-6 bg-bg-secondary p-2 sm:p-4 rounded-xl border border-border-main overflow-x-auto hide-scrollbar">
+        <div className="flex rounded-lg bg-bg-main p-1.5 min-w-max sm:min-w-0">
           <button
             onClick={() => setActiveTab('diario')}
-            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded whitespace-nowrap ${activeTab === 'diario' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
+            className={`px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition-all duration-200 whitespace-nowrap ${activeTab === 'diario' ? 'bg-accent text-accent-text shadow-lg' : 'text-text-muted hover:text-text-main hover:bg-bg-tertiary'}`}
           >
             {t('dashboard.tabs.daily')}
           </button>
           <button
             onClick={() => setActiveTab('nominas')}
-            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded whitespace-nowrap ${activeTab === 'nominas' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
+            className={`px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition-all duration-200 whitespace-nowrap ${activeTab === 'nominas' ? 'bg-accent text-accent-text shadow-lg' : 'text-text-muted hover:text-text-main hover:bg-bg-tertiary'}`}
           >
             {t('dashboard.tabs.period')}
           </button>
           <button
             onClick={() => setActiveTab('cierres')}
-            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded whitespace-nowrap ${activeTab === 'cierres' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
+            className={`px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition-all duration-200 whitespace-nowrap ${activeTab === 'cierres' ? 'bg-accent text-accent-text shadow-lg' : 'text-text-muted hover:text-text-main hover:bg-bg-tertiary'}`}
           >
             {t('dashboard.tabs.closings')}
           </button>
           <button
             onClick={() => setActiveTab('clientes')}
-            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded whitespace-nowrap ${activeTab === 'clientes' ? 'bg-accent text-accent-text' : 'text-text-muted hover:text-text-main'}`}
+            className={`px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg transition-all duration-200 whitespace-nowrap ${activeTab === 'clientes' ? 'bg-accent text-accent-text shadow-lg' : 'text-text-muted hover:text-text-main hover:bg-bg-tertiary'}`}
           >
             {t('dashboard.tabs.clients')}
           </button>
@@ -808,7 +833,7 @@ const DashboardPage = () => {
         {activeTab === 'cierres' && <TabCierres />}
         {activeTab === 'clientes' && <TabClientes />}
       </div>
-    </>
+    </div>
   );
 };
 export default DashboardPage;

@@ -11,15 +11,19 @@ import { Icons } from '../ui/Icons';
 const SUPER_ADMIN_EMAIL = "filimorniga@gmail.com";
 
 const RoleBadge = ({ role }) => {
-    let color = '';
-    if (role === 'owner') color = 'bg-[#f6e05e]/10 text-[#f6e05e] border-[#f6e05e]/30';
-    if (role === 'admin') color = 'bg-red-500/10 text-red-500 border-red-500/20';
-    if (role === 'staff') color = 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-    if (role === 'client') color = 'bg-green-500/10 text-green-500 border-green-500/20';
+    const isOwner = role === 'owner';
+    const isAdmin = role === 'admin';
+    const isStaff = role === 'staff';
+
+    let colorClasses = '';
+    if (isOwner) colorClasses = 'bg-gradient-to-r from-[#f6e05e]/20 to-[#d4a853]/20 text-[#d4a853] border-[#f6e05e]/30 shadow-[0_0_15px_rgba(246,224,94,0.1)]';
+    else if (isAdmin) colorClasses = 'bg-red-500/10 text-red-500 border-red-500/20';
+    else if (isStaff) colorClasses = 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+    else colorClasses = 'bg-green-500/10 text-green-500 border-green-500/20';
 
     return (
-        <span className={`px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider ${color}`}>
-            {role}
+        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black border uppercase tracking-[0.2em] transition-all duration-500 ${colorClasses}`}>
+            {isOwner ? 'Owner Premium' : role}
         </span>
     );
 };
@@ -133,13 +137,13 @@ export const Dashboard = ({ user, isDarkMode }) => {
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Tarjeta de Ingresos REALES */}
-                <div className={`p-6 rounded-2xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+                <div className={`p-6 rounded-2xl border transition-all duration-300 ${isDarkMode ? 'bg-slate-800/50 border-slate-700 shadow-lg' : 'bg-white border-slate-200 shadow-sm hover:shadow-md'}`}>
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>{t.dashboard.admin_section.revenue}</h3>
-                        <Icons.ChartBar />
+                        <h3 className={`font-bold text-sm uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{t.dashboard.admin_section.revenue}</h3>
+                        <div className="p-2 rounded-lg bg-[#f6e05e]/10 text-[#f6e05e]"><Icons.ChartBar /></div>
                     </div>
-                    <div className={`text-3xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'} ${loadingStats ? 'opacity-50' : ''}`}>
-                        ${revenue.toFixed(2)}
+                    <div className={`text-4xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'} ${loadingStats ? 'opacity-50' : ''}`}>
+                        <span className="text-[#f6e05e] mr-1">$</span>{revenue.toFixed(2)}
                     </div>
                 </div>
 

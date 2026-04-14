@@ -51,6 +51,10 @@ export const DataProvider = ({ children }) => {
     loadingTech || loadingRetail || loadingConfig ||
     loadingMovements || loadingAppointments;
 
+  // ── Branding Helpers ───────────────────────────────────────────
+  const brandName = config?.[0]?.brandName || 'AgendiApp';
+  const logoUrl = config?.[0]?.logoUrl || null;
+
   const value = useMemo(() => ({
     isLoading,
     error,
@@ -60,12 +64,13 @@ export const DataProvider = ({ children }) => {
     updateRoleSimulation,
     loadingAuth,
     businessId,
+    brandName, logoUrl,
     currentLocale, currentCurrencySymbol, setCurrentCurrency,
   }), [
     isLoading, error, clients, collaborators, services, technicalInventory,
     retailInventory, config, movements, appointments,
     user, userRole, realRole, simulatedRole, loadingAuth,
-    businessId, currentLocale, currentCurrencySymbol,
+    businessId, brandName, logoUrl, currentLocale, currentCurrencySymbol,
   ]);
 
   return (

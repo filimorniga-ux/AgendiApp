@@ -157,7 +157,7 @@ export default function CurrentCashTab({ onArqueoClick }) {
   }, [collaborators, sortBy]);
 
   const reactToPrintFn = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle: `CajaDiaria_${todayStr}`,
   });
 

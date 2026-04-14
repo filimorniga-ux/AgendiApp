@@ -15,8 +15,18 @@ const GlobalLoader = () => (
 );
 
 const Layout = () => {
-  const { isLoading } = useData();
+  const { isLoading, brandName } = useData();
   const location = useLocation();
+
+  // ── Scroll detection for topbar depth ───────────────────────────────────
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const mainCont = document.getElementById('main-content');
+    if (!mainCont) return;
+    const handleScroll = () => setScrolled(mainCont.scrollTop > 10);
+    mainCont.addEventListener('scroll', handleScroll);
+    return () => mainCont.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // ── Mobile drawer state ──────────────────────────────────────────────────
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -113,23 +123,26 @@ const Layout = () => {
       <main className="flex flex-col flex-1 overflow-hidden min-w-0">
         {/* Mobile top bar with hamburger */}
         {isMobile && (
-          <div className="mobile-topbar">
+          <div className={`mobile-topbar transition-all duration-300 ${scrolled ? 'shadow-xl border-border-main/50 bg-bg-secondary/95 backdrop-blur-md' : 'bg-bg-main'}`}>
             <button
               onClick={() => setSidebarOpen(true)}
-              className="mobile-menu-toggle shadow-sm"
+              className="mobile-menu-toggle-inline"
               aria-label="Open Sidebar"
             >
               <Menu size={20} className="text-text-main" />
             </button>
 
-            <div className="flex-1 flex justify-center">
-              <h1 className="text-lg font-black text-text-main tracking-tight uppercase">
+            <div className="flex-1 flex justify-center items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#f6e05e] to-[#d4a853] flex items-center justify-center shadow-lg">
+                <span className="text-[#1a202c] font-black text-xs">$</span>
+              </div>
+              <h1 className="text-lg font-black text-text-main tracking-tighter uppercase">
                 {brandName || 'AgendiApp'}
               </h1>
             </div>
 
             {/* Placeholder to balance the centered title */}
-            <div style={{ width: 40 }} />
+            <div style={{ width: 44 }} />
           </div>
         )}
 
