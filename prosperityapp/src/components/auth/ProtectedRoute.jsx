@@ -43,7 +43,7 @@ const ProtectedRoute = ({ children }) => {
             <button
               onClick={async () => {
                 await signOutAll();
-                window.location.href = '/';
+                window.location.replace('/');
               }}
               className="btn-golden px-6 py-2.5 font-semibold"
             >

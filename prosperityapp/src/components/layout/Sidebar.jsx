@@ -84,15 +84,21 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
   const handleLanguageChange = (e) => i18n.changeLanguage(e.target.value);
 
   const handleLogout = async () => {
+    // Guarantee redirect happens even if something hangs
+    const redirectTimeout = setTimeout(() => {
+      window.location.replace('/');
+    }, 3000);
+
     try {
       await signOutAll();
       toast.success(t('common.logoutSuccess') || 'Sesión cerrada correctamente');
     } catch (error) {
       console.warn('Error al cerrar sesión:', error);
-      // Still redirect even on error — user wants OUT
     }
-    // ALWAYS redirect — no matter what
-    window.location.href = '/';
+
+    clearTimeout(redirectTimeout);
+    // ALWAYS redirect — no matter what — replace history so back button doesn't loop
+    window.location.replace('/');
   };
 
   // ── Ref para preservar scroll del nav ──────────────────────────────────────
