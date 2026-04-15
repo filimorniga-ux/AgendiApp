@@ -39,7 +39,7 @@ const ProtectedRoute = ({ children }) => {
             Si eres dueño de un comercio, necesitas suscribirte primero.
             Si eres colaborador, pide a tu administrador que te registre.
           </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={async () => {
                 await signOutAll();
@@ -51,7 +51,7 @@ const ProtectedRoute = ({ children }) => {
             </button>
             <a
               href="/"
-              className="px-6 py-2.5 border border-border-main rounded-lg text-text-main text-sm hover:bg-bg-main transition-colors inline-flex items-center"
+              className="px-6 py-2.5 border border-border-main rounded-lg text-text-main text-sm hover:bg-bg-main transition-colors inline-flex items-center justify-center"
             >
               Ir al inicio
             </a>

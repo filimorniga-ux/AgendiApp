@@ -80,4 +80,13 @@ export async function readCachedRows(tableName, businessId) {
   }
 }
 
+export async function clearAllCache() {
+  try {
+    await Promise.all(localDb.tables.map(table => table.clear()));
+    console.info('[localDb] Caché IndexedDB limpiada exitosamente.');
+  } catch (err) {
+    console.warn('[localDb] Error limpiando cache:', err);
+  }
+}
+
 export default localDb;

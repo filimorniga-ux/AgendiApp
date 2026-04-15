@@ -50,7 +50,7 @@ const PreciosPage = () => {
         const filteredServices = categories[category].filter(service =>
           service.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
-        if (filteredServices.length > 0) {
+        if ((filteredServices || []).length > 0) {
           acc[category] = filteredServices;
         }
         return acc;

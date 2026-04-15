@@ -241,7 +241,7 @@ const ColaboradoresPage = () => {
                 />
               </div>
             ))}
-            {filteredCollabList.length === 0 && (
+            {(filteredCollabList || []).length === 0 && (
               <div className="text-center text-text-muted p-12 animate-fadeInUp">
                 <div className="animate-float inline-block mb-4">
                   <i data-feather="users" className="w-16 h-16 mx-auto opacity-20"></i>

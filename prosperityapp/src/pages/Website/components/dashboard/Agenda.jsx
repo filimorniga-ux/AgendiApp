@@ -139,12 +139,12 @@ export const Agenda = ({ isDarkMode }) => {
                     )}
 
                     {/* COLUMNAS POR ESTILISTA */}
-                    {staffMembers.length === 0 && !loading ? (
+                    {(staffMembers || []).length === 0 && !loading ? (
                         <div className="w-full text-center py-10 opacity-50">
                             No hay estilistas registrados. Crea usuarios con rol 'staff'.
                         </div>
                     ) : (
-                        staffMembers.map(staff => (
+                        (staffMembers || []).map(staff => (
                             <div key={staff.id} className={`w-72 flex-shrink-0 rounded-xl border flex flex-col ${isDarkMode ? 'bg-slate-800/30 border-slate-700' : 'bg-white border-slate-200'}`}>
                                 {/* HEADER COLUMNA */}
                                 <div className={`p-3 border-b border-slate-500/10 flex items-center gap-3 ${isDarkMode ? 'bg-slate-800' : 'bg-slate-50'} rounded-t-xl`}>

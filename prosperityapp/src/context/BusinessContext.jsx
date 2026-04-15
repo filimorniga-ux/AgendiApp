@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../supabase/client';
+import { clearAllCache } from '../lib/localDb';
 
 export const BusinessContext = createContext({
   businessId:       null,
@@ -31,6 +32,7 @@ export const BusinessProvider = ({ children }) => {
     }
 
     // 2. Always reset local state
+    await clearAllCache();
     setSupabaseUser(null);
     setRealRole(null);
     setIsClient(false);
@@ -56,6 +58,8 @@ export const BusinessProvider = ({ children }) => {
     // ── Supabase Auth listener ─────────────────────
     const { data: { subscription: sbSub } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (event === 'TOKEN_REFRESHED') return;
+
         const sbUser = session?.user ?? null;
         setSupabaseUser(sbUser);
         setNoBusinessFound(false); // Reset on every auth change

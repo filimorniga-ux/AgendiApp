@@ -30,7 +30,9 @@ class ErrorBoundary extends React.Component {
           fontFamily: 'system-ui, sans-serif',
         }}>
           <div style={{
+            width: '100%',
             maxWidth: '500px',
+            boxSizing: 'border-box',
             background: 'var(--color-bg-card, #1E1E24)',
             borderRadius: '16px',
             padding: '2rem',

@@ -288,7 +288,7 @@ const ReportsPage = () => {
               </td>
             </tr>
           ))}
-          {filteredMovements.length === 0 && (
+          {(filteredMovements || []).length === 0 && (
             <tr><td colSpan="4" className="p-8 text-center text-text-muted">{t('dashboard.noData')}</td></tr>
           )}
         </tbody>
@@ -372,7 +372,7 @@ const ReportsPage = () => {
               <td className="p-3 text-right font-bold">${(parseFloat(r.amount || 0)).toLocaleString()}</td>
             </tr>
           ))}
-          {filteredClosings.length === 0 && (
+          {(filteredClosings || []).length === 0 && (
             <tr><td colSpan="3" className="p-8 text-center text-text-muted">{t('dashboard.noData')}</td></tr>
           )}
         </tbody>
@@ -467,13 +467,13 @@ const ReportsPage = () => {
         {activeTab === 'closings' && renderClosingsTable()}
         {activeTab === 'crm' && (
           <div className="p-4 text-center text-text-muted print:text-black">
-            <p>Tabla de Clientes ({filteredClients.length} registros)</p>
+            <p>Tabla de Clientes ({(filteredClients || []).length} registros)</p>
             {/* Implement Client Table here similar to others */}
           </div>
         )}
         {activeTab === 'hr' && (
           <div className="p-4 text-center text-text-muted print:text-black">
-            <p>Tabla de Colaboradores ({filteredCollaborators.length} registros)</p>
+            <p>Tabla de Colaboradores ({(filteredCollaborators || []).length} registros)</p>
           </div>
         )}
       </div>

@@ -120,7 +120,7 @@ const ConfiguracionPage = () => {
       };
     } else if (tabKey === 'accounting') {
       const totalPercent = (formData.partners || []).reduce((sum, p) => sum + (parseFloat(p.percent) || 0), 0);
-      if (totalPercent !== 100 && formData.partners.length > 0) {
+      if (totalPercent !== 100 && (formData.partners || []).length > 0) {
         toast.error(t('settings.accounting.errorTotal', { total: totalPercent }));
         return;
       }
