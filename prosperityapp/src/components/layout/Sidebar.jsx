@@ -1,5 +1,5 @@
 // ===== INICIO: src/components/layout/Sidebar.jsx (collapsible + live logo + collaborator mode) =====
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import feather from 'feather-icons';
 import { ThemeContext } from '../../context/ThemeContext';
@@ -95,18 +95,31 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
     window.location.href = '/';
   };
 
+  // ── Ref para preservar scroll del nav ──────────────────────────────────────
+  const navRef = useRef(null);
+  const scrollPosRef = useRef(0);
+
+  // Guardar posición de scroll antes de navegar
+  const handleLinkClick = useCallback((e) => {
+    // Guardar scroll position del nav
+    if (navRef.current) scrollPosRef.current = navRef.current.scrollTop;
+    // Close mobile drawer on navigation
+    if (isMobile && onClose) onClose();
+    // Prevent browser from auto-scrolling the sidebar by blurring after click
+    requestAnimationFrame(() => {
+      e.currentTarget?.blur();
+      // Restaurar scroll position después del render
+      if (navRef.current) navRef.current.scrollTop = scrollPosRef.current;
+    });
+  }, [isMobile, onClose]);
+
   // ── Link item (handles collapsed icon-only mode) ─────────────────────────
   const SidebarLink = ({ to, icon, label, end }) => (
     <NavLink
       to={to}
       end={end}
       preventScrollReset
-      onClick={(e) => {
-        // Close mobile drawer on navigation
-        if (isMobile && onClose) onClose();
-        // Prevent browser from auto-scrolling the sidebar by blurring after click
-        requestAnimationFrame(() => e.currentTarget?.blur());
-      }}
+      onClick={handleLinkClick}
       title={collapsed ? label : undefined}
       className={({ isActive }) =>
         `sidebar-link flex items-center gap-3 rounded-md transition-all duration-150 font-medium
@@ -197,6 +210,7 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
 
       {/* ── Navegación ──────────────────────────────────────────────────────── */}
       <nav
+        ref={navRef}
         id="sidebar-nav"
         className={`flex-1 flex flex-col gap-1 overflow-y-auto overflow-x-hidden
           ${collapsed ? 'p-2' : 'p-3'}`}
