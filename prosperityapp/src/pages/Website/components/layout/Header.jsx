@@ -24,12 +24,16 @@ export const Header = ({ isDarkMode, toggleTheme, user, onLoginClick, onRegister
                 ? isDarkMode 
                     ? 'py-2 bg-slate-950/80 backdrop-blur-xl border-white/10 shadow-2xl' 
                     : 'py-2 bg-white/80 backdrop-blur-xl border-slate-200 shadow-sm'
-                : 'py-5 bg-transparent border-transparent'
+                : 'py-5 bg-gradient-to-b from-black/70 via-black/30 to-transparent border-transparent'
         }`}>
             <nav className="container mx-auto px-6 flex justify-between items-center max-w-7xl">
                 <div className="flex items-center gap-3 group cursor-pointer">
                     <img src={LOGO_URL} alt="AgendiApp" className="w-10 h-10 rounded-full shadow-lg group-hover:rotate-12 transition-transform duration-300" />
-                    <span className={`text-2xl font-black tracking-tighter ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                    <span className={`text-2xl font-black tracking-tighter ${
+                        scrolled
+                            ? isDarkMode ? 'text-white' : 'text-slate-900'
+                            : 'text-white'
+                    }`} style={!scrolled ? { textShadow: '0 1px 4px rgba(0,0,0,0.5)' } : undefined}>
                         AGENDI<span className="text-[#f6e05e]">APP</span>
                     </span>
                 </div>
@@ -40,7 +44,12 @@ export const Header = ({ isDarkMode, toggleTheme, user, onLoginClick, onRegister
                         <a
                             key={item}
                             href={`#${item}`}
-                            className={`text-sm font-medium hover:text-[#f6e05e] transition-colors ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}
+                            className={`text-sm font-medium hover:text-[#f6e05e] transition-colors ${
+                                scrolled
+                                    ? isDarkMode ? 'text-slate-300' : 'text-slate-600'
+                                    : 'text-white/90 hover:text-[#f6e05e]'
+                            }`}
+                            style={!scrolled ? { textShadow: '0 1px 3px rgba(0,0,0,0.6)' } : undefined}
                         >
                             {t.nav[item]}
                         </a>
@@ -52,7 +61,13 @@ export const Header = ({ isDarkMode, toggleTheme, user, onLoginClick, onRegister
 
                     {!user ? (
                         <>
-                            <button onClick={onLoginClick} className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'} hover:text-[#f6e05e] transition-colors`}>
+                            <button onClick={onLoginClick} className={`text-sm font-bold ${
+                                scrolled
+                                    ? isDarkMode ? 'text-white' : 'text-slate-900'
+                                    : 'text-white'
+                            } hover:text-[#f6e05e] transition-colors`}
+                                style={!scrolled ? { textShadow: '0 1px 3px rgba(0,0,0,0.6)' } : undefined}
+                            >
                                 {t.nav.login}
                             </button>
                             <button
