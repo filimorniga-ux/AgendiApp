@@ -28,6 +28,7 @@ export const COLLECTION_TO_TABLE = {
   openUnits:            'open_units',
   purchaseOrders:       'purchase_orders',
   purchaseOrderItems:   'purchase_order_items',
+  serviceTimers:        'service_timers',
 };
 
 /**

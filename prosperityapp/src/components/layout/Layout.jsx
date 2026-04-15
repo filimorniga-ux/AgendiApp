@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import BottomNavigationBar from './BottomNavigationBar';
+import FloatingTimerWidget from '../timer/FloatingTimerWidget';
 import { useData } from '../../context/DataContext';
 import { Menu } from 'lucide-react';
 import '../../styles/mobile.css';
@@ -163,6 +164,9 @@ const Layout = () => {
 
       {/* ── Bottom Navigation (mobile only) ─────────────────────────────── */}
       <BottomNavigationBar />
+
+      {/* ── Timer Widget (floating) ──────────────────────────────────────── */}
+      <FloatingTimerWidget />
     </div>
   );
 };

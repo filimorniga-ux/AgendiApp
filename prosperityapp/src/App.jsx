@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { BusinessProvider } from './context/BusinessContext';
 import { DataProvider } from './context/DataContext';
+import { TimerProvider } from './context/TimerContext';
 import { Toaster } from 'react-hot-toast';
 import PWAInstallBanner from './components/PWAInstallBanner';
 import OfflineIndicator from './components/OfflineIndicator';
@@ -79,6 +80,7 @@ function App() {
     <ThemeProvider>
       <BusinessProvider>
         <DataProvider>
+          <TimerProvider>
           <Toaster
             position="bottom-right"
             toastOptions={{
@@ -159,6 +161,7 @@ function App() {
             </Suspense>
             </ErrorBoundary>
           </BrowserRouter>
+          </TimerProvider>
         </DataProvider>
       </BusinessProvider>
     </ThemeProvider>
