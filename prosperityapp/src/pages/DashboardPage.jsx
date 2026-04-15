@@ -189,7 +189,7 @@ const TabDiario = () => {
                   <span className="text-accent font-bold">{collab.serviceCount} {t('dashboard.cards.services')}</span>
                 </li>
               ))}
-              {summary.ranking.length === 0 && (
+              {(summary.ranking || []).length === 0 && (
                 <div className="flex flex-col items-center py-8 text-text-muted animate-fadeInUp">
                   <i data-feather="award" className="w-12 h-12 mb-3 opacity-30 animate-float"></i>
                   <p>{t('dashboard.noData')}</p>

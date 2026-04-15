@@ -222,7 +222,7 @@ const PedidosPage = () => {
                     <button onClick={() => handleDelete('suppliers', s.id)} className="mt-2 text-red-400 hover:text-red-500 text-xs flex items-center gap-1"><i data-feather="trash-2" className="w-3 h-3"></i> {t('common.delete')}</button>
                 </div>
             ))}
-            {suppliers.length === 0 && <p className="text-text-muted p-4">{t('dashboard.noData')}</p>}
+            {(suppliers || []).length === 0 && <p className="text-text-muted p-4">{t('dashboard.noData')}</p>}
         </div>
     );
 
@@ -300,7 +300,7 @@ const PedidosPage = () => {
                     ))}
                 </tbody>
             </table>
-            {invoices.length === 0 && <p className="text-text-muted p-4 text-center">{t('dashboard.noData')}</p>}
+            {(invoices || []).length === 0 && <p className="text-text-muted p-4 text-center">{t('dashboard.noData')}</p>}
         </div>
     );
 
@@ -339,7 +339,7 @@ const PedidosPage = () => {
                     </div>
                 </div>
             ))}
-            {debts.length === 0 && <p className="text-text-muted p-4 text-center">{t('dashboard.noData')}</p>}
+            {(debts || []).length === 0 && <p className="text-text-muted p-4 text-center">{t('dashboard.noData')}</p>}
         </div>
     );
 

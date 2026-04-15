@@ -335,7 +335,7 @@ const NominasPage = () => {
                 <i data-feather="x" className="w-4 h-4" /> {t('payroll.clear')}
               </button>
               <div className="flex gap-2 ml-auto">
-                <button onClick={() => setIsActionsOpen(true)} disabled={!payrollCards.length}
+                <button onClick={() => setIsActionsOpen(true)} disabled={!(payrollCards || []).length}
                   className="btn-golden bg-blue-600 text-white text-sm py-2 px-3 flex items-center gap-2 disabled:opacity-50 shadow-lg hover:bg-blue-700">
                   <i data-feather="settings" className="w-4 h-4" />
                   <span className="hidden md:inline">{t('payroll.actionsBtn')}</span>
@@ -343,7 +343,7 @@ const NominasPage = () => {
                 <Link to="/app/nomina/historial" className="btn-golden bg-bg-main/50 text-text-muted text-sm py-2 px-3 flex items-center gap-2">
                   <i data-feather="archive" className="w-4 h-4" /> <span className="hidden sm:inline">{t('payroll.historyBtn')}</span>
                 </Link>
-                <button onClick={() => setIsCloseOpen(true)} disabled={!selectedDates.length}
+                <button onClick={() => setIsCloseOpen(true)} disabled={!(selectedDates || []).length}
                   className="btn-golden flex-shrink-0 flex items-center text-sm py-2 px-3 disabled:opacity-50">
                   <i data-feather="check-circle" className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">{t('payroll.closePeriodBtn')}</span>
                 </button>
@@ -365,7 +365,7 @@ const NominasPage = () => {
               />
             ))}
           </div>
-          {!activeCollabs.length && !isLoading && (
+          {!((activeCollabs || []).length) && !isLoading && (
             <div className="bg-bg-secondary rounded-lg p-8 text-center text-text-muted">
               <p>{t('dashboard.noData')}</p>
             </div>

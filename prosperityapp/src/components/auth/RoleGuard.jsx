@@ -25,7 +25,7 @@ const RoleGuard = ({ allowedRoles = ['owner', 'admin'], fallbackPath = '/app', c
     return <Navigate to="/" replace />;
   }
 
-  if (!allowedRoles.includes(realRole)) {
+  if (!allowedRoles.includes(realRole || '')) {
     return <Navigate to={fallbackPath} replace />;
   }
 

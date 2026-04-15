@@ -72,7 +72,7 @@ describe('Sidebar', () => {
   });
 
   it('renders only allowed modules for collaborator role', () => {
-    global.__REAL_ROLE__ = 'collaborator';
+    global.__REAL_ROLE__ = 'staff';
     renderSidebar();
 
     expect(screen.getByText('sidebar.agenda')).toBeInTheDocument();
@@ -84,7 +84,7 @@ describe('Sidebar', () => {
   });
 
   it('calls signOutAll on logout', () => {
-    global.__REAL_ROLE__ = 'collaborator';
+    global.__REAL_ROLE__ = 'staff';
     renderSidebar();
 
     fireEvent.click(screen.getByText('sidebar.logout'));
