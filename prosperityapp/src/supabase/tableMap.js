@@ -29,6 +29,7 @@ export const COLLECTION_TO_TABLE = {
   purchaseOrders:       'purchase_orders',
   purchaseOrderItems:   'purchase_order_items',
   serviceTimers:        'service_timers',
+  googleSheetsSync:     'google_sheets_sync',
 };
 
 /**

@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import AppearanceTab from './Settings/AppearanceTab';
 import TicketEditorTab from './Settings/TicketEditorTab';
 import ClientAcquisitionTab from './Settings/ClientAcquisitionTab';
+import IntegrationsTab from './Settings/IntegrationsTab';
 import { useStorage } from '../hooks/useStorage';
 
 const ConfiguracionPage = () => {
@@ -217,6 +218,7 @@ const ConfiguracionPage = () => {
     { id: 'ticket', icon: 'file-text', label: 'Ticket de Venta' },
     { id: 'accounting', icon: 'dollar-sign', label: t('settings.tabs.accounting') },
     { id: 'security', icon: 'lock', label: t('settings.tabs.security') },
+    { id: 'integrations', icon: 'link-2', label: 'Integraciones' },
   ];
 
   return (
@@ -565,6 +567,11 @@ const ConfiguracionPage = () => {
               </div>
             </div>
           )}
+
+          {/* --- INTEGRACIONES --- */}
+          <div className={`space-y-8 ${activeTab === 'integrations' ? '' : 'hidden'}`}>
+            <IntegrationsTab />
+          </div>
 
         </div>
       </div>
