@@ -41,27 +41,20 @@ export function useGoogleSheets() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('No active session');
 
-    const res = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sheets-sync`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          action,
-          business_id: businessId,
-          ...extraPayload,
-        }),
-      }
-    );
+    const { data, error } = await supabase.functions.invoke('sheets-sync', {
+      body: {
+        action,
+        business_id: businessId,
+        ...extraPayload,
+      },
+    });
 
-    const result = await res.json();
-    if (!res.ok) {
-      throw new Error(result.error || `Error ${res.status}`);
+    if (error) {
+      console.error('Edge Function Error:', error);
+      throw new Error(error.message || 'Error invocando la función Deno');
     }
-    return result;
+
+    return data;
   };
 
   /**
