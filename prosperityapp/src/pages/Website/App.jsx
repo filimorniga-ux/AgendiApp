@@ -35,21 +35,41 @@ function MainApp() {
 
     // LÓGICA LIMPIA DE AUTENTICACIÓN REAL
     useEffect(() => {
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        let mounted = true;
+
+        // 1. Obtener la sesión actual por defecto para no quedarnos atascados esperando
+        supabase.auth.getSession().then(({ data: { session }, error }) => {
+            if (!mounted) return;
             const currentUser = session?.user ?? null;
             setUser(currentUser);
             setLoadingAuth(false);
+            
+            if (currentUser && (window.location.pathname === '/' || window.location.pathname === '')) {
+                navigate('/app');
+            }
+        });
+
+        // 2. Escuchar cambios de estado en segundo plano
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (!mounted) return;
+            
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
+            setLoadingAuth(false);
+            
             if (currentUser) {
                 console.info("✅ Usuario autenticado:", currentUser.email);
-                // Si estamos en la raíz y ya hay usuario, lo mandamos a la app real
                 if (window.location.pathname === '/' || window.location.pathname === '') {
                     navigate('/app');
                 }
             }
         });
-        return () => subscription.unsubscribe();
+        
+        return () => {
+            mounted = false;
+            subscription?.unsubscribe();
+        };
     }, [navigate]);
-
     useEffect(() => {
         // MANTENEMOS SOLO UN COLOR BASE LIMPIO Y ELEGANTE
         setBgStyle({

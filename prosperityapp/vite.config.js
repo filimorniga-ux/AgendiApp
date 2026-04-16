@@ -84,9 +84,9 @@ export default defineConfig({
               cacheableResponse: { statuses: [0, 200] },
             },
           },
-          // ── Supabase REST/Auth — NetworkFirst con fallback offline ─────────
+          // ── Supabase REST — NetworkFirst con fallback offline ─────────
           {
-            urlPattern: /^https:\/\/mzoodzsefyaymhjpzopm\.supabase\.co\/(rest|auth)\/.*/i,
+            urlPattern: /^https:\/\/mzoodzsefyaymhjpzopm\.supabase\.co\/rest\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'supabase-api',
