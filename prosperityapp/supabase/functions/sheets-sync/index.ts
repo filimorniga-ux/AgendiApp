@@ -4,7 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 // ── Google Auth via Service Account JWT ──────────────────────────────────────
 const SCOPES = [
   "https://www.googleapis.com/auth/spreadsheets",
-  "https://www.googleapis.com/auth/drive.file",
+  "https://www.googleapis.com/auth/drive",
 ];
 
 async function getGoogleAccessToken(): Promise<string> {
@@ -24,7 +24,7 @@ async function getGoogleAccessToken(): Promise<string> {
   };
 
   const enc = new TextEncoder();
-  const b64url = (buf: ArrayBuffer) =>
+  const b64url = (buf: ArrayBuffer | Uint8Array) =>
     btoa(String.fromCharCode(...new Uint8Array(buf)))
       .replace(/\+/g, "-")
       .replace(/\//g, "_")
@@ -95,15 +95,8 @@ const HEADERS: Record<string, string[]> = {
 };
 
 async function createSpreadsheet(token: string, businessName: string) {
-  const sheets = SHEET_TABS.map((tab, i) => ({
-    properties: {
-      sheetId: i,
-      title: tab.title,
-      tabColor: tab.color,
-      gridProperties: { frozenRowCount: 1 },
-    },
-  }));
-
+  // Try using the Drive API instead to create the raw file and avoid Sheets API 403 creation limit logic
+  // Actually, let's keep Sheets API but just create an empty one first
   const res = await fetch(SHEETS_API, {
     method: "POST",
     headers: {
@@ -111,14 +104,37 @@ async function createSpreadsheet(token: string, businessName: string) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      properties: { title: `AgendiApp — ${businessName}` },
-      sheets,
+      properties: { title: `AgendiApp — ${businessName}` }
     }),
   });
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Failed to create spreadsheet: ${err}`);
+    const errText = await res.text();
+    
+    // If it still fails, let's try via Drive API directly as fallback
+    if (res.status === 403) {
+      console.log("Sheets API creation failed with 403, attempting via Drive API...");
+      const driveRes = await fetch("https://www.googleapis.com/drive/v3/files", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: `AgendiApp — ${businessName}`,
+          mimeType: "application/vnd.google-apps.spreadsheet",
+        }),
+      });
+
+      if (!driveRes.ok) {
+        const driveErr = await driveRes.text();
+        throw new Error(`Failed to create spreadsheet via Drive API: ${driveErr}. This usually means your Service Account is completely blocked from creating files. Add "Editor" role to the service account in IAM.`);
+      }
+      const driveData = await driveRes.json();
+      return { spreadsheetId: driveData.id, spreadsheetUrl: `https://docs.google.com/spreadsheets/d/${driveData.id}/edit` };
+    }
+
+    throw new Error(`Failed to create spreadsheet via Sheets API: ${errText}`);
   }
   return await res.json();
 }
@@ -142,37 +158,85 @@ async function shareSpreadsheet(token: string, fileId: string, email: string) {
   }
 }
 
-async function formatHeaders(token: string, spreadsheetId: string) {
-  const requests = SHEET_TABS.map((_, i) => ([
-    // Bold + background color on header row
-    {
-      repeatCell: {
-        range: { sheetId: i, startRowIndex: 0, endRowIndex: 1 },
-        cell: {
-          userEnteredFormat: {
-            backgroundColor: { red: 0.85, green: 0.65, blue: 0.13 },
-            textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 11 },
-            horizontalAlignment: "CENTER",
-            borders: {
-              bottom: { style: "SOLID", width: 2, color: { red: 0.6, green: 0.45, blue: 0.1 } },
+async function formatHeaders(token: string, spreadsheetId: string, firstSheetId: number = 0) {
+  // First we need to actually setup the sheets properly since we created an empty one
+  const setupRequests = SHEET_TABS.map((tab, i) => {
+    // If it's the very first tab, we rename the default "Sheet1" (which usually has index 0 / sheetId 0)
+    // If it's subsequent, we add new sheets
+    if (i === 0) {
+      return {
+        updateSheetProperties: {
+          properties: {
+            sheetId: firstSheetId,
+            title: tab.title,
+            tabColor: tab.color,
+            gridProperties: { frozenRowCount: 1 },
+          },
+          fields: "title,tabColor,gridProperties.frozenRowCount",
+        }
+      };
+    } else {
+      return {
+        addSheet: {
+          properties: {
+            title: tab.title,
+            tabColor: tab.color,
+            gridProperties: { frozenRowCount: 1 },
+          }
+        }
+      };
+    }
+  });
+
+  // Execute structural setup first
+  await fetch(`${SHEETS_API}/${spreadsheetId}:batchUpdate`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ requests: setupRequests }),
+  });
+
+  // Then fetch again to find out what IDs were assigned to our new tabs (necessary for formatting which needs sheetIds!)
+  const metaRes = await fetch(`${SHEETS_API}/${spreadsheetId}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const meta = await metaRes.json();
+  const sheetsInfo = meta.sheets || [];
+
+  // Now apply formatting using the real sheetIds assigned by Google
+  const formatRequests = sheetsInfo.map((sh: any) => {
+    const sId = sh.properties.sheetId;
+    return [
+      // Bold + background color on header row
+      {
+        repeatCell: {
+          range: { sheetId: sId, startRowIndex: 0, endRowIndex: 1 },
+          cell: {
+            userEnteredFormat: {
+              backgroundColor: { red: 0.85, green: 0.65, blue: 0.13 },
+              textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 11 },
+              horizontalAlignment: "CENTER",
+              borders: {
+                bottom: { style: "SOLID", width: 2, color: { red: 0.6, green: 0.45, blue: 0.1 } },
+              },
             },
           },
+          fields: "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,borders)",
         },
-        fields: "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,borders)",
       },
-    },
-    // Auto-resize columns
-    {
-      autoResizeDimensions: {
-        dimensions: { sheetId: i, dimension: "COLUMNS", startIndex: 0, endIndex: 10 },
+      // Auto-resize columns
+      {
+        autoResizeDimensions: {
+          dimensions: { sheetId: sId, dimension: "COLUMNS", startIndex: 0, endIndex: 10 },
+        },
       },
-    },
-  ])).flat();
+    ];
+  }).flat();
 
   await fetch(`${SHEETS_API}/${spreadsheetId}:batchUpdate`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ requests }),
+    body: JSON.stringify({ requests: formatRequests }),
   });
 }
 
@@ -352,11 +416,7 @@ Deno.serve(async (req: Request) => {
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
     
     let authHeader = req.headers.get("authorization") || "";
-    const token = authHeader.replace("Bearer ", "");
-
-    console.log("== DEBUG REQUEST ==");
-    console.log("Method:", req.method);
-    console.log("Token length:", token.length);
+    const token = authHeader.replace(/^Bearer\s+/i, "");
 
     if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
         throw new Error("Missing Supabase Native Environment Variables");
@@ -368,18 +428,16 @@ Deno.serve(async (req: Request) => {
     // Explicit token validation inside edge function
     const { data: { user }, error: authErr } = await userClient.auth.getUser(token);
     
-    console.log("Auth User resolution:", !!user, authErr?.message);
-    
     if (authErr || !user) {
-      console.error("Rejecting request with 401: Unauthorized", authErr);
-      return jsonResponse({ error: "Unauthorized", details: authErr?.message }, 401);
+      console.error("Rejecting request: Unauthorized", authErr);
+      // Return 200 with success: false to gracefully show the error in the frontend
+      return jsonResponse({ success: false, error: "Unauthorized", details: authErr?.message }, 200);
     }
 
     // Admin client for data operations
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
     const body = await req.json();
-    console.log("Body action:", body.action);
     const { action, business_id, shared_email } = body;
 
     // Verify user belongs to business
@@ -406,9 +464,17 @@ Deno.serve(async (req: Request) => {
 
     // ── CREATE ─────────────────────────────────────────────
     if (action === "create") {
-      if (!shared_email) {
-        return jsonResponse({ error: "shared_email is required" }, 400);
+      const spreadsheet_url = body.spreadsheet_url;
+      if (!spreadsheet_url) {
+        return jsonResponse({ error: "spreadsheet_url is required" }, 400);
       }
+
+      const match = spreadsheet_url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+      if (!match) {
+        return jsonResponse({ error: "Enlace de Google Sheets inválido. Debe contener /d/ID" }, 400);
+      }
+      const spreadsheetId = match[1];
+      const spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`;
 
       // Check if already connected
       const { data: existing } = await adminClient
@@ -421,36 +487,50 @@ Deno.serve(async (req: Request) => {
         return jsonResponse({ error: "already_connected", url: existing.spreadsheet_url }, 409);
       }
 
-      // 1. Create the spreadsheet
-      const spreadsheet = await createSpreadsheet(googleToken, businessName);
-      const spreadsheetId = spreadsheet.spreadsheetId;
-      const spreadsheetUrl = spreadsheet.spreadsheetUrl;
+      try {
+        // Fetch metadata to verify Access AND get first sheet ID
+        const metaRes = await fetch(`${SHEETS_API}/${spreadsheetId}`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${googleToken}` }
+        });
+        
+        if (!metaRes.ok) {
+           const errReason = await metaRes.text();
+           throw new Error(`El bot no pudo acceder al archivo. Verifica haberle dado permiso de Editor en tu Google Sheet. Detalles: ${metaRes.status}`);
+        }
+        
+        const meta = await metaRes.json();
+        const firstSheetId = meta.sheets?.[0]?.properties?.sheetId ?? 0;
 
-      // 2. Write headers
-      await writeHeaders(googleToken, spreadsheetId);
-      await formatHeaders(googleToken, spreadsheetId);
+        // 1. Setup tabs & formatting
+        await formatHeaders(googleToken, spreadsheetId, firstSheetId);
 
-      // 3. Share with user
-      await shareSpreadsheet(googleToken, spreadsheetId, shared_email);
+        // 2. Write headers data
+        await writeHeaders(googleToken, spreadsheetId);
 
-      // 4. Full data sync
-      await fullSync(googleToken, spreadsheetId, adminClient, business_id);
+        // 3. Full data sync
+        await fullSync(googleToken, spreadsheetId, adminClient, business_id);
 
-      // 5. Save to DB
-      await adminClient.from("google_sheets_sync").insert({
-        business_id,
-        spreadsheet_id: spreadsheetId,
-        spreadsheet_url: spreadsheetUrl,
-        shared_email,
-        last_synced_at: new Date().toISOString(),
-        sync_status: "active",
-      });
+        // 4. Save to DB
+        await adminClient.from("google_sheets_sync").insert({
+          business_id,
+          spreadsheet_id: spreadsheetId,
+          spreadsheet_url: spreadsheetUrl,
+          shared_email: "Conectado vía Carpeta Compartida",
+          last_synced_at: new Date().toISOString(),
+          sync_status: "active",
+        });
 
-      return jsonResponse({
-        success: true,
-        spreadsheet_url: spreadsheetUrl,
-        spreadsheet_id: spreadsheetId,
-      });
+        return jsonResponse({
+          success: true,
+          spreadsheet_url: spreadsheetUrl,
+          spreadsheet_id: spreadsheetId,
+        });
+
+      } catch (setupError: any) {
+         // Re-throw so the edge function handler properly reports it back to the client
+         throw new Error(setupError.message || String(setupError));
+      }
     }
 
     // ── FULL SYNC ──────────────────────────────────────────
@@ -487,8 +567,9 @@ Deno.serve(async (req: Request) => {
 
     return jsonResponse({ error: "Invalid action. Use: create, full-sync, disconnect" }, 400);
   } catch (err: any) {
-    console.error("sheets-sync error:", err);
-    return jsonResponse({ error: err.message || "Internal error" }, 500);
+    console.error("FATAL ERROR IN SHEETS-SYNC:", err);
+    if (err.stack) console.error(err.stack);
+    return jsonResponse({ success: false, error: "Internal Server Error", details: err?.message || String(err) }, 200);
   }
 });
 

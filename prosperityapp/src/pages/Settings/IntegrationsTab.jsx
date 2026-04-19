@@ -19,17 +19,17 @@ const IntegrationsTab = () => {
     disconnect,
   } = useGoogleSheets();
 
-  const [email, setEmail] = useState('');
+  const [sheetUrl, setSheetUrl] = useState('');
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
 
   const handleConnect = async (e) => {
     e.preventDefault();
-    if (!email || !email.includes('@')) {
-      toast.error('Ingresa un correo Gmail válido');
+    if (!sheetUrl || !sheetUrl.includes('docs.google.com/spreadsheets')) {
+      toast.error('Ingresa un enlace de Google Sheets válido');
       return;
     }
     try {
-      await connectSheets(email);
+      await connectSheets(sheetUrl);
       toast.success('¡Google Sheets conectado exitosamente!');
     } catch (err) {
       if (err.message === 'already_connected') {
@@ -103,40 +103,48 @@ const IntegrationsTab = () => {
             /* ─── Not Connected State ─── */
             <div>
               <div className="bg-accent/5 border border-accent/20 rounded-xl p-4 mb-5">
-                <p className="text-sm text-text-main font-medium mb-2">📊 ¿Qué obtienes?</p>
-                <ul className="text-xs text-text-muted space-y-1.5">
-                  <li className="flex items-center gap-2">
-                    <span className="text-green-500">✓</span> Libro con 7 pestañas: Agenda, Caja Diaria, Inventarios, Clientes, Nóminas, Cierres
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-green-500">✓</span> Formato corporativo profesional con colores y fórmulas
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-green-500">✓</span> Sincronización manual con un click
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-green-500">✓</span> Ábrelo con tu cuenta personal de Gmail
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-green-500">✓</span> Compártelo con tu contador o socios
-                  </li>
-                </ul>
+                <p className="text-sm text-text-main font-bold mb-3">🛠 Pasos de Configuración (Gratis & Ilimitado)</p>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-xs text-text-main font-semibold mb-1">Paso 1: Crea un Google Sheet en tu Drive</p>
+                    <p className="text-xs text-text-muted flex items-center gap-1">
+                      Crea un archivo nuevo y vacío desde <a href="https://sheets.new" target="_blank" rel="noopener noreferrer" className="text-accent font-medium hover:underline flex items-center gap-1">sheets.new <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-text-main font-semibold mb-1">Paso 2: Invita al Bot</p>
+                    <p className="text-xs text-text-muted">Haz clic en el botón "Compartir" de Google Sheets e invita a este correo con el permiso de <strong>Editor</strong>:</p>
+                    <div className="mt-1 flex items-center bg-bg-main border border-border-main rounded-md overflow-hidden text-xs">
+                      <code className="px-3 py-2 flex-1 text-text-main overflow-x-auto whitespace-nowrap">hojas-bot-free@agendiapp-sheets.iam.gserviceaccount.com</code>
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          navigator.clipboard.writeText('hojas-bot-free@agendiapp-sheets.iam.gserviceaccount.com'); 
+                          toast.success('Correo copiado al portapapeles');
+                        }} 
+                        className="px-3 py-2 bg-bg-secondary hover:bg-border-main text-text-main border-l border-border-main shrink-0 transition-colors font-medium"
+                      >
+                        Copiar
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <form onSubmit={handleConnect} className="space-y-3">
                 <label className="block text-sm font-medium text-text-main">
-                  Correo Gmail del dueño
+                  Paso 3: Pega el enlace aquí
                 </label>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="tu-correo@gmail.com"
+                  type="url"
+                  value={sheetUrl}
+                  onChange={(e) => setSheetUrl(e.target.value)}
+                  placeholder="https://docs.google.com/spreadsheets/d/..."
                   required
                   className="w-full px-4 py-2.5 rounded-lg bg-bg-secondary border border-border-main text-text-main placeholder-text-muted focus:outline-none focus:border-accent"
                 />
                 <p className="text-xs text-text-muted">
-                  El libro de Google Sheets se compartirá con este correo. Podrás abrirlo desde Google Drive.
+                  AgendiApp configurará todas las pestañas por ti en este documento sin causarte límites de cuota.
                 </p>
 
                 {error && (
@@ -148,7 +156,7 @@ const IntegrationsTab = () => {
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="w-full btn-golden py-3 font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full btn-golden py-3 mt-2 font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {actionLoading ? (
                     <>
@@ -171,10 +179,13 @@ const IntegrationsTab = () => {
             /* ─── Connected State ─── */
             <div className="space-y-4">
               {/* Status Info */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="bg-bg-secondary rounded-xl p-3.5 border border-border-main">
-                  <p className="text-xs text-text-muted mb-1">Correo vinculado</p>
-                  <p className="text-sm font-medium text-text-main truncate">{sharedEmail}</p>
+                  <p className="text-xs text-text-muted mb-1">Estado</p>
+                  <p className="text-sm font-medium text-text-main truncate text-green-500 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    Sincronización Activa
+                  </p>
                 </div>
                 <div className="bg-bg-secondary rounded-xl p-3.5 border border-border-main">
                   <p className="text-xs text-text-muted mb-1">Última sincronización</p>
@@ -279,20 +290,23 @@ const IntegrationsTab = () => {
             <line x1="12" y1="16" x2="12" y2="12" />
             <line x1="12" y1="8" x2="12.01" y2="8" />
           </svg>
-          ¿Cómo funciona?
+          ¿Por qué el proceso es así?
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="bg-bg-secondary rounded-xl p-3 border border-border-main text-center">
-            <div className="text-2xl mb-1">1️⃣</div>
-            <p className="text-xs text-text-muted">Ingresa tu Gmail y conecta</p>
+            <div className="text-2xl mb-1">🔒</div>
+            <p className="text-xs text-text-muted font-medium mb-1 mt-1">Dueño 100%</p>
+            <p className="text-[11px] text-text-muted leading-tight">Miras de ser propietario del archivo. Nadie más lo puede borrar u ocupar tu espacio.</p>
           </div>
           <div className="bg-bg-secondary rounded-xl p-3 border border-border-main text-center">
-            <div className="text-2xl mb-1">2️⃣</div>
-            <p className="text-xs text-text-muted">Se crea un libro con todas las pestañas</p>
+            <div className="text-2xl mb-1">⚡️</div>
+            <p className="text-xs text-text-muted font-medium mb-1 mt-1">Sin Límites</p>
+            <p className="text-[11px] text-text-muted leading-tight">Al no ser dueño el sistema, jamás alcanzarás el temido error de Cuota Excedida.</p>
           </div>
           <div className="bg-bg-secondary rounded-xl p-3 border border-border-main text-center">
-            <div className="text-2xl mb-1">3️⃣</div>
-            <p className="text-xs text-text-muted">Ábrelo desde tu Google Drive</p>
+            <div className="text-2xl mb-1">💅</div>
+            <p className="text-xs text-text-muted font-medium mb-1 mt-1">Magia Automática</p>
+            <p className="text-[11px] text-text-muted leading-tight">Igualmente preparamos las pestañas, formatos y encabezados por ti.</p>
           </div>
         </div>
       </div>

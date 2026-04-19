@@ -85,9 +85,9 @@ function App() {
             position="bottom-right"
             toastOptions={{
               style: {
-                background: 'var(--color-bg-card, #1E1E24)',
+                background: 'var(--color-bg-secondary, #1E1E24)',
                 color: 'var(--color-text-main, #FFFFFF)',
-                border: '1px solid var(--color-border, #2d2d3a)',
+                border: '1px solid var(--color-border-main, #2d2d3a)',
                 borderRadius: '12px',
                 boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
                 padding: '16px',
@@ -97,13 +97,13 @@ function App() {
               success: {
                 iconTheme: {
                   primary: 'var(--color-accent, #D4A853)',
-                  secondary: 'var(--color-bg-card, #1E1E24)',
+                  secondary: 'var(--color-bg-secondary, #1E1E24)',
                 },
               },
               error: {
                 iconTheme: {
                   primary: '#ef4444',
-                  secondary: 'var(--color-bg-card, #1E1E24)',
+                  secondary: 'var(--color-bg-secondary, #1E1E24)',
                 },
               },
             }}

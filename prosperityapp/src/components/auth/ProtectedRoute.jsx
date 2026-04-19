@@ -8,7 +8,7 @@ const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
 const ProtectedRoute = ({ children }) => {
   if (DEV_BYPASS) return children;
 
-  const { user, supabaseUser, loadingAuth, noBusinessFound, signOutAll } = useBusiness();
+  const { user, supabaseUser, loadingAuth, noBusinessFound, authErrorDetail, signOutAll } = useBusiness();
 
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
@@ -35,10 +35,15 @@ const ProtectedRoute = ({ children }) => {
             Tu cuenta <strong className="text-text-main">{supabaseUser?.email}</strong> no está
             asociada a ningún comercio registrado en AgendiApp.
           </p>
-          <p className="text-text-muted text-xs mb-6">
+          <p className="text-text-muted text-xs mb-4">
             Si eres dueño de un comercio, necesitas suscribirte primero.
             Si eres colaborador, pide a tu administrador que te registre.
           </p>
+          {authErrorDetail && (
+            <div className="bg-red-900/10 border border-red-500/20 text-red-400 p-3 rounded-lg text-xs mb-6 text-left break-all">
+              <strong>Info Técnica:</strong> {authErrorDetail}
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={async () => {

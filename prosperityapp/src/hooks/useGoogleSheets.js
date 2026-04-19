@@ -50,21 +50,36 @@ export function useGoogleSheets() {
     });
 
     if (error) {
-      console.error('Edge Function Error:', error);
-      throw new Error(error.message || 'Error invocando la función Deno');
+      console.error('Edge Function Error Object:', error);
+      
+      // If it's a 500 error from our catch block, we might have context inside error.context
+      let msg = error.message || 'Error invocando la función Deno';
+      if (error.context && typeof error.context.json === 'function') {
+        try {
+          const body = await error.context.json();
+          if (body.details) msg = `${msg} - ${body.details}`;
+        } catch (e) {}
+      }
+      
+      throw new Error(msg);
+    }
+
+    if (data && data.success === false) {
+      console.error('Edge Function returned error payload:', data);
+      throw new Error(data.details || data.error || 'Error desconocido sincronizando con Google Sheets');
     }
 
     return data;
   };
 
   /**
-   * Connect Google Sheets — creates a new spreadsheet and shares it
+   * Connect Google Sheets — uses an existing spreadsheet URL
    */
-  const connectSheets = async (email) => {
+  const connectSheets = async (spreadsheetUrl) => {
     setError(null);
     setActionLoading(true);
     try {
-      const result = await callSheetsSync('create', { shared_email: email });
+      const result = await callSheetsSync('create', { spreadsheet_url: spreadsheetUrl });
       await fetchSyncStatus();
       return result;
     } catch (err) {

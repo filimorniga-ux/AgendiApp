@@ -4,3 +4,11 @@ playwright-report/
 test-results/
 tests/e2e/screenshots/
 
+
+# Environment files
+.env*
+!.env.example
+
+# Build artifacts
+dev-dist/
+dist/
