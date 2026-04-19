@@ -3,7 +3,15 @@ import { useLanguage } from '../../context/LanguageContext';
 import { AnimatedSection } from '../ui/AnimatedSection';
 import { Icons } from '../ui/Icons';
 
-const BentoCard = ({ title, desc, icon: Icon, colSpan = 1, isDarkMode }: any) => (
+interface BentoCardProps {
+    title: string;
+    desc: string;
+    icon: React.ElementType;
+    colSpan?: number;
+    isDarkMode: boolean;
+}
+
+const BentoCard = ({ title, desc, icon: Icon, colSpan = 1, isDarkMode }: BentoCardProps) => (
     <div className={`
     group relative overflow-hidden rounded-3xl p-8 
     ${colSpan === 2 ? 'md:col-span-2' : 'md:col-span-1'}

@@ -11,7 +11,7 @@ export const Hero: React.FC<HeroProps> = ({ isDarkMode, onRegisterClick }) => {
     const { t } = useLanguage();
     return (
         <section className="relative pt-48 pb-32 px-6 text-center max-w-6xl mx-auto">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#f6e05e] rounded-full opacity-[0.08] blur-[120px] pointer-events-none"></div>
+            <div aria-hidden="true" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#f6e05e] rounded-full opacity-[0.08] blur-[120px] pointer-events-none"></div>
 
             <AnimatedSection>
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#f6e05e]/10 border border-[#f6e05e]/20 text-[#f6e05e] text-xs font-bold uppercase tracking-wider mb-8">

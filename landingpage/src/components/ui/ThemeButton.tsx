@@ -3,6 +3,7 @@ import React from 'react';
 export const ThemeButton = ({ isDarkMode, toggleTheme }: { isDarkMode: boolean, toggleTheme: () => void }) => (
     <button
         onClick={toggleTheme}
+        aria-label={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         className={`
       p-2 rounded-full transition-all duration-300
       ${isDarkMode ? 'bg-yellow-400/20 text-yellow-300 hover:bg-yellow-400/30' : 'bg-slate-800/10 text-slate-700 hover:bg-slate-800/20'}

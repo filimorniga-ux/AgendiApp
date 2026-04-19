@@ -13,7 +13,7 @@ export const Testimonials = ({ isDarkMode }: { isDarkMode: boolean }) => {
                     <p className={`text-xl text-center mb-16 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{t.testimonials.subtitle}</p>
                 </AnimatedSection>
                 <div className="grid md:grid-cols-3 gap-8">
-                    {t.testimonials.list.map((item: any, i: number) => (
+                    {t.testimonials.list.map((item: { name: string; salon: string; text: string }, i: number) => (
                         <AnimatedSection key={i} delay={i * 100}>
                             <div className={`p-8 rounded-3xl h-full flex flex-col ${isDarkMode ? 'bg-slate-800 text-slate-200' : 'bg-white text-slate-700'} shadow-xl`}>
                                 <div className="flex gap-1 mb-6 text-[#f6e05e]">

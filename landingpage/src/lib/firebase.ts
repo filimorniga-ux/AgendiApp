@@ -1,7 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getAnalytics } from 'firebase/analytics';
+import { getAnalytics, Analytics } from 'firebase/analytics';
 
 // Configuración que lee de tu archivo .env.local
 const firebaseConfig = {
@@ -20,7 +20,7 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 // Inicializamos los servicios
 const auth = getAuth(app);
 const db = getFirestore(app);
-let analytics: any = null;
+let analytics: Analytics | null = null;
 
 // Analytics solo corre en el navegador (cliente)
 if (typeof window !== 'undefined') {

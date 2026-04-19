@@ -14,6 +14,9 @@ export const translations = {
             logout: "Salir",
             dashboard: "Panel"
         },
+        footer: {
+            rights: "Todos los derechos reservados."
+        },
         hero: {
             title: "El Sistema Operativo para Salones del Futuro",
             subtitle: "No es solo una agenda. Es inteligencia de negocio. Controla costos gramo a gramo, gestiona stock dual y automatiza tu flujo de caja.",
@@ -129,6 +132,10 @@ export const translations = {
         },
         dashboard: {
             welcome: "Bienvenido,",
+            loading_profile: "Cargando perfil...",
+            real_role: "Tu Rol Real:",
+            preview_mode: "Vista Previa:",
+            sale_registered: "💰 ¡Venta de $45 registrada en Firebase!",
             role_switcher: "Simular Rol:",
             roles: {
                 admin: "Administrador",
@@ -144,6 +151,8 @@ export const translations = {
                 simulate_sale: "Simular Venta (+ $45)"
             },
             staff_section: {
+                panel_title: "Panel de Colaborador",
+                panel_desc: "Aquí verás tu agenda y comisiones asignadas.",
                 my_commissions: "Mis Comisiones (Hoy)",
                 my_schedule: "Mi Agenda",
                 product_list: "Lista de Precios",
@@ -153,7 +162,10 @@ export const translations = {
             },
             client_section: {
                 book_now: "Reservar Cita",
+                book_desc: "Reserva tu próxima cita en segundos.",
+                book_btn: "Reservar Ahora",
                 loyalty: "Mis Puntos",
+                pts: "pts",
                 promotions: "Promociones Activas",
                 history: "My Historial"
             }
@@ -170,6 +182,9 @@ export const translations = {
             register: "View Plans & Pricing",
             logout: "Logout",
             dashboard: "Dashboard"
+        },
+        footer: {
+            rights: "All rights reserved."
         },
         hero: {
             title: "The Operating System for Future Salons",
@@ -286,6 +301,10 @@ export const translations = {
         },
         dashboard: {
             welcome: "Welcome,",
+            loading_profile: "Loading profile...",
+            real_role: "Your Real Role:",
+            preview_mode: "Preview Mode:",
+            sale_registered: "💰 $45 sale registered in Firebase!",
             role_switcher: "Simular Role:",
             roles: {
                 admin: "Administrator",
@@ -301,6 +320,8 @@ export const translations = {
                 simulate_sale: "Simulate Sale (+ $45)"
             },
             staff_section: {
+                panel_title: "Collaborator Panel",
+                panel_desc: "Here you will see your schedule and assigned commissions.",
                 my_commissions: "My Commissions (Today)",
                 my_schedule: "My Schedule",
                 product_list: "Price List",
@@ -310,7 +331,10 @@ export const translations = {
             },
             client_section: {
                 book_now: "Book Appointment",
+                book_desc: "Book your next appointment in seconds.",
+                book_btn: "Book Now",
                 loyalty: "My Points",
+                pts: "pts",
                 promotions: "Active Promotions",
                 history: "My History"
             }

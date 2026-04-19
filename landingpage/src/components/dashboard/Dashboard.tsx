@@ -122,7 +122,7 @@ export const Dashboard = ({ user, isDarkMode }: { user: User, isDarkMode: boolea
                 cost: 10.00,
                 staffId: user.uid
             });
-            alert("💰 ¡Venta de $45 registrada en Firebase!");
+            alert(t.dashboard.sale_registered);
         } catch (e) {
             console.warn('[Dashboard] Error guardando venta');
         }
@@ -177,8 +177,8 @@ export const Dashboard = ({ user, isDarkMode }: { user: User, isDarkMode: boolea
     const StaffView = () => (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className={`p-6 rounded-2xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
-                <h3 className="font-bold mb-2 text-[#f6e05e]">Panel de Colaborador</h3>
-                <p className="text-sm opacity-70">Aquí verás tu agenda y comisiones asignadas.</p>
+                <h3 className="font-bold mb-2 text-[#f6e05e]">{t.dashboard.staff_section.panel_title}</h3>
+                <p className="text-sm opacity-70">{t.dashboard.staff_section.panel_desc}</p>
             </div>
         </div>
     );
@@ -189,12 +189,12 @@ export const Dashboard = ({ user, isDarkMode }: { user: User, isDarkMode: boolea
                 <div className="flex justify-between items-start">
                     <div>
                         <h3 className="font-bold text-xl mb-1">{t.dashboard.client_section.book_now}</h3>
-                        <p className="opacity-80 text-sm max-w-xs">Reserva tu próxima cita en segundos.</p>
+                        <p className="opacity-80 text-sm max-w-xs">{t.dashboard.client_section.book_desc}</p>
                     </div>
                     <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm"><Icons.Calendar /></div>
                 </div>
                 <button className="mt-6 bg-[#1a202c] text-white px-6 py-2 rounded-lg font-bold text-sm hover:shadow-lg hover:scale-105 transition-all">
-                    Reservar Ahora
+                    {t.dashboard.client_section.book_btn}
                 </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -203,7 +203,7 @@ export const Dashboard = ({ user, isDarkMode }: { user: User, isDarkMode: boolea
                         <h3 className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>{t.dashboard.client_section.loyalty}</h3>
                         <Icons.Star />
                     </div>
-                    <div className={`text-4xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>0 <span className="text-sm font-normal opacity-50">pts</span></div>
+                    <div className={`text-4xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>0 <span className="text-sm font-normal opacity-50">{t.dashboard.client_section.pts}</span></div>
                 </div>
             </div>
         </div>
@@ -212,7 +212,7 @@ export const Dashboard = ({ user, isDarkMode }: { user: User, isDarkMode: boolea
     // --- RENDER PRINCIPAL ---
 
     if (!realRole) {
-        return <div className="min-h-screen flex items-center justify-center text-[#f6e05e]">Cargando perfil...</div>;
+        return <div className="min-h-screen flex items-center justify-center text-[#f6e05e]">{t.dashboard.loading_profile}</div>;
     }
 
     return (
@@ -223,7 +223,7 @@ export const Dashboard = ({ user, isDarkMode }: { user: User, isDarkMode: boolea
                         {t.dashboard.welcome} <span className="text-[#f6e05e]">{user.displayName || user.email?.split('@')[0]}</span>
                     </h1>
                     <div className="mt-2 flex items-center gap-2">
-                        <span className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Tu Rol Real:</span>
+                        <span className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{t.dashboard.real_role}</span>
                         <RoleBadge role={realRole} />
                     </div>
                 </div>
@@ -231,7 +231,7 @@ export const Dashboard = ({ user, isDarkMode }: { user: User, isDarkMode: boolea
                 {/* SELECTOR DE VISTA: SOLO VISIBLE SI ERES ADMIN */}
                 {realRole === 'admin' && (
                     <div className={`flex items-center gap-2 p-1 rounded-lg border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
-                        <span className={`text-xs px-3 font-bold uppercase ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>Vista Previa:</span>
+                        <span className={`text-xs px-3 font-bold uppercase ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>{t.dashboard.preview_mode}</span>
                         {(['admin', 'staff', 'client'] as UserRole[]).map(role => (
                             <button
                                 key={role}

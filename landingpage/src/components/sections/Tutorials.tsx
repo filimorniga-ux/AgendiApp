@@ -18,7 +18,7 @@ export const Tutorials = ({ isDarkMode }: { isDarkMode: boolean }) => {
             </AnimatedSection>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {t.tutorials.list.map((item: any, i: number) => (
+                {t.tutorials.list.map((item: { title: string; desc: string }, i: number) => (
                     <AnimatedSection key={i} delay={i * 30}>
                         <a
                             href="https://youtube.com"

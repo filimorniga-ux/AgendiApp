@@ -37,7 +37,16 @@ export const Pricing: React.FC<PricingProps> = ({ isDarkMode, onRegisterClick })
         };
     };
 
-    const PlanCard = ({ title, desc, basePrice, features, recommended = false, cta }: any) => {
+    interface PlanCardProps {
+        title: string;
+        desc: string;
+        basePrice: number;
+        features: string[];
+        recommended?: boolean;
+        cta: string;
+    }
+
+    const PlanCard = ({ title, desc, basePrice, features, recommended = false, cta }: PlanCardProps) => {
         const priceData = calculatePrice(basePrice);
 
         return (
