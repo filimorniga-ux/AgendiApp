@@ -8,6 +8,6 @@ export const Footer = ({ isDarkMode }: { isDarkMode: boolean }) => (
             <a href="#" className="hover:text-[#f6e05e] transition-colors transform hover:scale-110"><Icons.Instagram /></a>
             <a href="#" className="hover:text-[#f6e05e] transition-colors transform hover:scale-110"><Icons.TikTok /></a>
         </div>
-        <p>&copy; 2025 Agendiapp. Gema-Arquitecto Build.</p>
+        <p>&copy; 2026 AgendiApp. Todos los derechos reservados.</p>
     </footer>
 );

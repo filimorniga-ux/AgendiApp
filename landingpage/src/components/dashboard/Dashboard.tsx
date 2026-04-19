@@ -39,12 +39,11 @@ export const Dashboard = ({ user, isDarkMode }: { user: User, isDarkMode: boolea
         const checkUserRole = async () => {
             if (!db || !user) return;
 
-            // A) ¿Es el Super Admin (Tú)?
-            if (user.email === SUPER_ADMIN_EMAIL || user.email?.includes('admin')) {
-                console.log("👑 Super Admin detectado");
+            // A) ¿Es el Super Admin?
+            if (user.email === SUPER_ADMIN_EMAIL) {
                 setRealRole('admin');
                 setViewMode('admin');
-                return; // No necesitamos buscar en DB
+                return;
             }
 
             // B) Buscar usuario en Firestore
@@ -60,7 +59,6 @@ export const Dashboard = ({ user, isDarkMode }: { user: User, isDarkMode: boolea
                     setViewMode(myRole);
                 } else {
                     // C) Usuario NUEVO -> Lo creamos como CLIENTE por defecto
-                    console.log("🆕 Creando perfil de usuario nuevo...");
                     await setDoc(userRef, {
                         email: user.email,
                         name: user.displayName || "Usuario Sin Nombre",
@@ -71,7 +69,7 @@ export const Dashboard = ({ user, isDarkMode }: { user: User, isDarkMode: boolea
                     setViewMode('client');
                 }
             } catch (error) {
-                console.error("Error verificando rol:", error);
+                console.warn('[Dashboard] Error verificando rol');
                 setRealRole('client'); // Fallback seguro
             }
         };
@@ -104,7 +102,7 @@ export const Dashboard = ({ user, isDarkMode }: { user: User, isDarkMode: boolea
                 setRevenue(total);
                 setLoadingStats(false);
             }, (error) => {
-                console.error("Error cargando ventas:", error);
+                console.warn('[Dashboard] Error cargando ventas');
                 setLoadingStats(false);
             });
             return () => unsubscribe();
@@ -126,7 +124,7 @@ export const Dashboard = ({ user, isDarkMode }: { user: User, isDarkMode: boolea
             });
             alert("💰 ¡Venta de $45 registrada en Firebase!");
         } catch (e) {
-            console.error("Error guardando venta: ", e);
+            console.warn('[Dashboard] Error guardando venta');
         }
     };
 

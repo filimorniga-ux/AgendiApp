@@ -46,9 +46,6 @@ function MainApp() {
             const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
                 setUser(currentUser);
                 setLoadingAuth(false);
-                if (currentUser) {
-                    console.log("✅ Usuario autenticado:", currentUser.email);
-                }
             });
             return () => unsubscribe();
         } else {
@@ -87,9 +84,10 @@ function MainApp() {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             setShowLoginModal(false); // Cerrar modal al éxito
-        } catch (error: any) {
-            console.error("Error login:", error);
-            alert("Error: " + error.message);
+        } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : 'Error desconocido';
+            console.warn('[Auth] Login error:', msg);
+            alert("No se pudo iniciar sesión. Verifica tus credenciales.");
         }
     };
 
@@ -100,9 +98,10 @@ function MainApp() {
         try {
             await createUserWithEmailAndPassword(auth, email, password);
             setShowRegisterModal(false);
-        } catch (error: any) {
-            console.error("Error registro:", error);
-            alert("Error: " + error.message);
+        } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : 'Error desconocido';
+            console.warn('[Auth] Register error:', msg);
+            alert("No se pudo crear la cuenta. Inténtalo de nuevo.");
         }
     };
 
@@ -114,7 +113,7 @@ function MainApp() {
             setShowLoginModal(false);
             setShowRegisterModal(false);
         } catch (error) {
-            console.error("Google Auth Error:", error);
+            console.warn('[Auth] Google auth failed');
         }
     };
 

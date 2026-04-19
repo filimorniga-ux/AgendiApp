@@ -31,8 +31,6 @@ if (typeof window !== 'undefined') {
     }
 }
 
-// Debug: Esto te confirmará en la consola que ya tienes conexión
-console.log("🔥 Prosperity App conectada correctamente. ID:", firebaseConfig.projectId);
 
 export { app, auth, db, analytics };
 // Parche temporal para compatibilidad con la UI antigua
