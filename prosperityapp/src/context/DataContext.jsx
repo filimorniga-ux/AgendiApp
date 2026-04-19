@@ -36,7 +36,7 @@ export const DataProvider = ({ children }) => {
   const appointmentsConstraints = useMemo(() => {
     if (!user || !userRole) return [];
     if (['admin', 'owner'].includes(userRole)) return [];
-    return [{ field: 'stylist_id', op: 'eq', value: user.uid }];
+    return [{ field: 'collaborator_id', op: 'eq', value: user.id }];
   }, [user, userRole]);
 
   const { data: appointments, loading: loadingAppointments, error: errorAppointments } = useSupabaseCollection('appointments', appointmentsConstraints);

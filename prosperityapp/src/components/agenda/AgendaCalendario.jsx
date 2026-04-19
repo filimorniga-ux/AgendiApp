@@ -235,8 +235,6 @@ const AgendaCalendario = () => {
       ends_at:           endTime.toISOString(),
       status:            formData.status,
       notes:             formData.notes,
-      products_used:     techProducts,
-      technical_cost:    technicalCost,
       updated_at:        new Date().toISOString(),
     };
 
@@ -260,7 +258,7 @@ const AgendaCalendario = () => {
             transactionId,
           };
           const { data: mv } = await sbCreate('movements', movementData, businessId);
-          appointmentData.movementId = mv?.id || null;
+          // Note: movement stores appointment_id via FK, no need to write back
           await sbUpdate('appointments', selectedEvent.id, appointmentData);
           paymentRegistered = true;
 

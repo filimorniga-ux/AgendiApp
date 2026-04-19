@@ -14,7 +14,13 @@ const formatCurrency = (value) => {
 
 const formatDate = (timestamp) => {
   if (!timestamp) return 'N/A';
-  return new Date(timestamp.seconds * 1000).toLocaleString('es-CL', {
+  // Supabase: ISO string; Firestore legacy: { seconds }
+  const date = typeof timestamp === 'string' ? new Date(timestamp)
+    : timestamp instanceof Date ? timestamp
+    : timestamp?.seconds ? new Date(timestamp.seconds * 1000)
+    : null;
+  if (!date || isNaN(date.getTime())) return 'N/A';
+  return date.toLocaleString('es-CL', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit'
   });
@@ -60,8 +66,8 @@ const GiftCardPage = () => {
     if (!giftCards) return [];
 
     const sorted = [...giftCards].sort((a, b) => {
-      const timeA = a.createdAt?.seconds || 0;
-      const timeB = b.createdAt?.seconds || 0;
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return timeB - timeA;
     });
 

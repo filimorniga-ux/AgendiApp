@@ -105,7 +105,7 @@ const SubscriptionPage = () => {
                         <div className="mt-6 flex flex-col gap-4">
                             {businessPlan === 'free' && (
                                 <div className="flex flex-col gap-3">
-                                    <h5 className="text-sm font-semibold text-text-main mb-1">Selecciona tu método the pago:</h5>
+                                    <h5 className="text-sm font-semibold text-text-main mb-1">Selecciona tu método de pago:</h5>
                                     <div className="flex flex-wrap gap-4">
                                         <button 
                                             onClick={() => handleUpgradeToPro('mercadopago')} 
