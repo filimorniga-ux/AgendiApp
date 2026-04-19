@@ -1,14 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT_TICKET_CONFIG } from '../../pages/Settings/TicketEditorTab';
+import { parseDate } from '../../lib/dateUtils';
 
 const formatCurrency = (amount) =>
   new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(amount);
 
 const formatDate = (dateObj) => {
   if (!dateObj) return new Date().toLocaleString('es-CL');
-  const date = dateObj.toDate ? dateObj.toDate() : new Date(dateObj);
-  return date.toLocaleString('es-CL');
+  return parseDate(dateObj).toLocaleString('es-CL');
 };
 
 /**

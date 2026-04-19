@@ -18,10 +18,11 @@ import {
   ClipboardList, Calendar, FileSpreadsheet, FileText, Search,
   Filter, ArrowDownCircle, ArrowUpCircle, Package, TrendingDown, TrendingUp
 } from 'lucide-react';
+import { parseDate } from '../lib/dateUtils';
 
 const formatCurrency = (v) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(v || 0);
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('es-CL') : '—';
-const formatDateTime = (d) => d ? new Date(d).toLocaleString('es-CL') : '—';
+const formatDate = (d) => d ? parseDate(d).toLocaleDateString('es-CL') : '—';
+const formatDateTime = (d) => d ? parseDate(d).toLocaleString('es-CL') : '—';
 
 // Filtros de fecha preestablecidos
 const DATE_PRESETS = [

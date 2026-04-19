@@ -1,5 +1,6 @@
 // ===== INICIO: src/components/reports/DailyReportTemplate.jsx =====
 import React from 'react';
+import { parseDate } from '../../lib/dateUtils';
 
 const formatCurrency = (value) => {
     if (typeof value !== 'number') value = 0;
@@ -7,7 +8,8 @@ const formatCurrency = (value) => {
 };
 
 const formatDate = (date) => {
-    return new Date(date).toLocaleString('es-CL', {
+    if (!date) return 'N/A';
+    return parseDate(date).toLocaleString('es-CL', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',

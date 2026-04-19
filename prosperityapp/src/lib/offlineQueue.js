@@ -58,7 +58,6 @@ export async function enqueueWrite(operation, table, payload, recordId = null) {
     status: 'pending',
     createdAt: new Date().toISOString(),
   });
-  console.log(`[offlineQueue] Encolado ${operation} en ${table}`);
 }
 
 /**
@@ -77,7 +76,6 @@ export async function batchEnqueueWrite(table, rows) {
     status: 'pending',
     createdAt: new Date().toISOString(),
   });
-  console.log(`[offlineQueue] Batch encolado (${rows.length} rows) en ${table}`);
 }
 
 /**
@@ -94,7 +92,6 @@ export async function syncOfflineQueue() {
 
   if (pending.length === 0) return;
 
-  console.log(`[offlineQueue] Sincronizando ${pending.length} operaciones pendientes...`);
 
   for (const item of pending) {
     try {
@@ -139,7 +136,6 @@ export async function syncOfflineQueue() {
 
       // Marcar como completada
       await localDb.offline_queue.update(item.id, { status: 'synced' });
-      console.log(`[offlineQueue] ✅ ${item.operation} en ${item.table}`);
 
     } catch (err) {
       await localDb.offline_queue.update(item.id, { status: 'error', errorMsg: err.message });
@@ -154,7 +150,6 @@ export async function syncOfflineQueue() {
     .and(item => item.createdAt < yesterday)
     .delete();
 
-  console.log('[offlineQueue] Sincronización completada.');
 }
 
 /**

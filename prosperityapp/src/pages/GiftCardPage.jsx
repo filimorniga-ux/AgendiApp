@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useStorage } from '../hooks/useStorage';
 import { sbUpdate } from '../supabase/db';
 import toast from 'react-hot-toast';
+import { parseDate } from '../lib/dateUtils';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -14,12 +15,8 @@ const formatCurrency = (value) => {
 
 const formatDate = (timestamp) => {
   if (!timestamp) return 'N/A';
-  // Supabase: ISO string; Firestore legacy: { seconds }
-  const date = typeof timestamp === 'string' ? new Date(timestamp)
-    : timestamp instanceof Date ? timestamp
-    : timestamp?.seconds ? new Date(timestamp.seconds * 1000)
-    : null;
-  if (!date || isNaN(date.getTime())) return 'N/A';
+  const date = parseDate(timestamp);
+  if (!date || isNaN(date.getTime()) || date.getTime() === 0) return 'N/A';
   return date.toLocaleString('es-CL', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit'
