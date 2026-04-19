@@ -8,9 +8,10 @@ import React, { useState } from 'react';
 import { useInventoryLots } from '../../hooks/useInventoryLots';
 import { ChevronDown, ChevronUp, Package, FileText, Truck, Calendar, Tag } from 'lucide-react';
 import { OpenUnitTracker } from './OpenUnitTracker';
+import { parseDate } from '../../lib/dateUtils';
 
 const formatCurrency = (v) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(v || 0);
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('es-CL') : '—';
+const formatDate = (d) => d ? parseDate(d).toLocaleDateString('es-CL') : '—';
 
 export function LotRow({ productId, inventoryType, productName, sellMode, unitSize, unitOfMeasure }) {
   const [isOpen, setIsOpen] = useState(false);

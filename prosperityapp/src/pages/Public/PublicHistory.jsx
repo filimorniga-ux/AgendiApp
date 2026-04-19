@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
+import { parseDate } from '../../lib/dateUtils';
 
 const PublicHistory = () => {
   const { business, clientUser } = useOutletContext();
@@ -83,7 +84,7 @@ const PublicHistory = () => {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString('es-CL', {
+    return parseDate(dateStr).toLocaleDateString('es-CL', {
       weekday: 'short',
       day: 'numeric',
       month: 'short',
@@ -93,7 +94,7 @@ const PublicHistory = () => {
 
   const formatTime = (dateStr) => {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+    return parseDate(dateStr).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
   };
 
   const statusBadge = (status) => {

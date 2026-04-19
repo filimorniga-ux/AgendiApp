@@ -16,6 +16,7 @@ import { StockExitModal } from '../components/inventory/StockExitModal';
 import { QuickCreateProductModal } from '../components/inventory/QuickCreateProductModal';
 import { useBarcodeLookup } from '../hooks/useBarcodeLookup';
 import { LotRow } from '../components/inventory/LotRow';
+import { parseDate } from '../lib/dateUtils';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -24,14 +25,7 @@ const formatCurrency = (value) => {
 
 const formatDate = (timestamp) => {
   if (!timestamp) return 'N/A';
-  // Supabase: string ISO | Firestore legacy: { seconds }
-  if (typeof timestamp === 'string' || timestamp instanceof Date) {
-    return new Date(timestamp).toLocaleDateString('es-CL');
-  }
-  if (timestamp?.seconds) {
-    return new Date(timestamp.seconds * 1000).toLocaleDateString('es-CL');
-  }
-  return 'N/A';
+  return parseDate(timestamp).toLocaleDateString('es-CL');
 };
 
 // --- Pestaña 1: Inventario Técnico ---

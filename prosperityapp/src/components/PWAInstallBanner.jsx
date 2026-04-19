@@ -33,7 +33,6 @@ export default function PWAInstallBanner() {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
-      console.info('[PWA] Instalada correctamente');
     }
     setDeferredPrompt(null);
     setVisible(false);

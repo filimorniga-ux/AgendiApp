@@ -13,6 +13,7 @@ import DashboardPrintTemplate from '../components/reports/DashboardPrintTemplate
 import { useReactToPrint } from 'react-to-print';
 import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { parseDate } from '../lib/dateUtils';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -21,24 +22,7 @@ const formatCurrency = (value) => {
 
 const formatDate = (timestamp) => {
   if (!timestamp) return 'N/A';
-  // Supabase: string ISO; Firestore legacy: { seconds }
-  if (typeof timestamp === 'string') return new Date(timestamp).toLocaleDateString('es-CL');
-  if (timestamp.seconds) return new Date(timestamp.seconds * 1000).toLocaleDateString('es-CL');
-  return 'N/A';
-};
-
-/**
- * Convierte cualquier formato de fecha a objeto Date.
- * Soporta: string ISO (Supabase), Firestore Timestamp { seconds }, Date
- */
-const parseDate = (date) => {
-  if (!date) return new Date(0);
-  if (date instanceof Date) return date;
-  if (typeof date === 'string') return new Date(date);
-  if (typeof date === 'number') return new Date(date);
-  if (date.toDate) return date.toDate();      // Firestore Timestamp
-  if (date.seconds) return new Date(date.seconds * 1000); // Firestore raw
-  return new Date(0);
+  return parseDate(timestamp).toLocaleDateString('es-CL');
 };
 
 // --- Componente de Badge de Rol (Premium) ---

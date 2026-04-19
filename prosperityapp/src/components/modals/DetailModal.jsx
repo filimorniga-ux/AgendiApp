@@ -1,6 +1,7 @@
 // ===== INICIO: src/components/modals/DetailModal.jsx =====
 import React, { useEffect } from 'react';
 import feather from 'feather-icons';
+import { parseDate } from '../../lib/dateUtils';
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
@@ -32,7 +33,7 @@ const DetailModal = ({ isOpen, onClose, title, items = [] }) => {
                     <p className="text-text-main">{item.description}</p>
                     {item.date && (
                       <p className="text-xs text-text-main/70">
-                        {new Date(item.date?.toDate()).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' })}
+                        {parseDate(item.date).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' })}
                       </p>
                     )}
                   </div>
