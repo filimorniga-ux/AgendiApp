@@ -167,10 +167,12 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
               className="w-full h-full object-cover"
             />
           ) : (
-            /* Placeholder con inicial */
-            <span className={`font-black text-xl select-none ${realRole === 'owner' ? 'text-[#1a202c]' : 'text-accent'}`}>
-              {brandName.charAt(0).toUpperCase()}
-            </span>
+            /* Fallback: isotipo AgendiApp moneda dorada */
+            <img
+              src="/icons/icon-192x192.png"
+              alt="AgendiApp"
+              className="w-full h-full object-cover"
+            />
           )}
         </div>
 

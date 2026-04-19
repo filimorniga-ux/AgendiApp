@@ -4,8 +4,8 @@ import { ThemeButton } from '../ui/ThemeButton';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import { User } from 'firebase/auth';
 
-// Isotipo AgendiApp
-const LOGO_URL = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#f6e05e"/><text x="50" y="68" font-family="Inter,sans-serif" font-weight="900" font-size="60" fill="#1a202c" text-anchor="middle">A</text></svg>');
+// Isotipo AgendiApp — Moneda dorada con tijeras
+const LOGO_URL = "/logo-agendiapp.png";
 
 interface HeaderProps {
     isDarkMode: boolean;
