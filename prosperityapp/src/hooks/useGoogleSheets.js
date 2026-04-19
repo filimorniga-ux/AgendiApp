@@ -50,7 +50,7 @@ export function useGoogleSheets() {
     });
 
     if (error) {
-      console.error('Edge Function Error Object:', error);
+      console.warn('[sheets-sync] Edge Function error:', error?.message || 'Unknown');
       
       // If it's a 500 error from our catch block, we might have context inside error.context
       let msg = error.message || 'Error invocando la función Deno';
@@ -65,7 +65,7 @@ export function useGoogleSheets() {
     }
 
     if (data && data.success === false) {
-      console.error('Edge Function returned error payload:', data);
+      console.warn('[sheets-sync] Edge Function returned error:', data?.error || data?.details);
       throw new Error(data.details || data.error || 'Error desconocido sincronizando con Google Sheets');
     }
 

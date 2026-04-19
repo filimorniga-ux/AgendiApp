@@ -48,7 +48,7 @@ export const useStorage = () => {
                 setIsUploading(false);
                 resolve(publicUrl);
             } catch (err) {
-                console.error("Storage upload error:", err);
+                console.warn("[Storage] upload error:", err?.message || 'Unknown');
                 setError(err);
                 setIsUploading(false);
                 reject(err);

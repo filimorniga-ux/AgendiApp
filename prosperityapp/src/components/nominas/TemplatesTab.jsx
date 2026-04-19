@@ -56,7 +56,7 @@ const CollaboratorOverrideCard = ({ collab, override, defaultSteps, businessId, 
         setIsOpen(false);
       }
     } catch (e) {
-      console.error(e);
+      console.warn("[TemplatesTab]", e?.message || e);
       if (isMounted.current) toast.error('Error al guardar override');
     } finally {
       if (isMounted.current) setSaving(false);
@@ -79,7 +79,7 @@ const CollaboratorOverrideCard = ({ collab, override, defaultSteps, businessId, 
         setIsOpen(false);
       }
     } catch (e) {
-      console.error(e);
+      console.warn("[TemplatesTab]", e?.message || e);
       if (isMounted.current) toast.error('Error al eliminar override');
     }
   };
@@ -182,7 +182,7 @@ const TemplatesTab = () => {
         setOverrides(ovrRes.data || []);
       }
     } catch (e) {
-      console.error(e);
+      console.warn("[TemplatesTab]", e?.message || e);
       if (isMounted.current) toast.error('Error al cargar datos');
     } finally {
       if (isMounted.current) setLoading(false);
@@ -231,7 +231,7 @@ const TemplatesTab = () => {
         load();
       }
     } catch (e) {
-      console.error(e);
+      console.warn("[TemplatesTab]", e?.message || e);
       if (isMounted.current) toast.error('Error al guardar');
     } finally {
       if (isMounted.current) setSaving(false);
@@ -258,7 +258,7 @@ const TemplatesTab = () => {
         load();
       }
     } catch (e) {
-      console.error(e);
+      console.warn("[TemplatesTab]", e?.message || e);
       if (isMounted.current) toast.error('Error al establecer predeterminada');
     }
   };
@@ -279,7 +279,7 @@ const TemplatesTab = () => {
         load();
       }
     } catch (e) {
-      console.error(e);
+      console.warn("[TemplatesTab]", e?.message || e);
       if (isMounted.current) toast.error('Error al eliminar plantilla');
     }
   };

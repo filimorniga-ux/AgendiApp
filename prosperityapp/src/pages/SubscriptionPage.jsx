@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 
 const SubscriptionPage = () => {
     const { t } = useTranslation();
-    const { userRole, isLoading, config } = useData();
+    const { userRole, isLoading, config, collaborators } = useData();
     const { realRole, businessId, businessPlan, user } = useBusiness();
     const [isCreatingCheckout, setIsCreatingCheckout] = React.useState(false);
 
@@ -20,12 +20,12 @@ const SubscriptionPage = () => {
 
     if (isLoading) return null;
 
-    // For now, we simulate the plan data if it's not present in the config or business table.
     const planName = businessPlan === 'pro' ? "AgendiApp PRO" : businessPlan === 'enterprise' ? "AgendiApp ENTERPRISE" : "AgendiApp FREE"; 
-    const planStatus = businessPlan === 'free' ? "Gratuito" : "Activo";
-    const renewalDate = businessPlan === 'free' ? "-" : "Renovación Mensual";
+    const planStatus = businessPlan === 'free' ? t('subscription.free', 'Gratuito') : t('subscription.active', 'Activo');
+    const renewalDate = businessPlan === 'free' ? "-" : t('subscription.monthlyRenewal', 'Renovación Mensual');
+    const planPrice = businessPlan === 'pro' ? '$14.990' : businessPlan === 'enterprise' ? '$29.990' : '$0';
     const userLimit = businessPlan === 'free' ? 2 : businessPlan === 'pro' ? 10 : 999;
-    const currentUsers = 1; // Assuming 1 for logic simplification here if not reading from real count
+    const currentUsers = (collaborators || []).length || 1;
 
     const handleUpgradeToPro = async (provider = 'mercadopago') => {
         setIsCreatingCheckout(true);
@@ -47,7 +47,7 @@ const SubscriptionPage = () => {
                 throw new Error("No se pudo obtener el link de pago seguro");
             }
         } catch (error) {
-            console.error(error);
+            console.warn('[Subscription] Checkout error:', error?.message || 'Unknown');
             toast.error("Error al conectar con el proveedor de pago");
         } finally {
             setIsCreatingCheckout(false);
@@ -88,18 +88,19 @@ const SubscriptionPage = () => {
 
                         <div className="grid sm:grid-cols-2 gap-6 mt-8 p-6 bg-bg-tertiary rounded-lg border border-border-main border-dashed">
                             <div>
-                                <p className="text-text-muted text-sm font-medium mb-1">Próxima Facturación</p>
+                                <p className="text-text-muted text-sm font-medium mb-1">{t('subscription.nextBilling', 'Próxima Facturación')}</p>
                                 <p className="text-text-main font-bold text-lg">{renewalDate}</p>
-                                <p className="text-xs text-text-muted mt-1">Monto: $19.99</p>
+                                <p className="text-xs text-text-muted mt-1">{t('subscription.amount', 'Monto')}: {planPrice}</p>
                             </div>
+                            {businessPlan !== 'free' && (
                             <div>
-                                <p className="text-text-muted text-sm font-medium mb-1">Método de Pago</p>
+                                <p className="text-text-muted text-sm font-medium mb-1">{t('subscription.paymentMethod', 'Método de Pago')}</p>
                                 <div className="flex items-center gap-2">
                                     <i data-feather="credit-card" className="w-5 h-5 text-text-main"></i>
-                                    <p className="text-text-main font-bold">•••• 4242</p>
+                                    <p className="text-text-main font-bold">{t('subscription.configuredOnProvider', 'Configurado en proveedor')}</p>
                                 </div>
-                                <p className="text-xs text-text-muted mt-1">Expira: 12/28</p>
                             </div>
+                            )}
                         </div>
 
                         <div className="mt-6 flex flex-col gap-4">
@@ -163,27 +164,25 @@ const SubscriptionPage = () => {
                     </div>
                 </div>
 
-                {/* Billing History (Placeholder) */}
+                {/* Billing History */}
                 <div className="bg-bg-secondary border border-border-main rounded-xl p-6 shadow-sm h-fit">
                     <h4 className="text-lg font-bold text-text-main mb-4 flex items-center gap-2">
                         <i data-feather="file-text" className="w-5 h-5 text-accent"></i>
-                        Historial de Pagos
+                        {t('subscription.billingHistory', 'Historial de Pagos')}
                     </h4>
                     <div className="space-y-4">
-                        {[1, 2, 3].map((_, index) => (
-                            <div key={index} className="flex justify-between items-center p-3 rounded-lg border border-border-main hover:bg-bg-tertiary transition-colors cursor-default">
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-bold text-text-main">Factura #{1028 - index}</span>
-                                    <span className="text-xs text-text-muted">15 {(index===0)? "Mar" : (index===1)? "Feb": "Ene"} 2026</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-sm font-bold text-text-main">$19.99</span>
-                                    <button title="Descargar" className="w-8 h-8 rounded bg-bg-main border border-border-main flex items-center justify-center text-text-muted hover:text-accent hover:border-accent transition-colors">
-                                        <i data-feather="download" className="w-4 h-4"></i>
-                                    </button>
-                                </div>
+                        {businessPlan === 'free' ? (
+                            <div className="text-center py-8 text-text-muted">
+                                <i data-feather="inbox" className="w-10 h-10 mx-auto mb-3 opacity-30"></i>
+                                <p className="text-sm">{t('subscription.noPayments', 'Sin pagos registrados')}</p>
+                                <p className="text-xs mt-1 opacity-60">{t('subscription.upgradeToSee', 'Actualiza a PRO para ver tu historial de facturación')}</p>
                             </div>
-                        ))}
+                        ) : (
+                            <div className="text-center py-8 text-text-muted">
+                                <i data-feather="clock" className="w-10 h-10 mx-auto mb-3 opacity-30"></i>
+                                <p className="text-sm">{t('subscription.billingManaged', 'Tu facturación se gestiona a través del proveedor de pago')}</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
