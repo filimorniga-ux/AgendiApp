@@ -296,8 +296,8 @@ const ConfiguracionPage = () => {
     const currentStoredPin = settings.securityPin || '1234';
 
     if (isForgotPinMode) {
-      if (!pinChangeData.otpCode || pinChangeData.otpCode.length !== 6) {
-        setPinError('Por favor ingresa el código de 6 dígitos que enviamos a tu correo');
+      if (!pinChangeData.otpCode || pinChangeData.otpCode.length < 6) {
+        setPinError('Por favor ingresa el código completo que enviamos a tu correo');
         return;
       }
     } else {
@@ -680,7 +680,7 @@ const ConfiguracionPage = () => {
                     otpStep === 'request' ? (
                       <div className="text-center py-4">
                         <p className="text-sm text-text-muted mb-4">
-                          Para verificar tu identidad, enviaremos un código de seguridad de 6 dígitos a tu correo registrado: <br />
+                          Para verificar tu identidad, enviaremos un código de seguridad a tu correo registrado: <br />
                           <strong className="text-text-main mt-1 block">{user?.email}</strong>
                         </p>
                       </div>
@@ -690,15 +690,15 @@ const ConfiguracionPage = () => {
                           Código de verificación
                         </label>
                         <p className="text-xs text-text-muted mb-2">
-                          Ingresa el código seguro de 6 dígitos que enviamos a tu correo.
+                          Ingresa el código seguro que enviamos a tu correo.
                         </p>
                         <input
                           type="text"
                           className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none disabled:opacity-50"
                           value={pinChangeData.otpCode}
-                          onChange={(e) => setPinChangeData({ ...pinChangeData, otpCode: e.target.value })}
-                          maxLength={6}
-                          placeholder="000000"
+                          onChange={(e) => setPinChangeData({ ...pinChangeData, otpCode: e.target.value.replace(/\D/g, '') })}
+                          maxLength={8}
+                          placeholder="00000000"
                           autoFocus
                           disabled={isProcessingPin}
                         />
