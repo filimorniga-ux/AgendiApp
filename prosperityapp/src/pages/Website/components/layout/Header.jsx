@@ -4,8 +4,7 @@ import { ThemeButton } from '../ui/ThemeButton';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import { Icons, CloseIcon } from '../ui/Icons';
 
-// Isotipo Moneda Dorada "Tech Premium"
-const LOGO_URL = "https://placehold.co/100x100/F6E05E/1A202C?text=$";
+// Navbar Component
 
 export const Header = ({ isDarkMode, toggleTheme, user, onLoginClick, onRegisterClick, onLogout }) => {
     const { t } = useLanguage();
@@ -28,7 +27,6 @@ export const Header = ({ isDarkMode, toggleTheme, user, onLoginClick, onRegister
         }`}>
             <nav className="container mx-auto px-6 flex justify-between items-center max-w-7xl">
                 <div className="flex items-center gap-3 group cursor-pointer">
-                    <img src={LOGO_URL} alt="AgendiApp" className="w-10 h-10 rounded-full shadow-lg group-hover:rotate-12 transition-transform duration-300" />
                     <span className={`text-2xl font-black tracking-tighter ${
                         scrolled
                             ? isDarkMode ? 'text-white' : 'text-slate-900'

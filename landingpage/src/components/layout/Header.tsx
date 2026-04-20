@@ -4,8 +4,7 @@ import { ThemeButton } from '../ui/ThemeButton';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import { User } from 'firebase/auth';
 
-// Isotipo AgendiApp — Moneda dorada con tijeras
-const LOGO_URL = "/logo-agendiapp.png?v=3";
+// Navbar Component
 
 interface HeaderProps {
     isDarkMode: boolean;
@@ -30,7 +29,6 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, toggleTheme, user, o
         <header className={`fixed top-0 z-50 w-full transition-all duration-500 ${scrolled || user ? 'py-2 glass-panel' : 'py-6 bg-transparent'}`}>
             <nav className="container mx-auto px-6 flex justify-between items-center max-w-7xl">
                 <div className="flex items-center gap-3 group cursor-pointer">
-                    <img src={LOGO_URL} alt="AgendiApp" className="w-10 h-10 rounded-full shadow-lg group-hover:rotate-12 transition-transform duration-300" />
                     <span className={`text-2xl font-black tracking-tighter ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
                         AGENDI<span className="text-[#f6e05e]">APP</span>
                     </span>
