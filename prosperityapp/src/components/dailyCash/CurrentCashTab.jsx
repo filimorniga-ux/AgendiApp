@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import feather from 'feather-icons';
 import { useTranslation } from 'react-i18next';
 import { useReactToPrint } from 'react-to-print';
@@ -270,30 +271,35 @@ export default function CurrentCashTab({ onArqueoClick }) {
         </div>
       </div>
 
-      <MovementModal
-        isOpen={isMovementModalOpen}
-        onClose={() => { setIsMovementModalOpen(false); setItemToEdit(null); setPreselectedCollab(null); setScannedProduct(null); }}
-        movementToEdit={itemToEdit}
-        preselectedCollab={preselectedCollab}
-        scannedProduct={scannedProduct}
-      />
-      {showQuickCreate && (
-        <QuickCreateProductModal
-          barcode={lastBarcode}
-          onClose={() => setShowQuickCreate(false)}
-          onCreated={({ product }) => {
-            import('react-hot-toast').then(({ default: toast }) => toast.success(`✅ Producto creado: ${product.name}`));
-            setScannedProduct(product); setIsMovementModalOpen(true);
-          }}
-        />
-      )}
-      <PinModal isOpen={isPinModalOpen} onClose={() => setIsPinModalOpen(false)} onSuccess={handlePinSuccess} />
+      {createPortal(
+        <>
+          <MovementModal
+            isOpen={isMovementModalOpen}
+            onClose={() => { setIsMovementModalOpen(false); setItemToEdit(null); setPreselectedCollab(null); setScannedProduct(null); }}
+            movementToEdit={itemToEdit}
+            preselectedCollab={preselectedCollab}
+            scannedProduct={scannedProduct}
+          />
+          {showQuickCreate && (
+            <QuickCreateProductModal
+              barcode={lastBarcode}
+              onClose={() => setShowQuickCreate(false)}
+              onCreated={({ product }) => {
+                import('react-hot-toast').then(({ default: toast }) => toast.success(`✅ Producto creado: ${product.name}`));
+                setScannedProduct(product); setIsMovementModalOpen(true);
+              }}
+            />
+          )}
+          <PinModal isOpen={isPinModalOpen} onClose={() => setIsPinModalOpen(false)} onSuccess={handlePinSuccess} />
 
-      <PrintPreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} onPrint={handleConfirmPrint} title={t('dailyCash.printBtn')}>
-        <div className="flex justify-center bg-white p-4">
-          <DailyReportTemplate data={summary} config={config} />
-        </div>
-      </PrintPreviewModal>
+          <PrintPreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} onPrint={handleConfirmPrint} title={t('dailyCash.printBtn')}>
+            <div className="flex justify-center bg-white p-4">
+              <DailyReportTemplate data={summary} config={config} />
+            </div>
+          </PrintPreviewModal>
+        </>,
+        document.body
+      )}
 
       <div style={{ display: 'none' }}>
         <DailyReportTemplate ref={componentRef} data={summary} config={config} />

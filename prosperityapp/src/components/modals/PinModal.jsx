@@ -29,7 +29,7 @@ const PinModal = ({ isOpen, onClose, onSuccess }) => {
   };
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 modal-backdrop">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md modal-backdrop">
       <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-sm modal-content">
         <div className="p-4 border-b border-border-main flex justify-between items-center">
           <h3 className="text-xl font-bold text-text-main">Requiere Autorización</h3>

@@ -769,7 +769,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
 
   return (
     <>
-      <div className={`fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-70 modal-backdrop ${isTechModalOpen || isCommissionModalOpen ? 'backdrop-blur-sm' : ''}`}>
+      <div className={`fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-md modal-backdrop ${isTechModalOpen || isCommissionModalOpen ? 'backdrop-blur-xl bg-black/60' : ''}`}>
         <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-5xl modal-content flex flex-col max-h-[90vh]">
 
           <div className="p-4 border-b border-border-main flex justify-between items-center flex-shrink-0">
@@ -781,7 +781,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
           </div>
 
           <div className="flex flex-grow overflow-hidden">
-            <fieldset disabled={isSaving} className="w-2/5 border-r border-border-main flex flex-col">
+            <fieldset disabled={isSaving} className="w-2/5 shrink-0 min-w-0 border-r border-border-main flex flex-col">
               <div className="p-4 flex-shrink-0 relative z-50">
                 <ScrollableSelector 
                   items={clients || []} 
@@ -792,7 +792,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                 />
               </div>
 
-              <div className="p-4 overflow-y-auto flex-grow space-y-4 pb-64">
+              <div className="p-4 overflow-y-auto overflow-x-hidden flex-grow space-y-4 pb-64">
 
                 <details className="bg-bg-main/40 rounded-lg overflow-hidden">
                   <summary className="p-3 font-semibold text-text-main cursor-pointer hover:bg-bg-main/60 flex justify-between">
@@ -1072,7 +1072,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
               </div>
             </fieldset>
 
-            <div className="w-3/5 flex flex-col bg-bg-main/50">
+            <div className="w-3/5 shrink-0 min-w-0 flex flex-col bg-bg-main/50">
               <div className="p-4 border-b border-border-main flex-shrink-0">
                 <h3 className="text-lg font-bold text-text-main">{t('modals.summaryTitle')}</h3>
               </div>
