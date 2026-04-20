@@ -65,6 +65,8 @@ export default function CurrentCashTab({ onArqueoClick }) {
   const { t } = useTranslation();
   const [isMovementModalOpen, setIsMovementModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+  const [pinOperation, setPinOperation] = useState(null);      // 'movement_edit' | 'cash_audit' | 'cash_close'
+  const [pendingCashAction, setPendingCashAction] = useState(null); // { summary, mode } — aplazado hasta PIN OK
   const [itemToEdit, setItemToEdit] = useState(null);
   const [preselectedCollab, setPreselectedCollab] = useState(null);
   const [sortBy, setSortBy] = useState('custom');
@@ -172,8 +174,35 @@ export default function CurrentCashTab({ onArqueoClick }) {
     reactToPrintFn();
   };
 
-  const handleEditClick = (m) => { setItemToEdit(m); setIsPinModalOpen(true); };
-  const handlePinSuccess = () => { setIsPinModalOpen(false); setIsMovementModalOpen(true); };
+  const handleEditClick = (m) => { setItemToEdit(m); setPinOperation('movement_edit'); setIsPinModalOpen(true); };
+
+  // PIN gate para arqueo y cierre de caja
+  const handleCashActionClick = (summary, mode) => {
+    const op = mode === 'cierre' ? 'cash_close' : 'cash_audit';
+    setPendingCashAction({ summary, mode });
+    setPinOperation(op);
+    setIsPinModalOpen(true);
+  };
+
+  const handlePinSuccess = () => {
+    setIsPinModalOpen(false);
+    if (pendingCashAction) {
+      // Fue un arqueo/cierre → ejecutar la acción aplazada
+      onArqueoClick(pendingCashAction.summary, pendingCashAction.mode);
+      setPendingCashAction(null);
+    } else {
+      // Fue edición de movimiento
+      setIsMovementModalOpen(true);
+    }
+    setPinOperation(null);
+  };
+
+  const handlePinClose = () => {
+    setIsPinModalOpen(false);
+    setPendingCashAction(null);
+    setPinOperation(null);
+  };
+
   const handleOpenCreateModal = () => { setItemToEdit(null); setPreselectedCollab(null); setIsMovementModalOpen(true); };
 
   if (isLoading) return null;
@@ -206,7 +235,7 @@ export default function CurrentCashTab({ onArqueoClick }) {
         <div className="flex gap-2 items-center">
           {/* Action Buttons for Audits & Closing */}
           <button
-            onClick={() => onArqueoClick(summary, 'arqueo')}
+            onClick={() => handleCashActionClick(summary, 'arqueo')}
             className="px-4 py-2 rounded-lg border border-accent bg-bg-secondary text-accent hover:bg-accent/10 transition-colors flex items-center gap-2 font-semibold shadow-sm"
           >
             <i data-feather="check-square" className="w-5 h-5"></i>
@@ -214,7 +243,7 @@ export default function CurrentCashTab({ onArqueoClick }) {
           </button>
 
           <button
-            onClick={() => onArqueoClick(summary, 'cierre')}
+            onClick={() => handleCashActionClick(summary, 'cierre')}
             className="px-4 py-2 rounded-lg border border-transparent bg-red-600/90 text-white hover:bg-red-500 transition-colors flex items-center gap-2 font-semibold shadow-md"
           >
             <i data-feather="lock" className="w-5 h-5"></i>
@@ -290,7 +319,7 @@ export default function CurrentCashTab({ onArqueoClick }) {
               }}
             />
           )}
-          <PinModal isOpen={isPinModalOpen} onClose={() => setIsPinModalOpen(false)} onSuccess={handlePinSuccess} />
+          <PinModal isOpen={isPinModalOpen} onClose={handlePinClose} onSuccess={handlePinSuccess} operation={pinOperation} />
 
           <PrintPreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} onPrint={handleConfirmPrint} title={t('dailyCash.printBtn')}>
             <div className="flex justify-center bg-white p-4">

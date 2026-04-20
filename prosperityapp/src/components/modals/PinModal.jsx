@@ -1,59 +1,198 @@
-// ===== INICIO: src/components/modals/PinModal.jsx =====
-import React, { useState, useEffect } from 'react';
-import feather from 'feather-icons';
+/**
+ * PinModal.jsx — Modal unificado de autorización con PIN.
+ *
+ * Uso:
+ *   <PinModal
+ *     isOpen={show}
+ *     operation="cash_close"          // clave de SENSITIVE_OPERATIONS
+ *     onClose={() => setShow(false)}
+ *     onSuccess={({ notes }) => { … }}
+ *   />
+ *
+ * El modal:
+ *  1. Muestra qué operación se quiere autorizar.
+ *  2. Valida el PIN contra config.settings.securityPin (global del negocio).
+ *  3. Si la operación requiere nota obligatoria → muestra campo de texto.
+ *  4. Bloquea tras 3 intentos fallidos (30 s).
+ *  5. Devuelve { notes } al callback onSuccess.
+ */
+import React, { useState, useEffect, useRef } from 'react';
 import { useData } from '../../context/DataContext';
+import { getOperationDef } from '../../lib/permissions';
 
-const PinModal = ({ isOpen, onClose, onSuccess }) => {
+const MAX_ATTEMPTS = 3;
+const BLOCK_DURATION_MS = 30_000;
+
+const PinModal = ({ isOpen, onClose, onSuccess, operation = null }) => {
   const [pin, setPin] = useState('');
+  const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
+  const [attempts, setAttempts] = useState(0);
+  const [blockedUntil, setBlockedUntil] = useState(null);
+  const inputRef = useRef(null);
+
   const { config } = useData();
 
-  const storedPin = config?.find(c => c.id === 'settings')?.securityPin || '1234';
+  // PIN almacenado en config → settings.securityPin
+  const storedPin = config?.[0]?.securityPin || '1234';
 
+  // Definición de la operación (si aplica)
+  const opDef = operation ? getOperationDef(operation) : null;
+  const requireNote = opDef?.requireNote ?? false;
+  const operationLabel = opDef?.label ?? 'Operación Protegida';
+
+  // Reset al abrir
   useEffect(() => {
     if (isOpen) {
       setPin('');
+      setNotes('');
       setError('');
-      setTimeout(() => feather.replace(), 50);
+      // No resetear attempts ni blockedUntil (persisten hasta expirar)
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
 
+  // Desbloqueo automático
+  useEffect(() => {
+    if (!blockedUntil) return;
+    if (Date.now() >= blockedUntil) {
+      setBlockedUntil(null);
+      setAttempts(0);
+      setError('');
+      return;
+    }
+    const timer = setTimeout(() => {
+      setBlockedUntil(null);
+      setAttempts(0);
+      setError('');
+    }, blockedUntil - Date.now());
+    return () => clearTimeout(timer);
+  }, [blockedUntil]);
+
+  const isBlocked = !!blockedUntil;
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (pin === storedPin) {
-      setError('');
-      onSuccess();
-    } else {
-      setError('PIN incorrecto. Inténtalo de nuevo.');
+    if (isBlocked) return;
+
+    // Validar PIN
+    if (pin !== storedPin) {
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+      if (newAttempts >= MAX_ATTEMPTS) {
+        setBlockedUntil(Date.now() + BLOCK_DURATION_MS);
+        setError('Demasiados intentos fallidos. Espera 30 segundos.');
+      } else {
+        setError(`PIN incorrecto. Intento ${newAttempts}/${MAX_ATTEMPTS}.`);
+      }
+      setPin('');
+      return;
     }
+
+    // Validar nota obligatoria
+    if (requireNote && !notes.trim()) {
+      setError('Debes ingresar una nota justificando esta operación.');
+      return;
+    }
+
+    // Éxito
+    setError('');
+    setAttempts(0);
+    onSuccess({ notes: notes.trim() || null });
   };
+
   if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md modal-backdrop">
-      <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-sm modal-content">
-        <div className="p-4 border-b border-border-main flex justify-between items-center">
-          <h3 className="text-xl font-bold text-text-main">Requiere Autorización</h3>
-          <button onClick={onClose} className="text-text-muted hover:text-text-main text-3xl leading-none">&times;</button>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-md modal-backdrop">
+      <div className="bg-bg-secondary rounded-xl shadow-2xl border border-border-main w-full max-w-sm mx-4 modal-content overflow-hidden">
+
+        {/* Header */}
+        <div className="p-5 border-b border-border-main bg-accent/5 flex items-start gap-3">
+          <div className="p-2.5 rounded-full bg-accent/15 text-accent flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-bold text-text-main">Autorización Requerida</h3>
+            <p className="text-sm text-accent font-semibold mt-0.5">{operationLabel}</p>
+          </div>
+          <button onClick={onClose} className="text-text-muted hover:text-text-main text-2xl leading-none p-1">×</button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6">
-          <label htmlFor="pin-input" className="block mb-2 font-semibold">PIN de Administrador</label>
-          <input
-            id="pin-input"
-            type="password"
-            value={pin}
-            onChange={(e) => setPin(e.target.value)}
-            className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-center text-2xl tracking-widest text-text-main"
-            maxLength={4}
-            autoFocus
-          />
-          {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
-          <button type="submit" className="btn-golden w-full mt-6 py-2">
-            Autorizar
-          </button>
+
+        {/* Body */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          {/* PIN Input */}
+          <div>
+            <label htmlFor="pin-auth-input" className="block text-sm font-semibold text-text-main mb-2">
+              PIN de Seguridad
+            </label>
+            <input
+              ref={inputRef}
+              id="pin-auth-input"
+              type="password"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={pin}
+              onChange={(e) => { setPin(e.target.value.replace(/\D/g, '')); setError(''); }}
+              className="w-full bg-bg-tertiary border border-border-main rounded-lg p-3 text-center text-2xl tracking-[0.4em] text-text-main focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent disabled:opacity-40"
+              maxLength={6}
+              autoComplete="off"
+              disabled={isBlocked}
+              placeholder="• • • •"
+            />
+          </div>
+
+          {/* Nota obligatoria */}
+          {requireNote && (
+            <div>
+              <label htmlFor="pin-auth-note" className="block text-sm font-semibold text-text-main mb-2">
+                Justificación <span className="text-red-400">*</span>
+              </label>
+              <textarea
+                id="pin-auth-note"
+                value={notes}
+                onChange={(e) => { setNotes(e.target.value); setError(''); }}
+                className="w-full bg-bg-tertiary border border-border-main rounded-lg p-3 text-text-main text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none"
+                rows={2}
+                placeholder="Describe el motivo de esta operación..."
+                required
+              />
+            </div>
+          )}
+
+          {/* Error */}
+          {error && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2.5 rounded-lg text-text-muted hover:text-text-main hover:bg-bg-tertiary font-semibold transition-colors text-sm"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={isBlocked || !pin}
+              className="flex-1 btn-golden py-2.5 font-bold disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+            >
+              {isBlocked ? 'Bloqueado…' : 'Autorizar'}
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
 };
+
 export default PinModal;
-// ===== FIN: src/components/modals/PinModal.jsx =====

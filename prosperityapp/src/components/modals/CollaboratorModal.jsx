@@ -7,6 +7,8 @@ import { supabase } from '../../supabase/client';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useStorage } from '../../hooks/useStorage';
+import { ROLE_CATALOG } from '../../lib/permissions';
+import PinModal from './PinModal';
 
 // ── Helper: llamar a la Edge Function de gestión de auth ─────────────────────
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -126,6 +128,7 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
 
   // ── "Acceso App" tab state ────────────────────────────────────────────────
   const [accessTabUnlocked, setAccessTabUnlocked] = useState(false);
+  const [isPinForAccessOpen, setIsPinForAccessOpen] = useState(false);
   const [loginEmail,        setLoginEmail]        = useState('');
   const [newPassword,       setNewPassword]       = useState('');
   const [showPassword,      setShowPassword]      = useState(false);
@@ -396,6 +399,16 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
                 </select>
               </div>
             </div>
+            {/* Rol del Sistema */}
+            <div>
+              <label className="text-xs text-text-muted font-semibold uppercase tracking-wide">Rol en la App</label>
+              <select name="appRole" value={formData.appRole || 'stylist'} onChange={handleInputChange} className="input-themed mt-1">
+                {ROLE_CATALOG.map(r => (
+                  <option key={r.value} value={r.value}>{r.icon} {r.label}</option>
+                ))}
+              </select>
+              <p className="text-xs text-text-muted mt-1">Define los permisos del colaborador dentro de la app.</p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs text-text-muted">{t('collaborators.modal.form.commService')}</label>
@@ -424,11 +437,27 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
                 <p className="text-text-muted text-sm">Primero guarda el colaborador para poder configurar su acceso a la app.</p>
               </div>
             ) : !accessTabUnlocked ? (
-              <PinVerifier
-                config={config}
-                onSuccess={() => setAccessTabUnlocked(true)}
-                onCancel={() => setActiveTab('personal')}
-              />
+              <>
+                <div className="flex flex-col items-center gap-4 py-6">
+                  <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0-6a2 2 0 100-4 2 2 0 000 4zm0 0v1m-7 4h14a2 2 0 002-2v-2a9 9 0 10-18 0v2a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold text-text-main">Autorización Requerida</p>
+                    <p className="text-text-muted text-sm mt-1">Solo el administrador puede gestionar el acceso a la app de los colaboradores.</p>
+                  </div>
+                  <button onClick={() => setIsPinForAccessOpen(true)} className="btn-golden py-2.5 px-6 font-semibold">Ingresar PIN</button>
+                  <button onClick={() => setActiveTab('personal')} className="text-text-muted text-sm hover:text-text-main transition-colors">Cancelar</button>
+                </div>
+                <PinModal
+                  isOpen={isPinForAccessOpen}
+                  operation="collaborator_access"
+                  onClose={() => setIsPinForAccessOpen(false)}
+                  onSuccess={() => { setIsPinForAccessOpen(false); setAccessTabUnlocked(true); }}
+                />
+              </>
             ) : (
               <form onSubmit={handleSaveAccess} className="space-y-5">
                 {/* Status badge */}

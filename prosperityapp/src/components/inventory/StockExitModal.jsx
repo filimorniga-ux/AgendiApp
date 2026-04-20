@@ -5,6 +5,7 @@
 import { useState, useContext } from 'react';
 import { supabase } from '../../supabase/client';
 import { BusinessContext } from '../../context/BusinessContext';
+import PinModal from '../modals/PinModal';
 
 const EXIT_REASONS = [
   { value: 'uso_servicio', label: '🔧 Uso en servicio' },
@@ -21,13 +22,14 @@ export function StockExitModal({ product, inventoryType, onClose, onSuccess }) {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showPinForMerma, setShowPinForMerma] = useState(false);
 
   const table = inventoryType === 'technical' ? 'technical_inventory' : 'retail_inventory';
   const currentStock = product?.stock_current ?? 0;
   const newStock = Math.max(0, currentStock - Number(qty));
   const isInsufficient = Number(qty) > currentStock;
 
-  async function handleConfirm() {
+  async function handleConfirm(pinNotes = null) {
     if (qty <= 0 || isInsufficient) return;
     setLoading(true);
     setError(null);
@@ -40,6 +42,7 @@ export function StockExitModal({ product, inventoryType, onClose, onSuccess }) {
       if (updErr) throw updErr;
 
       // 2. Registrar movimiento
+      const finalNotes = pinNotes ? `[Autorizado] ${pinNotes}${notes ? ' | ' + notes : ''}` : (notes || null);
       const { error: movErr } = await supabase
         .from('stock_movements')
         .insert({
@@ -52,9 +55,21 @@ export function StockExitModal({ product, inventoryType, onClose, onSuccess }) {
           inventory_type: inventoryType,
           barcode:        product.barcode ?? null,
           reason:         EXIT_REASONS.find(r => r.value === reason)?.label ?? reason,
-          notes:          notes || null,
+          notes:          finalNotes,
         });
       if (movErr) throw movErr;
+
+      // 3. Si fue merma, registrar en audit_log
+      if (reason === 'merma') {
+        await supabase.from('audit_log').insert({
+          business_id: businessId,
+          action: 'stock_shrinkage',
+          entity_table: table,
+          entity_id: product.id,
+          notes: finalNotes,
+          details: { product_name: product.name, qty: Number(qty), previous_stock: currentStock, new_stock: newStock },
+        }).catch(console.warn);
+      }
 
       onSuccess?.({ product, newStock, qty: Number(qty) });
       onClose();
@@ -62,6 +77,15 @@ export function StockExitModal({ product, inventoryType, onClose, onSuccess }) {
       setError(err.message ?? 'Error al registrar salida.');
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Gate: si es merma, pedir PIN primero
+  function handleConfirmClick() {
+    if (reason === 'merma') {
+      setShowPinForMerma(true);
+    } else {
+      handleConfirm();
     }
   }
 
@@ -138,13 +162,24 @@ export function StockExitModal({ product, inventoryType, onClose, onSuccess }) {
             Cancelar
           </button>
           <button
-            onClick={handleConfirm}
+            onClick={handleConfirmClick}
             className="bc-modal__btn bc-modal__btn--exit"
             disabled={loading || qty <= 0 || isInsufficient}
           >
             {loading ? 'Guardando…' : `📤 Retirar ${qty} unid.`}
           </button>
         </div>
+
+        {/* PinModal para mermas */}
+        <PinModal
+          isOpen={showPinForMerma}
+          operation="stock_shrinkage"
+          onClose={() => setShowPinForMerma(false)}
+          onSuccess={({ notes: pinNotes }) => {
+            setShowPinForMerma(false);
+            handleConfirm(pinNotes);
+          }}
+        />
       </div>
     </div>
   );
