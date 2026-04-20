@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <!-- Base Gold Gradient for the coin face -->
+    <linearGradient id="goldFace" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="50%" stop-color="#EAB308"/>
+      <stop offset="100%" stop-color="#A16207"/>
+    </linearGradient>
+    
+    <!-- Outer metallic border for 3D rim effect -->
+    <linearGradient id="goldRim" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#854D0E"/>
+      <stop offset="30%" stop-color="#D97706"/>
+      <stop offset="70%" stop-color="#FACC15"/>
+      <stop offset="100%" stop-color="#713F12"/>
+    </linearGradient>
+
+    <!-- Subtle drop shadow to lift the scissors off the coin -->
+    <filter id="lift">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#451A03" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- 1. The Thick Outer Rim -->
+  <circle cx="128" cy="128" r="120" fill="url(#goldRim)"/>
+  
+  <!-- 2. The Inner Coin Face -->
+  <circle cx="128" cy="128" r="108" fill="url(#goldFace)"/>
+  
+  <!-- 3. Decorative Engraved Groove -->
+  <circle cx="128" cy="128" r="98" fill="none" stroke="#CA8A04" stroke-width="1.5" stroke-dasharray="4 6" opacity="0.6"/>
+  
+  <!-- 4. Inner Shadow / Depth ring -->
+  <circle cx="128" cy="128" r="108" fill="none" stroke="#854D0E" stroke-width="2" opacity="0.4"/>
+
+  <!-- 5. Scissors Silhouette (Slate 900 / Almost Black for premium contrast) -->
+  <g fill="#0F172A" filter="url(#lift)">
+    <!-- Right Blade -->
+    <path d="M 166 70 Q 146 85 131 115 L 116 100 Q 141 60 171 50 Z"/>
+    <!-- Right Handle -->
+    <path d="M 131 115 L 101 165 Q 89 185 75 175 Q 61 165 73 145 L 116 100 Z"/>
+    <!-- Left Hand Hole -->
+    <circle cx="85" cy="165" r="14" fill="url(#goldFace)" stroke="#0F172A" stroke-width="5"/>
+
+    <!-- Left Blade -->
+    <path d="M 90 70 Q 110 85 125 115 L 140 100 Q 115 60 85 50 Z"/>
+    <!-- Left Handle -->
+    <path d="M 125 115 L 155 165 Q 167 185 181 175 Q 195 165 183 145 L 140 100 Z"/>
+    <!-- Right Hand Hole -->
+    <circle cx="171" cy="165" r="14" fill="url(#goldFace)" stroke="#0F172A" stroke-width="5"/>
+
+    <!-- Center Pivot Constraint / Screw -->
+    <circle cx="128" cy="115" r="4.5" fill="#FACC15"/>
+  </g>
+</svg>
