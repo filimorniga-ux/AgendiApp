@@ -13,10 +13,45 @@ import TicketEditorTab from './Settings/TicketEditorTab';
 import ClientAcquisitionTab from './Settings/ClientAcquisitionTab';
 import IntegrationsTab from './Settings/IntegrationsTab';
 import { useStorage } from '../hooks/useStorage';
+import { Country, State, City } from 'country-state-city';
+import { IMaskInput } from 'react-imask';
+
+const getTaxIdMaskOptions = (countryCode) => {
+  switch (countryCode) {
+    case 'CO':
+      // RUT/NIT: 000.000.000-0. Cedula: 0.000.000.000 o 00.000.000
+      return [{ mask: '000.000.000-0' }, { mask: '00.000.000' }, { mask: '0.000.000.000' }];
+    case 'CL':
+      // RUT: 00.000.000-0 o 0.000.000-0 (con K)
+      return [{ mask: '00.000.000-*' }, { mask: '0.000.000-*' }];
+    case 'AR':
+      // DNI: 00.000.000, CUIT: 00-00000000-0
+      return [{ mask: '00.000.000' }, { mask: '00-00000000-0' }];
+    case 'PE':
+      // RUC: 11 digits, DNI: 8 digits
+      return [{ mask: '00000000000' }, { mask: '00000000' }];
+    case 'US':
+      // EIN: 00-0000000, SSN: 000-00-0000
+      return [{ mask: '00-0000000' }, { mask: '000-00-0000' }];
+    case 'ES':
+      // NIF: 00000000-*, CIF: *-0000000, NIE: *-0000000-*
+      return [{ mask: '00000000-*' }, { mask: '*-0000000' }, { mask: '*-0000000-*' }];
+    case 'MX':
+      return [{ mask: '***-000000-***' }, { mask: '****-000000-***' }];
+    case 'BR':
+      return [{ mask: '000.000.000-00'}, { mask: '00.000.000/0000-00' }];
+    case 'UY':
+      return [{ mask: '00.000.000-0' }];
+    default:
+      // Si no es ninguno, permitimos que escriban cualquier id tributario comun
+      return /^[a-zA-Z0-9.\-]{0,30}$/;
+  }
+};
+
 
 const ConfiguracionPage = () => {
   const { t } = useTranslation();
-  const { config, collaborators, isLoading, businessId } = useData();
+  const { config, collaborators, isLoading, businessId, user } = useData();
   const { uploadFile } = useStorage();
   const [whatsappPhone, setWhatsappPhone] = useState('');
   const [businessSlug, setBusinessSlug] = useState('');
@@ -24,22 +59,31 @@ const ConfiguracionPage = () => {
   const [activeTab, setActiveTab] = useState('accounting');
   const [formData, setFormData] = useState({});
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+  const [isForgotPinMode, setIsForgotPinMode] = useState(false);
+  const [otpStep, setOtpStep] = useState('request'); // 'request' o 'verify'
   const [pinChangeData, setPinChangeData] = useState({
     currentPin: '',
     newPin: '',
-    confirmPin: ''
+    confirmPin: '',
+    otpCode: ''
   });
   const [pinError, setPinError] = useState('');
 
-  const settings = useMemo(() => config?.[0] || {
-    taxGeneral: 19,
-    partners: [],
-    theme: 'dark',
-    brandName: 'Gema',
-    logoUrl: null,
-    taxOverrides: {},
-    salesCommissionGeneral: 10,
-    securityPin: '1234'
+  const settings = useMemo(() => {
+    if (!config || !config[0]) {
+      return {
+        taxGeneral: 19,
+        partners: [],
+        theme: 'dark',
+        brandName: 'AgendiApp',
+        logoUrl: null,
+        taxOverrides: {},
+        salesCommissionGeneral: 10,
+        securityPin: '1234'
+      };
+    }
+    const row = config[0];
+    return { ...row, ...(row.settings || {}) };
   }, [config]);
 
   useEffect(() => {
@@ -63,6 +107,50 @@ const ConfiguracionPage = () => {
       feather.replace();
     }
   }, [activeTab, collaborators, formData.partners, isLoading]);
+
+  const handleCountryChange = (e) => {
+    const isoCode = e.target.value;
+    const countryObj = Country.getCountryByCode(isoCode);
+    if (!countryObj) return;
+
+    setFormData(prev => {
+      const newPhone = prev.phone ? prev.phone : `+${countryObj.phonecode} `;
+      if (!whatsappPhone) setWhatsappPhone(`+${countryObj.phonecode} `);
+      return {
+        ...prev,
+        countryCode: isoCode,
+        country: countryObj.name,
+        stateCode: '',
+        state: '',
+        city: '',
+        phone: newPhone
+      };
+    });
+  };
+
+  const handleStateChange = (e) => {
+    const isoCode = e.target.value;
+    const stateObj = State.getStateByCodeAndCountry(isoCode, formData.countryCode);
+    setFormData(prev => ({
+      ...prev,
+      stateCode: isoCode,
+      state: stateObj?.name || '',
+      city: ''
+    }));
+  };
+
+  const handleCityChange = (e) => {
+    setFormData(prev => ({ ...prev, city: e.target.value }));
+  };
+
+  const countries = useMemo(() => Country.getAllCountries(), []);
+  const states = useMemo(() => formData.countryCode ? State.getStatesOfCountry(formData.countryCode) : [], [formData.countryCode]);
+  const cities = useMemo(() => formData.stateCode ? City.getCitiesOfState(formData.countryCode, formData.stateCode) : [], [formData.countryCode, formData.stateCode]);
+
+  const getTaxIdLabel = (code) => {
+    const mapping = { CO: 'NIT / C.C.', CL: 'RUT', AR: 'CUIT / DNI', MX: 'RFC', PE: 'RUC / DNI', EC: 'RUC', UY: 'RUT', ES: 'NIF / CIF', US: 'EIN / SSN', BR: 'CNPJ / CPF', VE: 'RIF' };
+    return mapping[code] || t('settings.company.taxId') || 'Número de Identificación';
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -114,11 +202,12 @@ const ConfiguracionPage = () => {
 
   const handleSaveSettings = async (tabKey) => {
     let dataToSave = {};
+    const currentSettings = config?.[0]?.settings || {};
+    let nativeColsToSave = {};
+
     if (tabKey === 'appearance') {
-      dataToSave = {
-        brandName: formData.brandName,
-        logoUrl: formData.logoUrl,
-      };
+      nativeColsToSave = { logo_url: formData.logoUrl };
+      dataToSave = { ...currentSettings, brandName: formData.brandName };
     } else if (tabKey === 'accounting') {
       const totalPercent = (formData.partners || []).reduce((sum, p) => sum + (parseFloat(p.percent) || 0), 0);
       if (totalPercent !== 100 && (formData.partners || []).length > 0) {
@@ -126,6 +215,7 @@ const ConfiguracionPage = () => {
         return;
       }
       dataToSave = {
+        ...currentSettings,
         taxGeneral: formData.taxGeneral,
         taxOverrides: formData.taxOverrides,
         partners: formData.partners,
@@ -136,15 +226,17 @@ const ConfiguracionPage = () => {
         toast.error(t('settings.security.pinError'));
         return;
       }
-      dataToSave = {
-        securityPin: formData.securityPin
-      };
+      dataToSave = { ...currentSettings, securityPin: formData.securityPin };
     } else if (tabKey === 'company') {
+      nativeColsToSave = { business_name: formData.businessName };
       dataToSave = {
-        businessName: formData.businessName,
+        ...currentSettings,
         taxId: formData.taxId,
         address: formData.address,
+        countryCode: formData.countryCode,
         country: formData.country,
+        stateCode: formData.stateCode,
+        state: formData.state,
         city: formData.city,
         zipCode: formData.zipCode,
         email: formData.email,
@@ -158,12 +250,14 @@ const ConfiguracionPage = () => {
         }).eq('id', businessId);
       }
     } else if (tabKey === 'ticket') {
-      dataToSave = { ticketConfig: formData.ticketConfig };
+      dataToSave = { ...currentSettings, ticketConfig: formData.ticketConfig };
     }
+
     try {
       if (!businessId) throw new Error('Business ID no disponible');
       const rowId = settings?.id || businessId;
-      const { error } = await sbUpdate('config', rowId, dataToSave);
+      const finalPayload = { ...nativeColsToSave, settings: dataToSave };
+      const { error } = await sbUpdate('config', rowId, finalPayload);
       if (error) throw error;
       toast.success(t('common.success'));
     } catch (error) {
@@ -174,14 +268,45 @@ const ConfiguracionPage = () => {
 
 
 
+  const handleRequestOTP = async () => {
+    setPinError('');
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ email: user?.email });
+      if (error) throw error;
+      setOtpStep('verify');
+      toast.success('Código temporal enviado a tu correo');
+    } catch (err) {
+      console.warn(err);
+      setPinError('Error al enviar el código a tu correo');
+    }
+  };
+
   const handlePinChange = async () => {
     setPinError('');
-
-    // Validar que el PIN actual sea correcto
     const currentStoredPin = settings.securityPin || '1234';
-    if (pinChangeData.currentPin !== currentStoredPin) {
-      setPinError(t('settings.security.incorrectCurrentPin') || 'PIN actual incorrecto');
-      return;
+
+    if (isForgotPinMode) {
+      if (!pinChangeData.otpCode || pinChangeData.otpCode.length !== 6) {
+        setPinError('Por favor ingresa el código de 6 dígitos que enviamos a tu correo');
+        return;
+      }
+      // re-validate with Supabase OTP
+      const { error } = await supabase.auth.verifyOtp({
+        email: user?.email,
+        token: pinChangeData.otpCode,
+        type: 'email'
+      });
+
+      if (error) {
+        setPinError('Código de recuperación inválido o expirado');
+        return;
+      }
+    } else {
+      // Validar que el PIN actual sea correcto
+      if (pinChangeData.currentPin !== currentStoredPin) {
+        setPinError(t('settings.security.incorrectCurrentPin') || 'PIN actual incorrecto');
+        return;
+      }
     }
 
     // Validar que el nuevo PIN tenga al menos 4 dígitos
@@ -198,11 +323,14 @@ const ConfiguracionPage = () => {
 
     try {
       if (!businessId) throw new Error('Business ID no disponible');
-      const { error } = await sbUpdate('config', businessId, { securityPin: pinChangeData.newPin });
+      const currentSettings = config?.[0]?.settings || {};
+      const { error } = await sbUpdate('config', businessId, { settings: { ...currentSettings, securityPin: pinChangeData.newPin } });
       if (error) throw error;
       toast.success(t('settings.security.pinChanged') || 'PIN actualizado correctamente');
       setIsPinModalOpen(false);
-      setPinChangeData({ currentPin: '', newPin: '', confirmPin: '' });
+      setIsForgotPinMode(false);
+      setOtpStep('request');
+      setPinChangeData({ currentPin: '', newPin: '', confirmPin: '', otpCode: '' });
     } catch (error) {
       console.warn('Error al cambiar PIN:', error);
       toast.error(t('common.error'));
@@ -295,12 +423,17 @@ const ConfiguracionPage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-text-main">{t('settings.company.taxId')}</label>
-                  <input
-                    type="text"
+                  <label className="text-sm font-medium text-text-main">{getTaxIdLabel(formData.countryCode)}</label>
+                  <IMaskInput
+                    mask={getTaxIdMaskOptions(formData.countryCode)}
+                    definitions={{
+                      '*': /[a-zA-Z0-9]/
+                    }}
+                    prepareChar={(str) => str.toUpperCase()}
                     name="taxId"
                     value={formData.taxId || ''}
-                    onChange={handleInputChange}
+                    unmask={false}
+                    onAccept={(value) => handleInputChange({ target: { name: 'taxId', value } })}
                     className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main focus:border-accent focus:outline-none"
                   />
                 </div>
@@ -316,23 +449,47 @@ const ConfiguracionPage = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-text-main">{t('settings.company.country')}</label>
-                  <input
-                    type="text"
-                    name="country"
-                    value={formData.country || ''}
-                    onChange={handleInputChange}
+                  <select
+                    name="countryCode"
+                    value={formData.countryCode || ''}
+                    onChange={handleCountryChange}
                     className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main focus:border-accent focus:outline-none"
-                  />
+                  >
+                    <option value="">Seleccione un país...</option>
+                    {countries.map(c => (
+                      <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-text-main">Estado / Región</label>
+                  <select
+                    name="stateCode"
+                    value={formData.stateCode || ''}
+                    onChange={handleStateChange}
+                    disabled={!formData.countryCode}
+                    className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main focus:border-accent focus:outline-none disabled:opacity-50"
+                  >
+                    <option value="">Seleccione una región...</option>
+                    {states.map(s => (
+                      <option key={s.isoCode} value={s.isoCode}>{s.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-text-main">{t('settings.company.city')}</label>
-                  <input
-                    type="text"
+                  <select
                     name="city"
                     value={formData.city || ''}
-                    onChange={handleInputChange}
-                    className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main focus:border-accent focus:outline-none"
-                  />
+                    onChange={handleCityChange}
+                    disabled={!formData.stateCode}
+                    className="w-full bg-bg-tertiary border border-border-main rounded p-2 text-text-main focus:border-accent focus:outline-none disabled:opacity-50"
+                  >
+                    <option value="">Seleccione una ciudad...</option>
+                    {cities.map(c => (
+                      <option key={c.name} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-text-main">{t('settings.company.zipCode')}</label>
@@ -485,7 +642,9 @@ const ConfiguracionPage = () => {
                   <button
                     onClick={() => {
                       setIsPinModalOpen(false);
-                      setPinChangeData({ currentPin: '', newPin: '', confirmPin: '' });
+                      setIsForgotPinMode(false);
+                      setOtpStep('request');
+                      setPinChangeData({ currentPin: '', newPin: '', confirmPin: '', otpCode: '' });
                       setPinError('');
                     }}
                     className="text-text-muted hover:text-text-main text-2xl"
@@ -495,73 +654,140 @@ const ConfiguracionPage = () => {
                 </div>
 
                 <div className="space-y-4">
-                  {/* PIN Actual */}
-                  <div>
-                    <label className="block text-sm font-semibold text-text-main mb-2">
-                      {t('settings.security.currentPin') || 'PIN Actual'}
-                    </label>
-                    <input
-                      type="password"
-                      className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none"
-                      value={pinChangeData.currentPin}
-                      onChange={(e) => setPinChangeData({ ...pinChangeData, currentPin: e.target.value })}
-                      maxLength={6}
-                      placeholder="••••"
-                      autoFocus
-                    />
-                  </div>
+                  {/* Contraseña o PIN Actual dependiendo del modo */}
+                  {isForgotPinMode ? (
+                    otpStep === 'request' ? (
+                      <div className="text-center py-4">
+                        <p className="text-sm text-text-muted mb-4">
+                          Para verificar tu identidad, enviaremos un código de seguridad de 6 dígitos a tu correo registrado: <br />
+                          <strong className="text-text-main mt-1 block">{user?.email}</strong>
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="block text-sm font-semibold text-text-main mb-2">
+                          Código de verificación
+                        </label>
+                        <p className="text-xs text-text-muted mb-2">
+                          Ingresa el código seguro de 6 dígitos que enviamos a tu correo.
+                        </p>
+                        <input
+                          type="text"
+                          className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none"
+                          value={pinChangeData.otpCode}
+                          onChange={(e) => setPinChangeData({ ...pinChangeData, otpCode: e.target.value })}
+                          maxLength={6}
+                          placeholder="000000"
+                          autoFocus
+                        />
+                      </div>
+                    )
+                  ) : (
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block text-sm font-semibold text-text-main">
+                          {t('settings.security.currentPin') || 'PIN Actual'}
+                        </label>
+                      </div>
+                      <input
+                        type="password"
+                        className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none"
+                        value={pinChangeData.currentPin}
+                        onChange={(e) => setPinChangeData({ ...pinChangeData, currentPin: e.target.value })}
+                        maxLength={6}
+                        placeholder="••••"
+                        autoFocus
+                      />
+                    </div>
+                  )}
 
-                  {/* Nuevo PIN */}
-                  <div>
-                    <label className="block text-sm font-semibold text-text-main mb-2">
-                      {t('settings.security.newPin') || 'Nuevo PIN'}
-                    </label>
-                    <input
-                      type="password"
-                      className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none"
-                      value={pinChangeData.newPin}
-                      onChange={(e) => setPinChangeData({ ...pinChangeData, newPin: e.target.value })}
-                      maxLength={6}
-                      placeholder="••••"
-                    />
-                  </div>
-
-                  {/* Confirmar Nuevo PIN */}
-                  <div>
-                    <label className="block text-sm font-semibold text-text-main mb-2">
-                      {t('settings.security.confirmPin') || 'Confirmar Nuevo PIN'}
-                    </label>
-                    <input
-                      type="password"
-                      className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none"
-                      value={pinChangeData.confirmPin}
-                      onChange={(e) => setPinChangeData({ ...pinChangeData, confirmPin: e.target.value })}
-                      maxLength={6}
-                      placeholder="••••"
-                    />
-                  </div>
+                  {/* Nuevos inputs de PIN (solo si no estamos pidiendo OTP request) */}
+                  {!(isForgotPinMode && otpStep === 'request') && (
+                    <>
+                      {/* Nuevo PIN */}
+                      <div>
+                        <label className="block text-sm font-semibold text-text-main mb-2">
+                          {t('settings.security.newPin') || 'Nuevo PIN'}
+                        </label>
+                        <input
+                          type="password"
+                          className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none"
+                          value={pinChangeData.newPin}
+                          onChange={(e) => setPinChangeData({ ...pinChangeData, newPin: e.target.value })}
+                          maxLength={6}
+                          placeholder="••••"
+                        />
+                      </div>
+    
+                      {/* Confirmar Nuevo PIN */}
+                      <div>
+                        <label className="block text-sm font-semibold text-text-main mb-2">
+                          {t('settings.security.confirmPin') || 'Confirmar Nuevo PIN'}
+                        </label>
+                        <input
+                          type="password"
+                          className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none"
+                          value={pinChangeData.confirmPin}
+                          onChange={(e) => setPinChangeData({ ...pinChangeData, confirmPin: e.target.value })}
+                          maxLength={6}
+                          placeholder="••••"
+                        />
+                      </div>
+                    </>
+                  )}
 
                   {pinError && (
                     <p className="text-red-400 text-sm">{pinError}</p>
                   )}
 
-                  <div className="flex gap-3 mt-6">
+                  <div className="mt-2 text-center">
+                    {!isForgotPinMode ? (
+                      <button 
+                        type="button" 
+                        onClick={() => { setPinError(''); setIsForgotPinMode(true); }}
+                        className="text-accent hover:underline text-sm font-semibold"
+                      >
+                        ¿Olvidaste tu PIN?
+                      </button>
+                    ) : (
+                      <button 
+                        type="button" 
+                        onClick={() => { setPinError(''); setIsForgotPinMode(false); }}
+                        className="text-text-muted hover:text-text-main hover:underline text-sm"
+                      >
+                        Cancelar recuperación y volver a usar mi PIN actual
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex gap-3 mt-4">
                     <button
                       onClick={() => {
                         setIsPinModalOpen(false);
-                        setPinChangeData({ currentPin: '', newPin: '', confirmPin: '' });
+                        setIsForgotPinMode(false);
+                        setOtpStep('request');
+                        setPinChangeData({ currentPin: '', newPin: '', confirmPin: '', otpCode: '' });
                         setPinError('');
                       }}
                       className="flex-1 px-4 py-2 rounded-md border border-border-main bg-bg-tertiary text-text-main hover:bg-bg-main transition-colors"
                     >
                       {t('common.cancel') || 'Cancelar'}
                     </button>
-                    <button
-                      onClick={handlePinChange}
-                      className="flex-1 btn-golden"
-                    >
-                      {t('common.save') || 'Guardar'}
-                    </button>
+                    {(isForgotPinMode && otpStep === 'request') ? (
+                      <button
+                        onClick={handleRequestOTP}
+                        className="flex-1 btn-golden"
+                      >
+                        Enviar Código
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handlePinChange}
+                        className="flex-1 btn-golden"
+                      >
+                        {isForgotPinMode ? 'Verificar y Guardar PIN' : (t('common.save') || 'Guardar')}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
