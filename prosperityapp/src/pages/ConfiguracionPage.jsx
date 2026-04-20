@@ -339,9 +339,11 @@ const ConfiguracionPage = () => {
         }
       }
 
-      if (!businessId) throw new Error('Business ID no disponible');
+      const configId = config?.[0]?.id;
+      if (!configId) throw new Error('ID de configuración no disponible');
+      
       const currentSettings = config?.[0]?.settings || {};
-      const { error } = await sbUpdate('config', businessId, { settings: { ...currentSettings, securityPin: pinChangeData.newPin } });
+      const { error } = await sbUpdate('config', configId, { settings: { ...currentSettings, securityPin: pinChangeData.newPin } });
       if (error) throw error;
       toast.success(t('settings.security.pinChanged') || 'PIN actualizado correctamente');
       setIsPinModalOpen(false);
