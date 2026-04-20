@@ -68,6 +68,7 @@ const ConfiguracionPage = () => {
     otpCode: ''
   });
   const [pinError, setPinError] = useState('');
+  const [isProcessingPin, setIsProcessingPin] = useState(false);
 
   const settings = useMemo(() => {
     if (!config || !config[0]) {
@@ -269,7 +270,12 @@ const ConfiguracionPage = () => {
 
 
   const handleRequestOTP = async () => {
+    if (!user?.email) {
+      setPinError('No se encontró un correo electrónico asociado a tu cuenta.');
+      return;
+    }
     setPinError('');
+    setIsProcessingPin(true);
     try {
       const { error } = await supabase.auth.signInWithOtp({ email: user?.email });
       if (error) throw error;
@@ -278,6 +284,8 @@ const ConfiguracionPage = () => {
     } catch (err) {
       console.warn(err);
       setPinError('Error al enviar el código a tu correo');
+    } finally {
+      setIsProcessingPin(false);
     }
   };
 
@@ -288,17 +296,6 @@ const ConfiguracionPage = () => {
     if (isForgotPinMode) {
       if (!pinChangeData.otpCode || pinChangeData.otpCode.length !== 6) {
         setPinError('Por favor ingresa el código de 6 dígitos que enviamos a tu correo');
-        return;
-      }
-      // re-validate with Supabase OTP
-      const { error } = await supabase.auth.verifyOtp({
-        email: user?.email,
-        token: pinChangeData.otpCode,
-        type: 'email'
-      });
-
-      if (error) {
-        setPinError('Código de recuperación inválido o expirado');
         return;
       }
     } else {
@@ -321,7 +318,22 @@ const ConfiguracionPage = () => {
       return;
     }
 
+    setIsProcessingPin(true);
     try {
+      if (isForgotPinMode) {
+        // re-validate with Supabase OTP
+        const { error: otpError } = await supabase.auth.verifyOtp({
+          email: user?.email,
+          token: pinChangeData.otpCode,
+          type: 'email'
+        });
+
+        if (otpError) {
+          setPinError('Código de recuperación inválido o expirado');
+          return;
+        }
+      }
+
       if (!businessId) throw new Error('Business ID no disponible');
       const currentSettings = config?.[0]?.settings || {};
       const { error } = await sbUpdate('config', businessId, { settings: { ...currentSettings, securityPin: pinChangeData.newPin } });
@@ -334,6 +346,8 @@ const ConfiguracionPage = () => {
     } catch (error) {
       console.warn('Error al cambiar PIN:', error);
       toast.error(t('common.error'));
+    } finally {
+      setIsProcessingPin(false);
     }
   };
 
@@ -641,6 +655,7 @@ const ConfiguracionPage = () => {
                   <h3 className="text-xl font-bold text-text-main">{t('settings.security.changePin') || 'Cambiar PIN de Seguridad'}</h3>
                   <button
                     onClick={() => {
+                      if (isProcessingPin) return;
                       setIsPinModalOpen(false);
                       setIsForgotPinMode(false);
                       setOtpStep('request');
@@ -648,6 +663,7 @@ const ConfiguracionPage = () => {
                       setPinError('');
                     }}
                     className="text-text-muted hover:text-text-main text-2xl"
+                    disabled={isProcessingPin}
                   >
                     &times;
                   </button>
@@ -673,12 +689,13 @@ const ConfiguracionPage = () => {
                         </p>
                         <input
                           type="text"
-                          className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none"
+                          className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none disabled:opacity-50"
                           value={pinChangeData.otpCode}
                           onChange={(e) => setPinChangeData({ ...pinChangeData, otpCode: e.target.value })}
                           maxLength={6}
                           placeholder="000000"
                           autoFocus
+                          disabled={isProcessingPin}
                         />
                       </div>
                     )
@@ -691,12 +708,13 @@ const ConfiguracionPage = () => {
                       </div>
                       <input
                         type="password"
-                        className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none"
+                        className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none disabled:opacity-50"
                         value={pinChangeData.currentPin}
                         onChange={(e) => setPinChangeData({ ...pinChangeData, currentPin: e.target.value })}
                         maxLength={6}
                         placeholder="••••"
                         autoFocus
+                        disabled={isProcessingPin}
                       />
                     </div>
                   )}
@@ -711,11 +729,12 @@ const ConfiguracionPage = () => {
                         </label>
                         <input
                           type="password"
-                          className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none"
+                          className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none disabled:opacity-50"
                           value={pinChangeData.newPin}
                           onChange={(e) => setPinChangeData({ ...pinChangeData, newPin: e.target.value })}
                           maxLength={6}
                           placeholder="••••"
+                          disabled={isProcessingPin}
                         />
                       </div>
     
@@ -726,11 +745,12 @@ const ConfiguracionPage = () => {
                         </label>
                         <input
                           type="password"
-                          className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none"
+                          className="w-full bg-bg-tertiary border border-border-main rounded p-3 text-center text-2xl tracking-widest text-text-main focus:border-accent focus:outline-none disabled:opacity-50"
                           value={pinChangeData.confirmPin}
                           onChange={(e) => setPinChangeData({ ...pinChangeData, confirmPin: e.target.value })}
                           maxLength={6}
                           placeholder="••••"
+                          disabled={isProcessingPin}
                         />
                       </div>
                     </>
@@ -745,7 +765,8 @@ const ConfiguracionPage = () => {
                       <button 
                         type="button" 
                         onClick={() => { setPinError(''); setIsForgotPinMode(true); }}
-                        className="text-accent hover:underline text-sm font-semibold"
+                        className="text-accent hover:underline text-sm font-semibold disabled:opacity-50"
+                        disabled={isProcessingPin}
                       >
                         ¿Olvidaste tu PIN?
                       </button>
@@ -753,7 +774,8 @@ const ConfiguracionPage = () => {
                       <button 
                         type="button" 
                         onClick={() => { setPinError(''); setIsForgotPinMode(false); }}
-                        className="text-text-muted hover:text-text-main hover:underline text-sm"
+                        className="text-text-muted hover:text-text-main hover:underline text-sm disabled:opacity-50"
+                        disabled={isProcessingPin}
                       >
                         Cancelar recuperación y volver a usar mi PIN actual
                       </button>
@@ -769,23 +791,26 @@ const ConfiguracionPage = () => {
                         setPinChangeData({ currentPin: '', newPin: '', confirmPin: '', otpCode: '' });
                         setPinError('');
                       }}
-                      className="flex-1 px-4 py-2 rounded-md border border-border-main bg-bg-tertiary text-text-main hover:bg-bg-main transition-colors"
+                      className="flex-1 px-4 py-2 rounded-md border border-border-main bg-bg-tertiary text-text-main hover:bg-bg-main transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={isProcessingPin}
                     >
                       {t('common.cancel') || 'Cancelar'}
                     </button>
                     {(isForgotPinMode && otpStep === 'request') ? (
                       <button
                         onClick={handleRequestOTP}
-                        className="flex-1 btn-golden"
+                        className="flex-1 btn-golden disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isProcessingPin}
                       >
-                        Enviar Código
+                        {isProcessingPin ? 'Enviando...' : 'Enviar Código'}
                       </button>
                     ) : (
                       <button
                         onClick={handlePinChange}
-                        className="flex-1 btn-golden"
+                        className="flex-1 btn-golden disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isProcessingPin}
                       >
-                        {isForgotPinMode ? 'Verificar y Guardar PIN' : (t('common.save') || 'Guardar')}
+                        {isProcessingPin ? 'Guardando...' : (isForgotPinMode ? 'Verificar y Guardar PIN' : (t('common.save') || 'Guardar'))}
                       </button>
                     )}
                   </div>
