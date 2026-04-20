@@ -282,8 +282,10 @@ const ConfiguracionPage = () => {
       setOtpStep('verify');
       toast.success('Código temporal enviado a tu correo');
     } catch (err) {
-      console.warn(err);
-      setPinError('Error al enviar el código a tu correo');
+      console.error('Detalle del error OTP (request):', err);
+      const errMsg = err?.message || 'Error al enviar el código a tu correo';
+      setPinError(errMsg);
+      toast.error(errMsg);
     } finally {
       setIsProcessingPin(false);
     }
@@ -329,7 +331,10 @@ const ConfiguracionPage = () => {
         });
 
         if (otpError) {
-          setPinError('Código de recuperación inválido o expirado');
+          console.error('Detalle del error OTP (verify):', otpError);
+          const errMsg = otpError?.message || 'Código de recuperación inválido o expirado';
+          setPinError(errMsg);
+          toast.error(errMsg);
           return;
         }
       }
