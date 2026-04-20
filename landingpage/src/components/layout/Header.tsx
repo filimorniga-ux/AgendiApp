@@ -5,7 +5,7 @@ import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import { User } from 'firebase/auth';
 
 // Isotipo AgendiApp — Moneda dorada con tijeras
-const LOGO_URL = "/logo-agendiapp.png";
+const LOGO_URL = "/logo-agendiapp.png?v=2";
 
 interface HeaderProps {
     isDarkMode: boolean;
