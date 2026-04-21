@@ -5,7 +5,8 @@ import CollaboratorModal from '../CollaboratorModal';
 import * as DataContext from '../../../context/DataContext';
 
 vi.mock('../../../context/BusinessContext', () => ({
-  useBusiness: () => ({ businessId: 'biz123' })
+  useBusiness: () => ({ businessId: 'biz123' }),
+  BusinessContext: { Consumer: ({ children }) => children({ businessId: 'biz123' }) }
 }));
 
 vi.mock('../../../supabase/db', () => ({
@@ -46,20 +47,22 @@ describe('CollaboratorModal - Acceso App Tab', () => {
     expect(screen.getByText('Primero guarda el colaborador para poder configurar su acceso a la app.')).toBeInTheDocument();
   });
 
-  it('shows PinVerifier when unlocking tab in edit mode', () => {
+  it('shows PinModal and unlocks tab with correct PIN', async () => {
     render(<CollaboratorModal {...defaultProps} />);
 
+    // Switch to Acceso tab
     fireEvent.click(screen.getByText('Acceso App'));
 
+    // Debe mostrar la vista que pide autorización (Ingresar PIN)
     expect(screen.getByText('Autorización Requerida')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('PIN de administrador')).toBeInTheDocument();
-  });
 
-  it('unlocks tab with correct PIN', async () => {
-    render(<CollaboratorModal {...defaultProps} />);
-    fireEvent.click(screen.getByText('Acceso App'));
+    const ingresarPinButton = screen.getByRole('button', { name: 'Ingresar PIN' });
+    fireEvent.click(ingresarPinButton);
 
-    const pinInput = screen.getByPlaceholderText('PIN de administrador');
+    // PinModal renders
+    const pinInput = screen.getByLabelText(/PIN de Seguridad/i);
+    expect(pinInput).toBeInTheDocument();
+
     fireEvent.change(pinInput, { target: { value: '1234' } });
     fireEvent.click(screen.getByRole('button', { name: 'Autorizar' }));
 
@@ -68,17 +71,20 @@ describe('CollaboratorModal - Acceso App Tab', () => {
     });
   });
 
-  it('shows error and blocks after 3 incorrect attempts', async () => {
+  it('shows error in PinModal and blocks after 3 incorrect attempts', async () => {
     render(<CollaboratorModal {...defaultProps} />);
     fireEvent.click(screen.getByText('Acceso App'));
 
-    const pinInput = screen.getByPlaceholderText('PIN de administrador');
+    const ingresarPinButton = screen.getByRole('button', { name: 'Ingresar PIN' });
+    fireEvent.click(ingresarPinButton);
+
+    const pinInput = screen.getByLabelText(/PIN de Seguridad/i);
     const authButton = screen.getByRole('button', { name: 'Autorizar' });
 
     // Attempt 1
     fireEvent.change(pinInput, { target: { value: '9999' } });
     fireEvent.click(authButton);
-    expect(screen.getByText('PIN incorrecto. Inténtalo de nuevo.')).toBeInTheDocument();
+    expect(screen.getByText(/PIN incorrecto\. Intento 1\/3\./i)).toBeInTheDocument();
 
     // Attempt 2
     fireEvent.change(pinInput, { target: { value: '9999' } });
@@ -90,7 +96,7 @@ describe('CollaboratorModal - Acceso App Tab', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Demasiados intentos fallidos/)).toBeInTheDocument();
-      expect(authButton).toBeDisabled();
+      expect(authButton).toHaveTextContent('Bloqueado…');
       expect(pinInput).toBeDisabled();
     });
   });

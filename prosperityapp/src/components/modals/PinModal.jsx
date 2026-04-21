@@ -43,13 +43,15 @@ const PinModal = ({ isOpen, onClose, onSuccess, operation = null }) => {
 
   // Reset al abrir
   useEffect(() => {
+    let timerId;
     if (isOpen) {
       setPin('');
       setNotes('');
       setError('');
       // No resetear attempts ni blockedUntil (persisten hasta expirar)
-      setTimeout(() => inputRef.current?.focus(), 100);
+      timerId = setTimeout(() => inputRef.current?.focus(), 100);
     }
+    return () => clearTimeout(timerId);
   }, [isOpen]);
 
   // Desbloqueo automático
@@ -76,6 +78,9 @@ const PinModal = ({ isOpen, onClose, onSuccess, operation = null }) => {
     if (isBlocked) return;
 
     // Validar PIN
+    // TODO: SECURITY: El PIN se valida en texto plano. Se recomienda encarecidamente
+    // implementar un sistema de hashing (ej. bcrypt) en el backend (edge function)
+    // y no exponer el 'securityPin' crudo en 'config'.
     if (pin !== storedPin) {
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
