@@ -4,7 +4,7 @@ import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-business-id',
 };
 
 // Constante de rounds
@@ -45,7 +45,8 @@ serve(async (req) => {
     }
 
     // El body debería contener action y pin
-    const { action, pin } = await req.json();
+    const { action, pin, collaboratorId } = await req.json();
+    const businessId = req.headers.get('x-business-id');
 
     if (!pin || typeof pin !== 'string') {
       return new Response(JSON.stringify({ error: 'Invalid PIN provided' }), {
@@ -54,28 +55,66 @@ serve(async (req) => {
       });
     }
 
-    // Obtener la configuración actual del usuario
-    const { data: configData, error: configError } = await supabaseClient
-      .from('config')
-      .select('id, settings')
-      .limit(1)
-      .maybeSingle();
+    // Usaremos el admin client para evitar problemas de RLS en estas operaciones críticas.
+    // La capa auth ya aseguró que es un usuario legítimo.
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
 
-    if (configError) {
-      throw configError;
+    if (action === 'set_collaborator_pin') {
+       if (!collaboratorId) {
+          return new Response(JSON.stringify({ error: 'Missing collaboratorId' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+       }
+
+       // 1. Hashear el PIN con bcrypt
+       const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
+       const hashedPin = await bcrypt.hash(pin, salt);
+
+       // 2. Guardarlo en el colaborador
+       const { error: updateError } = await supabaseAdmin
+         .from('collaborators')
+         .update({ security_pin: hashedPin })
+         .eq('id', collaboratorId);
+
+       if (updateError) throw updateError;
+
+       return new Response(JSON.stringify({ success: true }), {
+         status: 200,
+         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+       });
     }
 
-    if (!configData) {
-      return new Response(JSON.stringify({ error: 'Config not found' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+    // Para operaciones que afectan la config global o requieren verificar config global:
+    let configData = null;
+    let configError = null;
+
+    if (businessId) {
+       const resp = await supabaseAdmin.from('config').select('id, settings').eq('business_id', businessId).limit(1).maybeSingle();
+       configData = resp.data;
+       configError = resp.error;
+    } else {
+       // Fallback para legacy sin businessId
+       const resp = await supabaseClient.from('config').select('id, settings').limit(1).maybeSingle();
+       configData = resp.data;
+       configError = resp.error;
     }
 
-    const currentSettings = configData.settings || {};
-    const storedPin = currentSettings.securityPin;
+    if (configError) throw configError;
 
     if (action === 'hash') {
+      if (!configData) {
+        return new Response(JSON.stringify({ error: 'Config not found' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      const currentSettings = configData.settings || {};
+
       // 1. Hashear el PIN con bcrypt
       const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
       const hashedPin = await bcrypt.hash(pin, salt);
@@ -83,7 +122,7 @@ serve(async (req) => {
       // 2. Actualizar configuración
       const newSettings = { ...currentSettings, securityPin: hashedPin };
 
-      const { error: updateError } = await supabaseClient
+      const { error: updateError } = await supabaseAdmin
         .from('config')
         .update({ settings: newSettings })
         .eq('id', configData.id);
@@ -96,53 +135,79 @@ serve(async (req) => {
       });
 
     } else if (action === 'verify') {
-      if (!storedPin) {
-        // No hay PIN configurado en la DB, retornar inválido
-        return new Response(JSON.stringify({ valid: false, error: 'No PIN configured' }), {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
 
-      let isValid = false;
+      let globalStoredPin = configData?.settings?.securityPin;
+      let validGlobal = false;
 
-      // Verificar si el storedPin ya es un hash bcrypt (empieza con $2a$, $2b$, etc.)
-      if (storedPin.startsWith('$2a$') || storedPin.startsWith('$2b$')) {
-        isValid = await bcrypt.compare(pin, storedPin);
-      } else {
-        // Modo legacy: texto plano
-        isValid = constantTimeCompare(pin, storedPin);
-
-        if (isValid) {
-          // AUTO-MIGRACIÓN: Si es válido en plano, hashear y reemplazar para que no quede más en plano
-          try {
-            // Utilizamos el supabase admin client (service_role_key) para asegurar que la
-            // migración se guarde exitosamente incluso si el usuario no tiene permisos RLS completos
-            // (aunque si llegó aquí, la query auth funcionó) y para evitar race conditions.
-            const supabaseAdmin = createClient(
-              Deno.env.get('SUPABASE_URL') ?? '',
-              Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-            );
-
-            const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
-            const hashedPin = await bcrypt.hash(pin, salt);
-
-            // Solo actualizar si sigue siendo igual en texto plano para mitigar race condition
-            // de que alguien haya cambiado el pin mientras tanto.
-            const newSettings = { ...currentSettings, securityPin: hashedPin };
-
-            await supabaseAdmin
-              .from('config')
-              .update({ settings: newSettings })
-              .eq('id', configData.id);
-          } catch (migrateErr) {
-            console.error('Error auto-migrating legacy PIN:', migrateErr);
-            // Si falla la migración, la verificación sigue siendo válida de todos modos
+      // 1. Verificar contra el PIN global del dueño
+      if (globalStoredPin) {
+        if (globalStoredPin.startsWith('$2a$') || globalStoredPin.startsWith('$2b$')) {
+          validGlobal = await bcrypt.compare(pin, globalStoredPin);
+        } else {
+          validGlobal = constantTimeCompare(pin, globalStoredPin);
+          if (validGlobal && configData) {
+             // Auto-migración global
+             try {
+               const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
+               const hashedPin = await bcrypt.hash(pin, salt);
+               const newSettings = { ...configData.settings, securityPin: hashedPin };
+               await supabaseAdmin.from('config').update({ settings: newSettings }).eq('id', configData.id);
+             } catch(e) {}
           }
         }
       }
 
-      return new Response(JSON.stringify({ valid: isValid }), {
+      if (validGlobal) {
+         return new Response(JSON.stringify({
+           valid: true,
+           authData: { id: 'admin', name: 'Administrador Principal', role: 'owner' }
+         }), {
+           status: 200,
+           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+         });
+      }
+
+      // 2. Si el PIN global no coincide (o no existe), probar con los colaboradores del business
+      // Requerimos tener el businessId (pasado desde PinModal o inferido) para no iterar toda la db
+      // Vamos a traer los colaboradores con role de acceso que tengan security_pin configurado
+
+      let collabsQuery = supabaseAdmin
+        .from('collaborators')
+        .select('id, name, role, security_pin')
+        .not('security_pin', 'is', null);
+
+      if (businessId) {
+        collabsQuery = collabsQuery.eq('business_id', businessId);
+      }
+
+      const { data: collabs, error: collabsError } = await collabsQuery;
+
+      if (!collabsError && collabs && collabs.length > 0) {
+        for (const collab of collabs) {
+          if (collab.security_pin) {
+            let isValid = false;
+            if (collab.security_pin.startsWith('$2a$') || collab.security_pin.startsWith('$2b$')) {
+              isValid = await bcrypt.compare(pin, collab.security_pin);
+            } else {
+              // Si de alguna forma guardaron un pin plano
+              isValid = constantTimeCompare(pin, collab.security_pin);
+            }
+
+            if (isValid) {
+               return new Response(JSON.stringify({
+                 valid: true,
+                 authData: { id: collab.id, name: collab.name, role: collab.role }
+               }), {
+                 status: 200,
+                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+               });
+            }
+          }
+        }
+      }
+
+      // 3. Ninguno coincidió
+      return new Response(JSON.stringify({ valid: false, error: 'Invalid PIN' }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });

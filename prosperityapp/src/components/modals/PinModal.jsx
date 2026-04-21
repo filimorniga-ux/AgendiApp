@@ -90,8 +90,17 @@ const PinModal = ({ isOpen, onClose, onSuccess, operation = null }) => {
     setIsVerifying(true);
     try {
       console.log('PinModal calling invoke with pin:', pin);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const userMeta = session?.user?.user_metadata || {};
+      const localBusId = localStorage.getItem('prosperity_business_id');
+      const effectiveBusinessId = userMeta.business_id || localBusId || '';
+
       const { data, error: fnError } = await supabase.functions.invoke('manage-pin', {
         body: { action: 'verify', pin },
+        headers: {
+          'x-business-id': effectiveBusinessId
+        }
       });
       console.log('PinModal invoke returned:', { data, fnError });
 
@@ -115,7 +124,7 @@ const PinModal = ({ isOpen, onClose, onSuccess, operation = null }) => {
       // Éxito
       setError('');
       setAttempts(0);
-      onSuccess({ notes: notes.trim() || null });
+      onSuccess({ notes: notes.trim() || null, authData: data?.authData });
     } catch (err) {
       if (!isMounted.current) return;
       console.warn('Error al verificar PIN:', err);
