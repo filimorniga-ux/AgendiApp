@@ -46,6 +46,10 @@ const PublicPrices               = lazy(() => import('./pages/Public/PublicPrice
 const PublicClientLogin          = lazy(() => import('./pages/Public/PublicClientLogin'));
 const PublicHistory              = lazy(() => import('./pages/Public/PublicHistory'));
 
+// Auth pages
+const AuthCallbackPage           = lazy(() => import('./pages/AuthCallbackPage'));
+const ResetPasswordPage          = lazy(() => import('./pages/ResetPasswordPage'));
+
 // Fallback de carga — spinner mínimo que no añade peso al bundle inicial
 const PageLoader = () => (
   <div
@@ -115,6 +119,10 @@ function App() {
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<WebsiteApp />} />
+
+                {/* Auth callback routes (email confirmation, password reset) */}
+                <Route path="/auth/callback" element={<AuthCallbackPage />} />
+                <Route path="/auth/update-password" element={<ResetPasswordPage />} />
 
                 {/* Rutas Públicas de Clientes (Multi-tenant) */}
                 <Route path="/p/:slug" element={<PublicLayout />}>

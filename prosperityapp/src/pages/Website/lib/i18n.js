@@ -144,7 +144,37 @@ export const translations = {
             apple: "Continuar con Apple",
             switch_reg: "¿No tienes cuenta? Regístrate",
             switch_log: "¿Ya tienes cuenta? Inicia Sesión",
-            error_generic: "Ocurrió un error. Verifica tus datos."
+            error_generic: "Ocurrió un error. Verifica tus datos.",
+            // Email verification flow
+            check_email_title: "¡Revisa tu correo!",
+            check_email_msg: "Te enviamos un enlace de confirmación a",
+            check_email_hint: "Revisa también la carpeta de spam o correo no deseado.",
+            resend_email: "Reenviar correo de confirmación",
+            resend_success: "¡Correo reenviado! Revisa tu bandeja de entrada.",
+            resend_cooldown: "Espera unos segundos antes de reenviar.",
+            already_confirmed: "¿Ya confirmaste tu correo?",
+            // Forgot password
+            forgot_password: "¿Olvidaste tu contraseña?",
+            forgot_password_title: "Recuperar Contraseña",
+            forgot_password_msg: "Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.",
+            forgot_password_submit: "Enviar enlace",
+            forgot_password_sent: "¡Enlace enviado! Revisa tu correo para restablecer tu contraseña.",
+            // Reset password
+            reset_password_title: "Nueva Contraseña",
+            new_password: "Nueva contraseña",
+            confirm_password: "Confirmar contraseña",
+            reset_password_submit: "Establecer contraseña",
+            reset_password_success: "¡Contraseña actualizada correctamente!",
+            passwords_no_match: "Las contraseñas no coinciden.",
+            // Validation
+            password_min_length: "La contraseña debe tener al menos 8 caracteres.",
+            password_needs_number: "La contraseña debe incluir al menos un número.",
+            // Google account detection
+            account_exists_google: "Ya tienes una cuenta con Google. Puedes iniciar sesión con Google o",
+            set_password_link: "establecer una contraseña.",
+            // Email not confirmed
+            email_not_confirmed: "Tu correo aún no ha sido confirmado. Revisa tu bandeja de entrada o",
+            back_to_login: "Volver al inicio de sesión"
         },
         dashboard: {
             welcome: "Bienvenido,",
@@ -321,7 +351,37 @@ export const translations = {
             apple: "Continue with Apple",
             switch_reg: "No account? Register",
             switch_log: "Already have an account? Login",
-            error_generic: "An error occurred. Check your credentials."
+            error_generic: "An error occurred. Check your credentials.",
+            // Email verification flow
+            check_email_title: "Check your email!",
+            check_email_msg: "We sent a confirmation link to",
+            check_email_hint: "Also check your spam or junk folder.",
+            resend_email: "Resend confirmation email",
+            resend_success: "Email resent! Check your inbox.",
+            resend_cooldown: "Wait a few seconds before resending.",
+            already_confirmed: "Already confirmed your email?",
+            // Forgot password
+            forgot_password: "Forgot your password?",
+            forgot_password_title: "Recover Password",
+            forgot_password_msg: "Enter your email and we'll send you a link to reset your password.",
+            forgot_password_submit: "Send link",
+            forgot_password_sent: "Link sent! Check your email to reset your password.",
+            // Reset password
+            reset_password_title: "New Password",
+            new_password: "New password",
+            confirm_password: "Confirm password",
+            reset_password_submit: "Set password",
+            reset_password_success: "Password updated successfully!",
+            passwords_no_match: "Passwords don't match.",
+            // Validation
+            password_min_length: "Password must be at least 8 characters.",
+            password_needs_number: "Password must include at least one number.",
+            // Google account detection
+            account_exists_google: "You already have a Google account. You can sign in with Google or",
+            set_password_link: "set a password.",
+            // Email not confirmed
+            email_not_confirmed: "Your email hasn't been confirmed yet. Check your inbox or",
+            back_to_login: "Back to login"
         },
         dashboard: {
             welcome: "Welcome,",
