@@ -11,14 +11,14 @@
  *
  * El modal:
  *  1. Muestra qué operación se quiere autorizar.
- *  2. Valida el PIN contra config.settings.securityPin (global del negocio).
+ *  2. Valida el PIN contra el hash bcrypt vía Edge Function manage-pin.
  *  3. Si la operación requiere nota obligatoria → muestra campo de texto.
  *  4. Bloquea tras 3 intentos fallidos (30 s).
  *  5. Devuelve { notes } al callback onSuccess.
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { useData } from '../../context/DataContext';
 import { getOperationDef } from '../../lib/permissions';
+import { supabase } from '../../supabase/client';
 
 const MAX_ATTEMPTS = 3;
 const BLOCK_DURATION_MS = 30_000;
@@ -29,12 +29,8 @@ const PinModal = ({ isOpen, onClose, onSuccess, operation = null }) => {
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
   const [blockedUntil, setBlockedUntil] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
   const inputRef = useRef(null);
-
-  const { config } = useData();
-
-  // PIN almacenado en config → settings.securityPin
-  const storedPin = config?.[0]?.securityPin || '1234';
 
   // Definición de la operación (si aplica)
   const opDef = operation ? getOperationDef(operation) : null;
@@ -48,6 +44,7 @@ const PinModal = ({ isOpen, onClose, onSuccess, operation = null }) => {
       setPin('');
       setNotes('');
       setError('');
+      setIsVerifying(false);
       // No resetear attempts ni blockedUntil (persisten hasta expirar)
       timerId = setTimeout(() => inputRef.current?.focus(), 100);
     }
@@ -73,37 +70,48 @@ const PinModal = ({ isOpen, onClose, onSuccess, operation = null }) => {
 
   const isBlocked = !!blockedUntil;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isBlocked) return;
+    if (isBlocked || isVerifying) return;
 
-    // Validar PIN
-    // TODO: SECURITY: El PIN se valida en texto plano. Se recomienda encarecidamente
-    // implementar un sistema de hashing (ej. bcrypt) en el backend (edge function)
-    // y no exponer el 'securityPin' crudo en 'config'.
-    if (pin !== storedPin) {
-      const newAttempts = attempts + 1;
-      setAttempts(newAttempts);
-      if (newAttempts >= MAX_ATTEMPTS) {
-        setBlockedUntil(Date.now() + BLOCK_DURATION_MS);
-        setError('Demasiados intentos fallidos. Espera 30 segundos.');
-      } else {
-        setError(`PIN incorrecto. Intento ${newAttempts}/${MAX_ATTEMPTS}.`);
-      }
-      setPin('');
-      return;
-    }
-
-    // Validar nota obligatoria
+    // Validar nota obligatoria primero (no gastar llamada al servidor)
     if (requireNote && !notes.trim()) {
       setError('Debes ingresar una nota justificando esta operación.');
       return;
     }
 
-    // Éxito
-    setError('');
-    setAttempts(0);
-    onSuccess({ notes: notes.trim() || null });
+    // Verificar PIN vía Edge Function (bcrypt en servidor)
+    setIsVerifying(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('manage-pin', {
+        body: { action: 'verify', pin },
+      });
+
+      if (fnError) throw fnError;
+
+      if (!data?.valid) {
+        const newAttempts = attempts + 1;
+        setAttempts(newAttempts);
+        if (newAttempts >= MAX_ATTEMPTS) {
+          setBlockedUntil(Date.now() + BLOCK_DURATION_MS);
+          setError('Demasiados intentos fallidos. Espera 30 segundos.');
+        } else {
+          setError(`PIN incorrecto. Intento ${newAttempts}/${MAX_ATTEMPTS}.`);
+        }
+        setPin('');
+        return;
+      }
+
+      // Éxito
+      setError('');
+      setAttempts(0);
+      onSuccess({ notes: notes.trim() || null });
+    } catch (err) {
+      console.warn('Error al verificar PIN:', err);
+      setError('Error de conexión. Intenta de nuevo.');
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -188,10 +196,10 @@ const PinModal = ({ isOpen, onClose, onSuccess, operation = null }) => {
             </button>
             <button
               type="submit"
-              disabled={isBlocked || !pin}
+              disabled={isBlocked || isVerifying || !pin}
               className="flex-1 btn-golden py-2.5 font-bold disabled:opacity-40 disabled:cursor-not-allowed text-sm"
             >
-              {isBlocked ? 'Bloqueado…' : 'Autorizar'}
+              {isBlocked ? 'Bloqueado…' : isVerifying ? 'Verificando…' : 'Autorizar'}
             </button>
           </div>
         </form>

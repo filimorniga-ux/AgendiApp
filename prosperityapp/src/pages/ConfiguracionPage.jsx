@@ -293,30 +293,22 @@ const ConfiguracionPage = () => {
 
   const handlePinChange = async () => {
     setPinError('');
-    const currentStoredPin = settings.securityPin || '1234';
-
     if (isForgotPinMode) {
       if (!pinChangeData.otpCode || pinChangeData.otpCode.length < 6) {
         setPinError('Por favor ingresa el código completo que enviamos a tu correo');
         return;
       }
-    } else {
-      // Validar que el PIN actual sea correcto
-      if (pinChangeData.currentPin !== currentStoredPin) {
-        setPinError(t('settings.security.incorrectCurrentPin') || 'PIN actual incorrecto');
-        return;
-      }
+    }
+
+    // Validar que los PINs coincidan (validación local rápida)
+    if (pinChangeData.newPin !== pinChangeData.confirmPin) {
+      setPinError(t('settings.security.pinMismatch') || 'Los PINs no coinciden');
+      return;
     }
 
     // Validar que el nuevo PIN tenga al menos 4 dígitos
     if (!pinChangeData.newPin || pinChangeData.newPin.length < 4) {
       setPinError(t('settings.security.pinError') || 'El PIN debe tener al menos 4 dígitos');
-      return;
-    }
-
-    // Validar que los PINs coincidan
-    if (pinChangeData.newPin !== pinChangeData.confirmPin) {
-      setPinError(t('settings.security.pinMismatch') || 'Los PINs no coinciden');
       return;
     }
 
@@ -337,14 +329,22 @@ const ConfiguracionPage = () => {
           toast.error(errMsg);
           return;
         }
+      } else {
+        // Verificar PIN actual vía Edge Function (bcrypt)
+        const { data: verifyData, error: verifyError } = await supabase.functions.invoke('manage-pin', {
+          body: { action: 'verify', pin: pinChangeData.currentPin },
+        });
+        if (verifyError || !verifyData?.valid) {
+          setPinError(t('settings.security.incorrectCurrentPin') || 'PIN actual incorrecto');
+          return;
+        }
       }
 
-      const configId = config?.[0]?.id;
-      if (!configId) throw new Error('ID de configuración no disponible');
-      
-      const currentSettings = config?.[0]?.settings || {};
-      const { error } = await sbUpdate('config', configId, { settings: { ...currentSettings, securityPin: pinChangeData.newPin } });
-      if (error) throw error;
+      // Hashear y guardar el nuevo PIN vía Edge Function (bcrypt en servidor)
+      const { data: pinData, error: pinFnError } = await supabase.functions.invoke('manage-pin', {
+        body: { action: 'hash', pin: pinChangeData.newPin },
+      });
+      if (pinFnError || !pinData?.success) throw new Error(pinFnError?.message || 'Error al hashear PIN');
       toast.success(t('settings.security.pinChanged') || 'PIN actualizado correctamente');
       setIsPinModalOpen(false);
       setIsForgotPinMode(false);
