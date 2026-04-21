@@ -67,5 +67,17 @@ vi.mock('../supabase/client', () => ({
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: null, error: null }),
     }),
+    functions: {
+      invoke: vi.fn().mockImplementation((funcName, options) => {
+        if (funcName === 'manage-pin') {
+          const pin = options?.body?.pin;
+          if (pin === '1234' || pin === '1213') {
+            return Promise.resolve({ data: { valid: true, success: true }, error: null });
+          }
+          return Promise.resolve({ data: { valid: false, success: false }, error: null });
+        }
+        return Promise.resolve({ data: {}, error: null });
+      }),
+    },
   },
 }));

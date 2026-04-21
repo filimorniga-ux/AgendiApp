@@ -17,7 +17,19 @@ vi.mock('../../../supabase/db', () => ({
 
 vi.mock('../../../supabase/client', () => ({
   supabase: {
-    auth: { getSession: vi.fn().mockResolvedValue({ data: { session: null } }) }
+    auth: { getSession: vi.fn().mockResolvedValue({ data: { session: null } }) },
+    functions: {
+      invoke: vi.fn().mockImplementation((funcName, options) => {
+        if (funcName === 'manage-pin') {
+          const pin = options?.body?.pin;
+          if (pin === '1234') {
+            return Promise.resolve({ data: { valid: true, success: true }, error: null });
+          }
+          return Promise.resolve({ data: { valid: false, success: false }, error: null });
+        }
+        return Promise.resolve({ data: {}, error: null });
+      }),
+    }
   }
 }));
 
@@ -84,11 +96,16 @@ describe('CollaboratorModal - Acceso App Tab', () => {
     // Attempt 1
     fireEvent.change(pinInput, { target: { value: '9999' } });
     fireEvent.click(authButton);
-    expect(screen.getByText(/PIN incorrecto\. Intento 1\/3\./i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/PIN incorrecto\. Intento 1\/3\./i)).toBeInTheDocument();
+    });
 
     // Attempt 2
     fireEvent.change(pinInput, { target: { value: '9999' } });
     fireEvent.click(authButton);
+    await waitFor(() => {
+      expect(screen.getByText(/PIN incorrecto\. Intento 2\/3\./i)).toBeInTheDocument();
+    });
 
     // Attempt 3
     fireEvent.change(pinInput, { target: { value: '9999' } });

@@ -69,6 +69,12 @@ const ConfiguracionPage = () => {
   });
   const [pinError, setPinError] = useState('');
   const [isProcessingPin, setIsProcessingPin] = useState(false);
+  const isMounted = React.useRef(true);
+
+  React.useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
 
   const settings = useMemo(() => {
     if (!config || !config[0]) {
@@ -345,16 +351,21 @@ const ConfiguracionPage = () => {
         body: { action: 'hash', pin: pinChangeData.newPin },
       });
       if (pinFnError || !pinData?.success) throw new Error(pinFnError?.message || 'Error al hashear PIN');
+
+      if (!isMounted.current) return;
       toast.success(t('settings.security.pinChanged') || 'PIN actualizado correctamente');
       setIsPinModalOpen(false);
       setIsForgotPinMode(false);
       setOtpStep('request');
       setPinChangeData({ currentPin: '', newPin: '', confirmPin: '', otpCode: '' });
     } catch (error) {
+      if (!isMounted.current) return;
       console.warn('Error al cambiar PIN:', error);
-      toast.error(t('common.error'));
+      toast.error(error?.message?.includes('Config not found') ? 'Configuración no encontrada.' : t('common.error'));
     } finally {
-      setIsProcessingPin(false);
+      if (isMounted.current) {
+        setIsProcessingPin(false);
+      }
     }
   };
 

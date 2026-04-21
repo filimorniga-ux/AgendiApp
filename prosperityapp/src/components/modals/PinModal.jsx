@@ -31,6 +31,12 @@ const PinModal = ({ isOpen, onClose, onSuccess, operation = null }) => {
   const [blockedUntil, setBlockedUntil] = useState(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const inputRef = useRef(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
 
   // Definición de la operación (si aplica)
   const opDef = operation ? getOperationDef(operation) : null;
@@ -83,9 +89,11 @@ const PinModal = ({ isOpen, onClose, onSuccess, operation = null }) => {
     // Verificar PIN vía Edge Function (bcrypt en servidor)
     setIsVerifying(true);
     try {
+      console.log('PinModal calling invoke with pin:', pin);
       const { data, error: fnError } = await supabase.functions.invoke('manage-pin', {
         body: { action: 'verify', pin },
       });
+      console.log('PinModal invoke returned:', { data, fnError });
 
       if (fnError) throw fnError;
 
@@ -102,15 +110,20 @@ const PinModal = ({ isOpen, onClose, onSuccess, operation = null }) => {
         return;
       }
 
+      if (!isMounted.current) return;
+
       // Éxito
       setError('');
       setAttempts(0);
       onSuccess({ notes: notes.trim() || null });
     } catch (err) {
+      if (!isMounted.current) return;
       console.warn('Error al verificar PIN:', err);
-      setError('Error de conexión. Intenta de nuevo.');
+      setError(err?.message?.includes('Config not found') ? 'Configuración no encontrada.' : 'Error de conexión. Intenta de nuevo.');
     } finally {
-      setIsVerifying(false);
+      if (isMounted.current) {
+        setIsVerifying(false);
+      }
     }
   };
 
