@@ -16,14 +16,16 @@ export default function CajaDiariaPage() {
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [sessionType, setSessionType] = useState('arqueo'); // 'arqueo' or 'cierre'
   const [sessionSummary, setSessionSummary] = useState(null);
+  const [sessionAuthData, setSessionAuthData] = useState(null);
 
   useEffect(() => {
     feather.replace();
   }, [activeTab]);
 
-  const handleOpenSessionModal = (summaryData, type="arqueo") => {
+  const handleOpenSessionModal = (summaryData, type="arqueo", authData = null) => {
     setSessionSummary(summaryData);
     setSessionType(type);
+    setSessionAuthData(authData);
     setIsSessionModalOpen(true);
   };
 
@@ -90,6 +92,7 @@ export default function CajaDiariaPage() {
         onClose={() => setIsSessionModalOpen(false)}
         summaryData={sessionSummary}
         sessionType={sessionType}
+        authData={sessionAuthData}
       />
     </div>
   );

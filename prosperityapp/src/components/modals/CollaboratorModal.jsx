@@ -55,6 +55,7 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
   const [newPassword,       setNewPassword]       = useState('');
   const [showPassword,      setShowPassword]      = useState(false);
   const [isSavingAccess,    setIsSavingAccess]    = useState(false);
+  const [newPin,            setNewPin]            = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -232,6 +233,38 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
       toast.success('Acceso revocado correctamente');
     } catch (err) {
       toast.error(`Error al revocar acceso: ${err.message}`);
+    } finally {
+      setIsSavingAccess(false);
+    }
+  };
+
+  const handleSavePin = async () => {
+    if (!newPin || newPin.length < 4) { toast.error('El PIN debe tener al menos 4 dígitos.'); return; }
+    setIsSavingAccess(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const authHeader = session?.access_token
+        ? `Bearer ${session.access_token}`
+        : `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`;
+      
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/manage-pin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authHeader,
+          'x-business-id': effectiveBusinessId || '',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ action: 'set_collaborator_pin', collaboratorId: collaboratorToEdit.id, pin: newPin }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || 'Error en Edge Function');
+      
+      toast.success('PIN asignado correctamente');
+      setNewPin('');
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al asignar el PIN: ' + err.message);
     } finally {
       setIsSavingAccess(false);
     }
@@ -460,6 +493,36 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
                   )}
                 </div>
               </form>
+            )}
+
+            {isEditMode && ['owner', 'admin', 'manager'].includes(formData.appRole) && (
+              <div className="mt-8 pt-6 border-t border-border-main">
+                <h4 className="font-semibold text-text-main mb-4">PIN de Autorización</h4>
+                <p className="text-xs text-text-muted mb-4">
+                  Define un código PIN de 4 a 6 dígitos para que este colaborador pueda autorizar operaciones sensibles como mermas, arqueos y cierres de caja.
+                </p>
+                <div className="flex gap-4 items-end">
+                  <div className="flex-1">
+                    <label className="text-xs text-text-muted font-semibold uppercase tracking-wide">Nuevo PIN</label>
+                    <input 
+                      type="password" 
+                      value={newPin} 
+                      onChange={e => setNewPin(e.target.value.replace(/\D/g, ''))} 
+                      maxLength={6} 
+                      placeholder="Mínimo 4 dígitos" 
+                      className="input-themed mt-1 font-mono tracking-widest text-center" 
+                    />
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={handleSavePin} 
+                    disabled={isSavingAccess || newPin.length < 4} 
+                    className="btn-golden py-2 px-5 font-semibold disabled:opacity-50 h-[42px]"
+                  >
+                    {isSavingAccess ? 'Guardando...' : 'Asignar PIN'}
+                  </button>
+                </div>
+              </div>
             )}
           </div>
 

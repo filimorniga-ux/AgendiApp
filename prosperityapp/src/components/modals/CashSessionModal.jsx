@@ -7,7 +7,7 @@ import { supabase } from '../../supabase/client';
 
 const formatCurrency = (val) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(val || 0);
 
-export default function CashSessionModal({ isOpen, onClose, summaryData, sessionType }) {
+export default function CashSessionModal({ isOpen, onClose, summaryData, sessionType, authData }) {
   const { t } = useTranslation();
   const { businessId } = useData();
   const [actualCash, setActualCash] = useState(0);
@@ -33,6 +33,9 @@ export default function CashSessionModal({ isOpen, onClose, summaryData, session
     setIsSubmitting(true);
 
     try {
+      const authorText = authData ? `[Autorizado por: ${authData.name}] ` : '';
+      const finalObservations = `${authorText}${observations}`.trim();
+
       const payload = {
         business_id: businessId,
         type: sessionType, // 'arqueo' or 'cierre'
@@ -42,7 +45,7 @@ export default function CashSessionModal({ isOpen, onClose, summaryData, session
         total_sales: summaryData.totalVentas + summaryData.totalServicios + summaryData.totalVentasGC,
         total_expenses: summaryData.totalGastos,
         total_advances: summaryData.totalAdelantos,
-        observations: observations,
+        observations: finalObservations,
       };
 
       const { error } = await supabase.from('cash_sessions').insert([payload]);

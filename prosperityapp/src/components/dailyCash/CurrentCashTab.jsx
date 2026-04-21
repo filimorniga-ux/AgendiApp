@@ -184,11 +184,11 @@ export default function CurrentCashTab({ onArqueoClick }) {
     setIsPinModalOpen(true);
   };
 
-  const handlePinSuccess = () => {
+  const handlePinSuccess = ({ authData }) => {
     setIsPinModalOpen(false);
     if (pendingCashAction) {
       // Fue un arqueo/cierre → ejecutar la acción aplazada
-      onArqueoClick(pendingCashAction.summary, pendingCashAction.mode);
+      onArqueoClick(pendingCashAction.summary, pendingCashAction.mode, authData);
       setPendingCashAction(null);
     } else {
       // Fue edición de movimiento

@@ -29,7 +29,7 @@ export function StockExitModal({ product, inventoryType, onClose, onSuccess }) {
   const newStock = Math.max(0, currentStock - Number(qty));
   const isInsufficient = Number(qty) > currentStock;
 
-  async function handleConfirm(pinNotes = null) {
+  async function handleConfirm(pinNotes = null, authData = null) {
     if (qty <= 0 || isInsufficient) return;
     setLoading(true);
     setError(null);
@@ -42,7 +42,8 @@ export function StockExitModal({ product, inventoryType, onClose, onSuccess }) {
       if (updErr) throw updErr;
 
       // 2. Registrar movimiento
-      const finalNotes = pinNotes ? `[Autorizado] ${pinNotes}${notes ? ' | ' + notes : ''}` : (notes || null);
+      const authorText = authData ? `[Autorizado por: ${authData.name}]` : `[Autorizado]`;
+      const finalNotes = pinNotes ? `${authorText} ${pinNotes}${notes ? ' | ' + notes : ''}` : (notes || null);
       const { error: movErr } = await supabase
         .from('stock_movements')
         .insert({
@@ -67,7 +68,7 @@ export function StockExitModal({ product, inventoryType, onClose, onSuccess }) {
           entity_table: table,
           entity_id: product.id,
           notes: finalNotes,
-          details: { product_name: product.name, qty: Number(qty), previous_stock: currentStock, new_stock: newStock },
+          details: { product_name: product.name, qty: Number(qty), previous_stock: currentStock, new_stock: newStock, author_id: authData?.id || null },
         }).catch(console.warn);
       }
 
@@ -175,9 +176,9 @@ export function StockExitModal({ product, inventoryType, onClose, onSuccess }) {
           isOpen={showPinForMerma}
           operation="stock_shrinkage"
           onClose={() => setShowPinForMerma(false)}
-          onSuccess={({ notes: pinNotes }) => {
+          onSuccess={({ notes: pinNotes, authData }) => {
             setShowPinForMerma(false);
-            handleConfirm(pinNotes);
+            handleConfirm(pinNotes, authData);
           }}
         />
       </div>
