@@ -16,16 +16,24 @@ const ResetPasswordPage = () => {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [sessionChecked, setSessionChecked] = useState(false);
+
   // Verify user is authenticated (came from recovery link)
   useEffect(() => {
+    let mounted = true;
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!mounted) return;
+
       if (!session) {
         // No session means the user didn't come from a valid recovery link
         navigate('/', { replace: true });
+      } else {
+        setSessionChecked(true);
       }
     };
     checkSession();
+    return () => { mounted = false; };
   }, [navigate]);
 
   const validatePassword = (pwd) => {
@@ -33,6 +41,9 @@ const ResetPasswordPage = () => {
     if (!/\d/.test(pwd)) return 'La contraseña debe incluir al menos un número.';
     return '';
   };
+
+  // Only render once session is verified to avoid flash of content
+  if (!sessionChecked) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

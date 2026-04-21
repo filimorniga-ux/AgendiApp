@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../supabase/client';
 
@@ -18,10 +18,22 @@ const AuthCallbackPage = () => {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState('processing'); // 'processing' | 'success' | 'error'
   const [errorMsg, setErrorMsg] = useState('');
+  const processingRef = useRef(false);
 
   useEffect(() => {
     const handleCallback = async () => {
+      if (processingRef.current) return;
+      processingRef.current = true;
+
       try {
+        // Parse errors from URL params or hash
+        const urlError = searchParams.get('error') || new URLSearchParams(window.location.hash.substring(1)).get('error');
+        const urlErrorDescription = searchParams.get('error_description') || new URLSearchParams(window.location.hash.substring(1)).get('error_description');
+
+        if (urlError) {
+          throw new Error(urlErrorDescription || 'El enlace de verificación es inválido o ha expirado.');
+        }
+
         const tokenHash = searchParams.get('token_hash');
         const type = searchParams.get('type');
         const code = searchParams.get('code');
@@ -63,12 +75,13 @@ const AuthCallbackPage = () => {
         }
 
         // If there's a hash fragment with access_token (implicit flow)
-        if (window.location.hash) {
+        if (window.location.hash && window.location.hash.includes('access_token')) {
           // Supabase client automatically processes the hash fragment
           const { data: { session }, error } = await supabase.auth.getSession();
           if (error) throw error;
           if (session) {
-            const event = searchParams.get('type');
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const event = hashParams.get('type');
             if (event === 'recovery') {
               navigate('/auth/update-password', { replace: true });
               return;
