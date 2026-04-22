@@ -69,7 +69,7 @@ const CierresMensualesPage = () => {
   const [recordToEdit, setRecordToEdit] = useState(null);
 
   const { records, partners, loading: loadingMonthly } = useMonthlyRecords(selectedMonth);
-  const { config } = useData();
+  const { config, businessId } = useData();
 
   // Usar useMemo para que las categorías se actualicen al cambiar el idioma
   const monthlyCategories = useMemo(() => ({
@@ -377,6 +377,7 @@ const CierresMensualesPage = () => {
         onClose={() => setIsModalOpen(false)}
         recordToEdit={recordToEdit}
         yearMonth={selectedMonth}
+        businessId={businessId}
       />
     </div>
   );

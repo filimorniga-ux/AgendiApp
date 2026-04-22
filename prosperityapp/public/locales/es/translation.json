@@ -697,7 +697,8 @@
       "created": "Cita agendada con éxito",
       "updated": "Cita actualizada",
       "deleted": "Cita eliminada",
-      "overlap": "El estilista ya tiene una cita en ese horario."
+      "overlap": "El estilista ya tiene una cita en ese horario.",
+      "paymentRegistered": "Pago registrado con éxito"
     }
   },
   "orders": {

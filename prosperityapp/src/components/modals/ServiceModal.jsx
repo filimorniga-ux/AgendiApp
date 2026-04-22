@@ -21,7 +21,15 @@ const ServiceModal = ({ isOpen, onClose, serviceToEdit }) => {
         setFormData({ name: '', category: '', price: '', duration: '' });
       }
     }
-  }, [isOpen, serviceToEdit, isEditMode]);
+    
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, serviceToEdit, isEditMode, onClose]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

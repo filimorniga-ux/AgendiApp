@@ -12,3 +12,4 @@ tests/e2e/screenshots/
 # Build artifacts
 dev-dist/
 dist/
+tests/e2e/.auth/

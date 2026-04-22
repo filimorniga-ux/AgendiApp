@@ -26,8 +26,16 @@ const ClientModal = ({ isOpen, onClose, clientToEdit }) => {
       }
       setActiveTab('personal');
       setTimeout(() => feather.replace(), 50);
+
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+          onClose();
+        }
+      };
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [isOpen, clientToEdit, isEditMode]);
+  }, [isOpen, clientToEdit, isEditMode, onClose]);
 
   useEffect(() => { feather.replace(); }, [activeTab]);
 
@@ -48,6 +56,11 @@ const ClientModal = ({ isOpen, onClose, clientToEdit }) => {
       delete dataToSave.id;
       delete dataToSave.createdAt;
       delete dataToSave.updatedAt;
+
+      // Ensure empty dates are null, not "" for postgres
+      if (!dataToSave.birthday) {
+        dataToSave.birthday = null;
+      }
 
       if (isEditMode) {
         const { error } = await sbUpdate('clients', clientToEdit.id, dataToSave);

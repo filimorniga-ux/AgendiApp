@@ -44,46 +44,54 @@ export default async function globalSetup(config) {
     console.log('[Diagnostic err]', err);
   }
 
-  console.log(`\n🔑 Authenticating test user: ${email}...`);
-  
+  const maxRetries = 3;
   try {
-    // Determine the login URL (assuming baseURL redirects / to /app when not logged in)
-    await page.goto(baseURL + '/app');
-    
-    // Wait for hydration to complete to prevent native form submission!
-    await page.waitForTimeout(2000);
-    
-    // Wait for the login form to appear
-    await page.waitForSelector('input[type="email"]', { timeout: 15000 });
-    await page.waitForSelector('input[type="password"]', { timeout: 5000 });
-    
-    // Fill credentials
-    await page.fill('input[type="email"]', email);
-    await page.fill('input[type="password"]', password);
-    
-    // Click submit
-    await page.click('button:has-text("Entrar")');
-    
-    // Wait for successful login by checking that the sidebar navigation appears (indicative of the dashboard/layout loading)
-    await Promise.race([
-      expect(page.locator('#sidebar-nav')).toBeVisible({ timeout: 15000 }),
-      expect(page.locator('text=Correo o contraseña incorrectos')).toBeVisible({ timeout: 15000 }).then(() => {
-        throw new Error('Login failed: Correo o contraseña incorrectos');
-      })
-    ]);
-    
-    // Wait a brief moment to ensure Supabase session is stored in localStorage
-    await page.waitForTimeout(2000);
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      console.log(`\n🔑 Authenticating test user: ${email} (Attempt ${attempt}/${maxRetries})...`);
+      
+      try {
+        // Determine the login URL (assuming baseURL redirects / to /app when not logged in)
+        await page.goto(baseURL + '/app');
+        
+        // Wait for hydration to complete to prevent native form submission!
+        await page.waitForTimeout(2000);
+        
+        // Wait for the login form to appear
+        await page.waitForSelector('input[type="email"]', { timeout: 15000 });
+        await page.waitForSelector('input[type="password"]', { timeout: 5000 });
+        
+        // Fill credentials
+        await page.fill('input[type="email"]', email);
+        await page.fill('input[type="password"]', password);
+        
+        // Click submit
+        await page.click('button:has-text("Entrar")');
+        
+        // Wait for successful login by checking that the sidebar navigation appears (indicative of the dashboard/layout loading)
+        await Promise.race([
+          expect(page.locator('#sidebar-nav')).toBeVisible({ timeout: 15000 }),
+          expect(page.locator('text=Correo o contraseña incorrectos')).toBeVisible({ timeout: 15000 }).then(() => {
+            throw new Error('Login failed: Correo o contraseña incorrectos');
+          })
+        ]);
+        
+        // Wait a brief moment to ensure Supabase session is stored in localStorage
+        await page.waitForTimeout(2000);
 
-    // Save state
-    await page.context().storageState({ path: storageState });
-    console.log(`✅ Authentication state saved to ${storageState}\n`);
-    
-  } catch (error) {
-    console.error(`\n❌ Global setup failed completely: ${error.message}`);
-    // Optionally we can still dump the storage state or leave it empty
-    // But throwing will stop the test suite from running
-    throw error;
+        // Save state
+        await page.context().storageState({ path: storageState });
+        console.log(`✅ Authentication state saved to ${storageState}\n`);
+        break; // Exit loop on success
+        
+      } catch (error) {
+        console.error(`\n❌ Global setup failed on attempt ${attempt}: ${error.message}`);
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        console.log('Retrying in 5 seconds...');
+        await page.waitForTimeout(5000);
+      }
+    }
   } finally {
     await browser.close();
   }
