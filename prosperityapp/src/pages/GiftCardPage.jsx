@@ -1,5 +1,6 @@
 // ===== INICIO: src/pages/GiftCardPage.jsx (Sprint 98 - Final Fix) =====
 import React, { useMemo, useState } from 'react';
+import ErrorBoundary from '../components/ErrorBoundary';
 import { useData } from '../context/DataContext';
 import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,14 @@ const formatDate = (timestamp) => {
 };
 
 const GiftCardPage = () => {
+  return (
+    <ErrorBoundary>
+      <GiftCardContent />
+    </ErrorBoundary>
+  );
+};
+
+const GiftCardContent = () => {
   const { t } = useTranslation();
   const { isLoading: isDataLoading } = useData();
   const { data: giftCards, loading } = useSupabaseCollection('gift_cards');
@@ -51,7 +60,8 @@ const GiftCardPage = () => {
       const url = await uploadFile(file, path);
 
       const updateField = type === 'purchase' ? 'receiptUrl' : 'redemptionReceiptUrl';
-      await sbUpdate('gift_cards', cardId, { [updateField]: url });
+      const { error } = await sbUpdate('gift_cards', cardId, { [updateField]: url });
+      if (error) throw error;
 
       toast.success(`${type === 'purchase' ? 'Comprobante de compra' : 'Evidencia de canje'} subido correctamente`);
     } catch (err) {

@@ -33,7 +33,7 @@ const PublicHistory = () => {
         const { data: mvData } = await supabase
           .from('movements')
           .select('id, date, type, description, amount, collaborator_name')
-          .or(`client_id.eq.${clientUser.id},client.eq.${clientUser.name}`)
+          .eq('client_id', clientUser.id)
           .eq('business_id', business.id)
           .order('date', { ascending: false })
           .limit(50);

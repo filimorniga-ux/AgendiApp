@@ -545,16 +545,17 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
           let gcClientId = item.gcClientId || null;
           if (!gcClientId && item.gcClientName) {
             // Crear cliente (con soporte offline)
-            const { data: newClient } = await sbCreate('clients', {
+            const { data: newClient, error: clientErr } = await sbCreate('clients', {
               name: item.gcClientName,
               phone: item.gcContact || '',
               lastVisit: todayISO,
               notes: 'Cliente creado automáticamente desde venta de Gift Card'
             }, businessId);
+            if (clientErr && !clientErr.queued) throw clientErr;
             gcClientId = newClient?.id || null;
           }
           // Insertar gift card (con soporte offline)
-          await sbCreate('giftCards', {
+          const { error: gcErr } = await sbCreate('giftCards', {
             code: item.gcCode,
             initialValue: item.amount,
             balance: item.amount,
@@ -566,6 +567,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
             transactionId: transactionId,
             history: [{ date: today.toISOString(), action: 'Compra', amount: item.amount }]
           }, businessId);
+          if (gcErr && !gcErr.queued) throw gcErr;
         }
 
         // 4. Pago con Gift Card → actualizar balance de forma atómica
@@ -665,7 +667,8 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
 
       // 8. Actualizar última visita del cliente
       if (selectedClient && navigator.onLine) {
-        await supabase.from('clients').update({ last_visit: todayISO }).eq('id', selectedClient.id);
+        const { error: visitErr } = await supabase.from('clients').update({ last_visit: todayISO }).eq('id', selectedClient.id);
+        if (visitErr) console.warn('Error updating client last visit:', visitErr);
       }
 
 
@@ -747,8 +750,10 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
     try {
       // Borrar todos los movimientos de esta transacción (con soporte offline)
       if (navigator.onLine) {
-        await supabase.from('movements').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
-        await supabase.from('gift_cards').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
+        const { error: delMvErr } = await supabase.from('movements').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
+        if (delMvErr) throw delMvErr;
+        const { error: delGcErr } = await supabase.from('gift_cards').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
+        if (delGcErr) throw delGcErr;
       } else {
         // Offline: encolar la eliminación para cuando haya red
         await batchEnqueueWrite('movements_delete_by_txid', [{ transaction_id: transactionId, business_id: businessId }]);
