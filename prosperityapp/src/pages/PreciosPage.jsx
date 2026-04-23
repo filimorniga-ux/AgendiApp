@@ -6,10 +6,11 @@ import ServiceModal from '../components/modals/ServiceModal';
 import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next'; // <-- Importar
+import { safeNum } from '../lib/mathUtils';
 
 const formatCurrency = (value) => {
-  if (typeof value !== 'number') value = 0;
-  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
+  const num = safeNum(value);
+  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(num);
 };
 
 const PreciosPage = () => {

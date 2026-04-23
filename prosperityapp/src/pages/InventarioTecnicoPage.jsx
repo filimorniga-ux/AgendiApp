@@ -5,6 +5,7 @@ import { useData } from '../context/DataContext';
 import TechProductModal from '../components/modals/TechProductModal';
 import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
+import { safeNum } from '../lib/mathUtils';
 import { BarcodeScanner } from '../components/barcode/BarcodeScanner';
 import { BarcodeScannerButton } from '../components/barcode/BarcodeScannerButton';
 import { StockEntryModal } from '../components/inventory/StockEntryModal';
@@ -22,6 +23,7 @@ const InventarioTecnicoPage = () => {
   const [productToEdit, setProductToEdit] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [visibleCount, setVisibleCount] = useState(20);
   const { technicalInventory: techInventory, isLoading: loading } = useData();
   const error = null;
 
@@ -54,14 +56,14 @@ const InventarioTecnicoPage = () => {
   const items = useMemo(() => {
     if (!techInventory) return [];
     let calculatedItems = techInventory.map(item => {
-      const facturaCost = item.facturaCost || 0;
-      const collabCost = item.collabCost || 0;
-      const unitSize = item.unitSize || 1;
-      const stockUnits = item.stockUnits || 0;
+      const facturaCost = safeNum(item.facturaCost);
+      const collabCost = safeNum(item.collabCost);
+      const unitSize = safeNum(item.unitSize, 1);
+      const stockUnits = safeNum(item.stockUnits);
       return {
         ...item,
         totalStockValue: stockUnits * facturaCost,
-        costPerGram: item.sellMode === 'whole' ? collabCost : (collabCost / unitSize)
+        costPerGram: item.sellMode === 'whole' ? collabCost : Number((collabCost / unitSize).toFixed(4))
       }
     });
     if (selectedCategory !== 'all') {
@@ -73,8 +75,7 @@ const InventarioTecnicoPage = () => {
         item.brand.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    calculatedItems.sort((a, b) => a.name.localeCompare(b.name));
-    return calculatedItems;
+    return [...calculatedItems].sort((a, b) => a.name.localeCompare(b.name));
   }, [techInventory, searchTerm, selectedCategory]);
 
   const categories = useMemo(() => {
@@ -178,7 +179,7 @@ const InventarioTecnicoPage = () => {
               </tr>
             </thead>
             <tbody>
-              {(items || []).map(p => (
+              {(items || []).slice(0, visibleCount).map(p => (
                 <tr key={p.id} className="border-b border-border-main text-sm hover:bg-tertiary/50">
                   <td className="p-3 text-text-main font-semibold">{p.name}</td>
                   <td className="p-3">{p.brand}</td>
@@ -219,6 +220,16 @@ const InventarioTecnicoPage = () => {
           )}
         </div>
       </div>
+      {items && visibleCount < items.length && (
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={() => setVisibleCount(prev => prev + 20)}
+            className="px-6 py-2 bg-bg-tertiary text-text-main rounded-lg hover:bg-bg-main border border-border-main"
+          >
+            {t('common.loadMore') || 'Cargar más'}
+          </button>
+        </div>
+      )}
       <TechProductModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

@@ -17,10 +17,11 @@ import { QuickCreateProductModal } from '../components/inventory/QuickCreateProd
 import { useBarcodeLookup } from '../hooks/useBarcodeLookup';
 import { LotRow } from '../components/inventory/LotRow';
 import { parseDate } from '../lib/dateUtils';
+import { safeNum } from '../lib/mathUtils';
 
 const formatCurrency = (value) => {
-  if (typeof value !== 'number') value = 0;
-  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
+  const num = safeNum(value);
+  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(num);
 };
 
 const formatDate = (timestamp) => {
@@ -35,6 +36,7 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
   const [productToEdit, setProductToEdit] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [visibleCount, setVisibleCount] = useState(20);
   const { technicalInventory, isLoading } = useData();
   const loading = isLoading;
   const error = null;
@@ -42,14 +44,14 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
   const items = useMemo(() => {
     if (!technicalInventory) return [];
     let calculatedItems = technicalInventory.map(item => {
-      const facturaCost = item.facturaCost || 0;
-      const collabCost = item.collabCost || 0;
-      const unitSize = item.unitSize || 1;
-      const stockUnits = item.stockUnits || 0;
-      const minStock = item.minStock || 3;
+      const facturaCost = safeNum(item.facturaCost);
+      const collabCost = safeNum(item.collabCost);
+      const unitSize = safeNum(item.unitSize, 1);
+      const stockUnits = safeNum(item.stockUnits);
+      const minStock = safeNum(item.minStock, 3);
       return {
         ...item, stockUnits, facturaCost, collabCost, minStock,
-        costPerGram: item.sellMode === 'whole' ? collabCost : (collabCost / unitSize),
+        costPerGram: item.sellMode === 'whole' ? collabCost : Number((collabCost / unitSize).toFixed(4)),
         ganancia: collabCost - facturaCost,
         totalFacturaValue: stockUnits * facturaCost,
         totalCollabValue: stockUnits * collabCost,
@@ -60,13 +62,13 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
       calculatedItems = calculatedItems.filter(item => item.category === selectedCategory);
     }
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       calculatedItems = calculatedItems.filter(item =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.brand.toLowerCase().includes(searchTerm.toLowerCase())
+        (item.name || '').toLowerCase().includes(term) ||
+        (item.brand || '').toLowerCase().includes(term)
       );
     }
-    calculatedItems.sort((a, b) => a.name.localeCompare(b.name));
-    return calculatedItems;
+    return [...calculatedItems].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   }, [technicalInventory, searchTerm, selectedCategory]);
 
   const categories = useMemo(() => {
@@ -156,7 +158,7 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
             </tr>
           </thead>
           <tbody>
-            {(items || []).map((p, i) => {
+            {(items || []).slice(0, visibleCount).map((p, i) => {
               const lowStockClass = p.isLowStock
                 ? 'bg-red-500/10 border-l-2 border-l-red-500 animate-pulseSoft'
                 : 'hover:bg-bg-tertiary transition-colors';
@@ -225,6 +227,16 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
           </div>
         )}
       </div>
+      {items && visibleCount < items.length && (
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={() => setVisibleCount(prev => prev + 20)}
+            className="px-6 py-2 bg-bg-tertiary text-text-main rounded-lg hover:bg-bg-main border border-border-main"
+          >
+            {t('common.loadMore')}
+          </button>
+        </div>
+      )}
       <TechProductModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -241,6 +253,7 @@ const TabInventarioRetail = ({ handleOpenStockModal }) => {
   const [productToEdit, setProductToEdit] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [visibleCount, setVisibleCount] = useState(20);
   const { retailInventory, isLoading } = useData();
   const loading = isLoading;
   const error = null;
@@ -248,10 +261,10 @@ const TabInventarioRetail = ({ handleOpenStockModal }) => {
   const items = useMemo(() => {
     if (!retailInventory) return [];
     let calculatedItems = retailInventory.map(item => {
-      const cost = item.cost || 0;
-      const price = item.price || 0;
-      const stock = item.stock || 0;
-      const minStock = item.minStock || 3;
+      const cost = safeNum(item.cost);
+      const price = safeNum(item.price);
+      const stock = safeNum(item.stock);
+      const minStock = safeNum(item.minStock, 3);
       return {
         ...item, stock, cost, price, minStock,
         ganancia: price - cost,
@@ -263,13 +276,13 @@ const TabInventarioRetail = ({ handleOpenStockModal }) => {
       calculatedItems = calculatedItems.filter(item => item.category === selectedCategory);
     }
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       calculatedItems = calculatedItems.filter(item =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (item.brand && item.brand.toLowerCase().includes(searchTerm.toLowerCase()))
+        (item.name || '').toLowerCase().includes(term) ||
+        (item.brand && item.brand.toLowerCase().includes(term))
       );
     }
-    calculatedItems.sort((a, b) => a.name.localeCompare(b.name));
-    return calculatedItems;
+    return [...calculatedItems].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   }, [retailInventory, searchTerm, selectedCategory]);
 
   const categories = useMemo(() => {
@@ -335,7 +348,7 @@ const TabInventarioRetail = ({ handleOpenStockModal }) => {
             </tr>
           </thead>
           <tbody>
-            {(items || []).map(p => {
+            {(items || []).slice(0, visibleCount).map(p => {
               const lowStockClass = p.isLowStock ? 'bg-red-100 dark:bg-red-900/30' : 'hover:bg-bg-tertiary';
               return (
                 <React.Fragment key={p.id}>
@@ -380,6 +393,16 @@ const TabInventarioRetail = ({ handleOpenStockModal }) => {
         </table>
         {items && items.length === 0 && (<p className="text-center text-text-muted p-8">{t('dashboard.noData')}</p>)}
       </div>
+      {items && visibleCount < items.length && (
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={() => setVisibleCount(prev => prev + 20)}
+            className="px-6 py-2 bg-bg-tertiary text-text-main rounded-lg hover:bg-bg-main border border-border-main"
+          >
+            {t('common.loadMore')}
+          </button>
+        </div>
+      )}
       <RetailProductModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
