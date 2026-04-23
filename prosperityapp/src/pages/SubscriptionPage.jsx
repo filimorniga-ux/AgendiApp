@@ -30,9 +30,8 @@ const SubscriptionPage = () => {
     const handleUpgradeToPro = async (provider = 'mercadopago') => {
         setIsCreatingCheckout(true);
         try {
-            const userEmail = user?.email || "";
             const { data, error } = await supabase.functions.invoke('create-checkout', {
-                body: { plan: 'pro', businessId, provider, userEmail }
+                body: { plan: 'pro', businessId, provider }
             });
 
             if (error) throw error;

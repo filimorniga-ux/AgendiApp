@@ -59,6 +59,11 @@ const PublicLayout = () => {
     checkClientAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        if (mounted) setClientUser(null);
+        return;
+      }
+
       if (session?.user) {
         const { data: client } = await supabase
           .from('clients')
@@ -73,7 +78,7 @@ const PublicLayout = () => {
 
     return () => {
       mounted = false;
-      subscription?.unsubscribe();
+      if (subscription) subscription.unsubscribe();
     };
   }, []);
 

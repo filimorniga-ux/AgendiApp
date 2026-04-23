@@ -46,7 +46,35 @@ serve(async (req) => {
 
     // El body debería contener action y pin
     const { action, pin, collaboratorId } = await req.json();
-    const businessId = req.headers.get('x-business-id');
+    let businessId = req.headers.get('x-business-id');
+
+    // 2. Verificar que el usuario tenga permiso sobre este businessId
+    // Si no viene x-business-id, intentamos obtenerlo del usuario autenticado
+    if (!businessId) {
+       const { data: userData } = await supabaseClient
+         .from('users')
+         .select('business_id, role')
+         .eq('auth_user_id', user.id)
+         .maybeSingle();
+
+       if (userData) {
+         businessId = userData.business_id;
+       } else {
+         const { data: collabData } = await supabaseClient
+           .from('collaborators')
+           .select('business_id, role')
+           .eq('auth_user_id', user.id)
+           .maybeSingle();
+         if (collabData) businessId = collabData.business_id;
+       }
+    }
+
+    if (!businessId) {
+      return new Response(JSON.stringify({ error: 'Business ID is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
 
     if (!pin || typeof pin !== 'string') {
       return new Response(JSON.stringify({ error: 'Invalid PIN provided' }), {
@@ -61,6 +89,23 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+
+    // 3. Verificar rol para acciones administrativas
+    const { data: userPermission } = await supabaseAdmin
+      .from('users')
+      .select('role')
+      .eq('auth_user_id', user.id)
+      .eq('business_id', businessId)
+      .maybeSingle();
+
+    const isOwnerOrAdmin = userPermission && (userPermission.role === 'owner' || userPermission.role === 'admin');
+
+    if ((action === 'set_collaborator_pin' || action === 'hash') && !isOwnerOrAdmin) {
+       return new Response(JSON.stringify({ error: 'Permission denied' }), {
+         status: 403,
+         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+       });
+    }
 
     if (action === 'set_collaborator_pin') {
        if (!collaboratorId) {
