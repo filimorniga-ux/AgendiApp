@@ -12,7 +12,7 @@
 export const safeNum = (val, fallback = 0) => {
   if (val === null || val === undefined || val === '') return fallback;
   const num = Number(val);
-  return Number.isNaN(num) ? fallback : num;
+  return Number.isNaN(num) || !Number.isFinite(num) ? fallback : num;
 };
 
 /**

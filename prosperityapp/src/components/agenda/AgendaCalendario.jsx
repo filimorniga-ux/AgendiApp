@@ -133,22 +133,24 @@ const AgendaCalendario = () => {
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    return appointments
-      .filter(apt => {
-        // Manejo seguro de Timestamp de Firestore
-        const aptDate = parseDate(apt.startsAt ?? apt.starts_at ?? apt.start);
-        return aptDate >= startOfDay && aptDate <= endOfDay;
-      })
-      .map(apt => ({
-        ...apt,
-        start: parseDate(apt.startsAt ?? apt.starts_at ?? apt.start),
-        end:   parseDate(apt.endsAt   ?? apt.ends_at   ?? apt.end),
-        // alias de compatibilidad: el kanban usa stylistId pero BD es collaboratorId
-        stylistId:   apt.collaboratorId   ?? apt.stylistId,
-        stylistName: apt.collaboratorName ?? apt.stylistName,
-        clientName:  apt.clientName  ?? apt.client_name,
-        serviceName: apt.serviceName ?? apt.service_name,
-      }));
+    return appointments.reduce((acc, apt) => {
+      const startsAt = apt.startsAt ?? apt.starts_at ?? apt.start;
+      const aptDate = parseDate(startsAt);
+
+      if (aptDate >= startOfDay && aptDate <= endOfDay) {
+        acc.push({
+          ...apt,
+          start: aptDate,
+          end:   parseDate(apt.endsAt ?? apt.ends_at ?? apt.end),
+          // alias de compatibilidad: el kanban usa stylistId pero BD es collaboratorId
+          stylistId:   apt.collaboratorId   ?? apt.stylistId,
+          stylistName: apt.collaboratorName ?? apt.stylistName,
+          clientName:  apt.clientName  ?? apt.client_name,
+          serviceName: apt.serviceName ?? apt.service_name,
+        });
+      }
+      return acc;
+    }, []);
   }, [appointments, date]);
 
   useEffect(() => { feather.replace(); }, [collaborators, dailyAppointments, isModalOpen, isTimeClockOpen]);

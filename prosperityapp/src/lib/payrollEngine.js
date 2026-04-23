@@ -19,6 +19,8 @@
  * @param {Array}  steps  - Array de pasos de la plantilla
  * @returns {{ rows: Array, finalPayment: number }}
  */
+import { safeNum } from './mathUtils.js';
+
 export function calculatePayroll(data, steps) {
   const {
     totalServices     = 0,
@@ -30,13 +32,6 @@ export function calculatePayroll(data, steps) {
     globalCommission  = 0,
     taxPercent        = 19,
   } = data || {};
-
-  // Utilidad para asegurar valores numéricos seguros y evitar propagación de NaN
-  const safeNum = (val, fallback = 0) => {
-    if (val === null || val === undefined || val === '') return fallback;
-    const num = Number(val);
-    return Number.isNaN(num) || !Number.isFinite(num) ? fallback : num;
-  };
 
   const effCommission = (commissionPercent === null || commissionPercent === undefined || commissionPercent === '') 
     ? globalCommission 
