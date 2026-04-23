@@ -1,10 +1,10 @@
 // ===== INICIO: src/components/reports/DailyReportTemplate.jsx =====
 import React from 'react';
 import { parseDate } from '../../lib/dateUtils';
+import { safeNum } from '../../lib/mathUtils';
 
 const formatCurrency = (value) => {
-    if (typeof value !== 'number') value = 0;
-    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(value);
+    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(safeNum(value));
 };
 
 const formatDate = (date) => {
@@ -36,26 +36,27 @@ const DailyReportTemplate = ({ data, user, config, ref }) => {
         totalAdelantos: 0
     };
 
-    const totalEfectivo =
-        summary.totalServicios +
-        summary.totalVentas +
-        summary.totalPropinas +
-        summary.totalVentasGC -
-        summary.totalTarjetas -
-        summary.totalTransferencias -
-        summary.totalPagosGC -
-        summary.totalGastos -
-        summary.totalAdelantos;
+    const totalEfectivo = summary.efectivoEnCaja !== undefined ? safeNum(summary.efectivoEnCaja) : (
+        safeNum(summary.totalServicios) +
+        safeNum(summary.totalVentas) +
+        safeNum(summary.totalPropinas) +
+        safeNum(summary.totalVentasGC) -
+        safeNum(summary.totalTarjetas) -
+        safeNum(summary.totalTransferencias) -
+        safeNum(summary.totalPagosGC) -
+        safeNum(summary.totalGastos) -
+        safeNum(summary.totalAdelantos)
+    );
 
     const totalIngresos =
-        summary.totalServicios +
-        summary.totalVentas +
-        summary.totalPropinas +
-        summary.totalVentasGC;
+        safeNum(summary.totalServicios) +
+        safeNum(summary.totalVentas) +
+        safeNum(summary.totalPropinas) +
+        safeNum(summary.totalVentasGC);
 
     const totalEgresos =
-        summary.totalGastos +
-        summary.totalAdelantos;
+        safeNum(summary.totalGastos) +
+        safeNum(summary.totalAdelantos);
 
     return (
         <div ref={ref}>

@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import * as XLSX from 'xlsx';
 import { parseDate } from '../lib/dateUtils';
+import { safeNum } from '../lib/mathUtils';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -22,8 +23,8 @@ const MonthlyColumn = ({ title, icon, records = [], categoryKey, onEdit, onDelet
     return (r[categoryKey] || 0) !== 0;
   });
   const total = filteredRecords.reduce((sum, r) => {
-    const val = r.amount_value ?? r.amountValue ?? r.amount ?? r[categoryKey] ?? 0;
-    return sum + (parseFloat(val) || 0);
+    const val = r.amount_value ?? r.amountValue ?? r.amount ?? r[categoryKey];
+    return sum + safeNum(val);
   }, 0);
   const locale = 'es-CL';
   return (
@@ -90,11 +91,11 @@ const CierresMensualesPage = () => {
     (records || []).forEach(record => {
       const recCat = record.category_key ?? record.categoryKey;
       if (recCat && totals[recCat] !== undefined) {
-        totals[recCat] += (parseFloat(record.amount_value ?? record.amountValue ?? record.amount) || 0);
+        totals[recCat] += safeNum(record.amount_value ?? record.amountValue ?? record.amount);
       } else {
         // legacy structure:
         Object.keys(monthlyCategories).forEach(key => {
-          totals[key] += (parseFloat(record[key]) || 0);
+          totals[key] += safeNum(record[key]);
         });
       }
     });
@@ -125,7 +126,8 @@ const CierresMensualesPage = () => {
   const handleDeleteRecord = async (record) => {
     if (!window.confirm(t('common.confirmDelete'))) return;
     try {
-      await sbDelete('monthly_closing_records', record.id);
+      const { error } = await sbDelete('monthly_closing_records', record.id);
+      if (error) throw error;
       toast.success(t('common.success'));
     } catch (error) {
       console.warn("Error:", error);
@@ -146,8 +148,8 @@ const CierresMensualesPage = () => {
       // Helper to sum a specific category securely across formats
       const sumCategory = (key) => records.reduce((s, r) => {
         const recCat = r.category_key ?? r.categoryKey;
-        if (recCat) return s + (recCat === key ? (parseFloat(r.amount_value ?? r.amountValue ?? r.amount) || 0) : 0);
-        return s + (parseFloat(r[key]) || 0);
+        if (recCat) return s + (recCat === key ? safeNum(r.amount_value ?? r.amountValue ?? r.amount) : 0);
+        return s + safeNum(r[key]);
       }, 0);
 
       // Sheet 1: Resumen General
@@ -213,7 +215,7 @@ const CierresMensualesPage = () => {
         const categoryRecords = records.filter(r => {
           const recCat = r.category_key ?? r.categoryKey;
           if (recCat) return recCat === key;
-          return (r[key] || 0) !== 0;
+          return safeNum(r[key]) !== 0;
         });
 
         if (categoryRecords.length > 0) {
@@ -223,13 +225,13 @@ const CierresMensualesPage = () => {
             ['Fecha', 'Descripción', 'Monto']
           ];
           categoryRecords.forEach(r => {
-            const val = r.amount_value ?? r.amountValue ?? r.amount ?? r[key] ?? 0;
-            categoryData.push([r.date, r.description, val]);
+            const val = r.amount_value ?? r.amountValue ?? r.amount ?? r[key];
+            categoryData.push([r.date, r.description, safeNum(val)]);
           });
 
           const catTotal = categoryRecords.reduce((s, r) => {
-            const val = r.amount_value ?? r.amountValue ?? r.amount ?? r[key] ?? 0;
-            return s + (parseFloat(val) || 0);
+            const val = r.amount_value ?? r.amountValue ?? r.amount ?? r[key];
+            return s + safeNum(val);
           }, 0);
           categoryData.push(['', 'TOTAL', catTotal]);
 

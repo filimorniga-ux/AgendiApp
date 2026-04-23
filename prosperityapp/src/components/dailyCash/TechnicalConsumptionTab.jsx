@@ -7,7 +7,9 @@ import { useSupabaseCollection } from '../../hooks/useSupabaseCollection';
 import { parseDate } from '../../lib/dateUtils';
 import { useData } from '../../context/DataContext';
 
-const formatCurrency = (val) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(val || 0);
+import { safeNum } from '../../lib/mathUtils';
+
+const formatCurrency = (val) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(safeNum(val));
 
 export default function TechnicalConsumptionTab() {
   const { t } = useTranslation();
@@ -49,12 +51,14 @@ export default function TechnicalConsumptionTab() {
     return filteredMovements.map(m => {
       const prod = technicalInventory?.find(p => p.id === m.productId);
       const prodName = prod ? prod.name : 'Desc.';
+      const quantity = safeNum(m.quantity);
+      const costPerUnit = safeNum(m.costPerUnit);
       return {
         'Fecha y Hora': new Date(m.createdAt || m.date).toLocaleString('es-CL'),
         'Producto': prodName,
-        'Cant. Consumida': m.quantity,
-        'Costo Unitario': m.costPerUnit || 0,
-        'Costo Total': (m.quantity * (m.costPerUnit || 0)),
+        'Cant. Consumida': quantity,
+        'Costo Unitario': costPerUnit,
+        'Costo Total': (quantity * costPerUnit),
         'Tipo': m.type.toUpperCase(),
         'Motivo': m.reason || 'N/A',
         'Responsable/Colaborador': m.userId || 'Sistema'
@@ -150,7 +154,9 @@ export default function TechnicalConsumptionTab() {
                 filteredMovements.map((m) => {
                   const prod = technicalInventory?.find(p => p.id === m.productId);
                   const prodName = prod ? prod.name : 'Desconocido';
-                  const totalCost = (m.quantity || 1) * (m.costPerUnit || 0);
+                  const quantity = safeNum(m.quantity);
+                  const costPerUnit = safeNum(m.costPerUnit);
+                  const totalCost = quantity * costPerUnit;
 
                   return (
                     <tr key={m.id} className="hover:bg-bg-tertiary/50 transition-colors">
@@ -162,7 +168,7 @@ export default function TechnicalConsumptionTab() {
                       </td>
                       <td className="p-4 text-right">
                         <span className="inline-flex px-2 py-1 bg-red-500/10 text-red-500 rounded font-bold border border-red-500/20">
-                          - {m.quantity}
+                          - {quantity}
                         </span>
                       </td>
                       <td className="p-4 text-right text-text-secondary">

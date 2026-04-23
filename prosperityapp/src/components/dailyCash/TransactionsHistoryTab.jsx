@@ -6,7 +6,9 @@ import { exportToPDF } from '../../lib/exportPDFUtils';
 import { useData } from '../../context/DataContext';
 import { parseDate } from '../../lib/dateUtils';
 
-const formatCurrency = (val) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(val || 0);
+import { safeNum } from '../../lib/mathUtils';
+
+const formatCurrency = (val) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(safeNum(val));
 
 export default function TransactionsHistoryTab() {
   const { t } = useTranslation();
@@ -42,7 +44,7 @@ export default function TransactionsHistoryTab() {
         'Descripción': m.description,
         'Colaborador': col ? col.name : 'N/A',
         'Método Pago': m.paymentMethod || 'N/A',
-        'Monto': m.amount
+        'Monto': safeNum(m.amount)
       };
     });
   }, [filteredMovements, collaborators]);
@@ -163,7 +165,7 @@ export default function TransactionsHistoryTab() {
                         {m.paymentMethod === 'Transferencia' && <span className="flex items-center gap-1"><i data-feather="smartphone" className="w-3 h-3"></i> Transf.</span>}
                         {!['Efectivo', 'Tarjeta', 'Transferencia'].includes(m.paymentMethod) && (m.paymentMethod || '-')}
                       </td>
-                      <td className={`p-4 text-right font-bold ${isNegative ? 'text-red-400' : 'text-green-400'}`}>
+                      <td className={`p-4 text-right font-bold ${safeNum(m.amount) < 0 ? 'text-red-400' : 'text-green-400'}`}>
                         {formatCurrency(m.amount)}
                       </td>
                     </tr>

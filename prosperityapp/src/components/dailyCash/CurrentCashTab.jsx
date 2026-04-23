@@ -131,19 +131,21 @@ export default function CurrentCashTab({ onArqueoClick }) {
     const totalAdelantos = safeSum(advances.map(m => m.amount));
     const totalPagosGC = safeSum(pagosGC.map(m => m.amount));
     
-    // Efectivo en caja (Todo el ingreso que NO es por Tarjeta o Transferencia) MENOS Gastos MENOS Adelantos
-    // En el futuro, agregar caja chica inicial si es necesario.
-    const efectivoEnCaja = (totalServicios + totalVentas + totalPropinas + totalVentasGC) 
-      - totalTarjetas - totalTransferencias 
-      + totalGastos + totalAdelantos + totalPagosGC;
+    // Efectivo en caja: Suma de todos los movimientos realizados en 'Efectivo' (ingresos y egresos)
+    const efectivoEnCaja = safeSum(dailyMovements
+      .filter(m => !m.paymentMethod || m.paymentMethod === 'Efectivo')
+      .map(m => m.amount)
+    );
 
     return {
       transfers: incomeMovements.filter(m => m.paymentMethod === 'Transferencia'),
       cards: incomeMovements.filter(m => m.paymentMethod === 'Tarjeta'),
       expenses, advances, sales, services, propinas, ventasGC, pagosGC, dailyMovements,
-      totalServicios, totalVentas, totalPropinas, totalVentasGC, totalPagosGC: Math.abs(totalPagosGC), totalTarjetas, totalTransferencias,
-      totalGastos: Math.abs(totalGastos),
-      totalAdelantos: Math.abs(totalAdelantos),
+      totalServicios, totalVentas, totalPropinas, totalVentasGC,
+      totalPagosGC: Math.abs(safeNum(totalPagosGC)),
+      totalTarjetas, totalTransferencias,
+      totalGastos: Math.abs(safeNum(totalGastos)),
+      totalAdelantos: Math.abs(safeNum(totalAdelantos)),
       efectivoEnCaja
     };
   }, [movements, todayStr]);

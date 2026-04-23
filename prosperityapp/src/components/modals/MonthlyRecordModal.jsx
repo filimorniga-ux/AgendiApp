@@ -51,7 +51,7 @@ const MonthlyRecordModal = ({ isOpen, onClose, recordToEdit, yearMonth, business
   };
 
   const handleSave = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (isSaving) return;
     setIsSaving(true);
     
