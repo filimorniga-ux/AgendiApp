@@ -70,33 +70,42 @@ const TabDiario = () => {
       totalTransferencias: 0, totalGastos: 0, totalAdelantos: 0,
       totalCostoTecnico: 0, ranking: []
     };
+
     const dailyMovements = movements.filter(m =>
       parseDate(m.date).toISOString().split('T')[0] === todayStr
     );
-    const totalServicios = dailyMovements.filter(m => m.type === 'Servicio').reduce((s, m) => s + m.amount, 0);
-    const totalVentas = dailyMovements.filter(m => m.type === 'Venta').reduce((s, m) => s + m.amount, 0);
-    const totalGastos = dailyMovements.filter(m => m.type === 'Gasto').reduce((s, m) => s + m.amount, 0);
-    const totalAdelantos = dailyMovements.filter(m => m.type === 'Adelanto').reduce((s, m) => s + m.amount, 0);
-    const totalCostoTecnico = dailyMovements
-      .filter(m => m.type === 'Servicio')
-      .reduce((s, m) => s + (m.technicalCost || 0), 0);
-    const totalEfectivo = dailyMovements.filter(m => m.paymentMethod === 'Efectivo').reduce((s, m) => s + m.amount, 0);
-    const totalTarjetas = dailyMovements.filter(m => m.paymentMethod === 'Tarjeta').reduce((s, m) => s + m.amount, 0);
-    const totalTransferencias = dailyMovements.filter(m => m.paymentMethod === 'Transferencia').reduce((s, m) => s + m.amount, 0);
-    const ranking = (collaborators || [])
-      .filter(c => c.status === 'active')
-      .map(collab => {
-        const serviceCount = dailyMovements.filter(m =>
-          m.collaboratorId === collab.id && m.type === 'Servicio'
-        ).length;
-        return {
-          id: collab.id,
-          name: collab.name,
-          serviceCount: serviceCount,
-        };
-      })
-      .filter(c => c.serviceCount > 0)
+
+    let totalServicios = 0, totalVentas = 0, totalGastos = 0, totalAdelantos = 0;
+    let totalCostoTecnico = 0, totalEfectivo = 0, totalTarjetas = 0, totalTransferencias = 0;
+    const servicesByCollab = {};
+
+    dailyMovements.forEach(m => {
+      if (m.type === 'Servicio') {
+        totalServicios += m.amount;
+        totalCostoTecnico += (m.technicalCost || 0);
+        servicesByCollab[m.collaboratorId] = (servicesByCollab[m.collaboratorId] || 0) + 1;
+      } else if (m.type === 'Venta') {
+        totalVentas += m.amount;
+      } else if (m.type === 'Gasto') {
+        totalGastos += m.amount;
+      } else if (m.type === 'Adelanto') {
+        totalAdelantos += m.amount;
+      }
+
+      if (m.paymentMethod === 'Efectivo') totalEfectivo += m.amount;
+      else if (m.paymentMethod === 'Tarjeta') totalTarjetas += m.amount;
+      else if (m.paymentMethod === 'Transferencia') totalTransferencias += m.amount;
+    });
+
+    const ranking = collaborators
+      .filter(c => c.status === 'active' && servicesByCollab[c.id])
+      .map(collab => ({
+        id: collab.id,
+        name: collab.name,
+        serviceCount: servicesByCollab[collab.id],
+      }))
       .sort((a, b) => b.serviceCount - a.serviceCount);
+
     return {
       totalServicios, totalVentas, totalEfectivo, totalTarjetas,
       totalTransferencias, totalGastos, totalAdelantos,
@@ -287,20 +296,27 @@ const TabNominas = () => {
       totalProduccion: 0, totalEfectivo: 0, totalTarjetas: 0,
       totalTransferencias: 0, totalGastos: 0, totalAdelantos: 0
     };
-    const selectedDateStrings = selectedDates.map(toISODateString);
-    const filteredMovements = movements.filter(m => {
+    const dateSet = new Set(selectedDates.map(toISODateString));
+
+    let totalProduccion = 0, totalEfectivo = 0, totalTarjetas = 0;
+    let totalTransferencias = 0, totalGastos = 0, totalAdelantos = 0;
+
+    movements.forEach(m => {
       const moveDateStr = parseDate(m.date).toISOString().split('T')[0];
-      return selectedDateStrings.includes(moveDateStr);
+      if (!dateSet.has(moveDateStr)) return;
+
+      if (m.type === 'Servicio' || m.type === 'Venta' || m.type === 'Propina') {
+        totalProduccion += m.amount;
+        if (m.paymentMethod === 'Efectivo') totalEfectivo += m.amount;
+        else if (m.paymentMethod === 'Tarjeta') totalTarjetas += m.amount;
+        else if (m.paymentMethod === 'Transferencia') totalTransferencias += m.amount;
+      } else if (m.type === 'Gasto') {
+        totalGastos += m.amount;
+      } else if (m.type === 'Adelanto') {
+        totalAdelantos += m.amount;
+      }
     });
-    const totalProduccion = filteredMovements
-      .filter(m => m.type === 'Servicio' || m.type === 'Venta' || m.type === 'Propina')
-      .reduce((s, m) => s + m.amount, 0);
-    const totalGastos = filteredMovements.filter(m => m.type === 'Gasto').reduce((s, m) => s + m.amount, 0);
-    const totalAdelantos = filteredMovements.filter(m => m.type === 'Adelanto').reduce((s, m) => s + m.amount, 0);
-    const incomeMovements = filteredMovements.filter(m => m.type === 'Servicio' || m.type === 'Venta' || m.type === 'Propina');
-    const totalEfectivo = incomeMovements.filter(m => m.paymentMethod === 'Efectivo').reduce((s, m) => s + m.amount, 0);
-    const totalTarjetas = incomeMovements.filter(m => m.paymentMethod === 'Tarjeta').reduce((s, m) => s + m.amount, 0);
-    const totalTransferencias = incomeMovements.filter(m => m.paymentMethod === 'Transferencia').reduce((s, m) => s + m.amount, 0);
+
     return {
       totalProduccion, totalEfectivo, totalTarjetas,
       totalTransferencias, totalGastos, totalAdelantos
@@ -641,10 +657,24 @@ const TabClientes = () => {
   };
   const clientSummary = useMemo(() => {
     if (!movements || !clients || !collaborators) return [];
+
+    // Optimizamos creando un mapa de colaboradores para evitar .find en cada iteración
+    const collabMap = collaborators.reduce((acc, c) => {
+      acc[c.id] = c.name;
+      return acc;
+    }, {});
+
+    // Mapa de IDs de clientes por nombre para el link
+    const clientMap = clients.reduce((acc, c) => {
+      acc[c.name] = c.id;
+      return acc;
+    }, {});
+
     const filteredMovements = movements.filter(m => {
       const moveDate = parseDate(m.date);
       return moveDate >= dateRange.start && moveDate <= dateRange.end && (m.type === 'Servicio' || m.type === 'Venta');
     });
+
     const clientData = {};
     for (const move of filteredMovements) {
       const clientName = move.client;
@@ -660,7 +690,7 @@ const TabClientes = () => {
       clientData[clientName].totalSpent += move.amount;
       clientData[clientName].visits.add(parseDate(move.date).toISOString().split('T')[0]);
       if (move.type === 'Servicio') {
-        const collabName = move.collaboratorName || collaborators.find(c => c.id === move.collaboratorId)?.name || 'Salón';
+        const collabName = move.collaboratorName || collabMap[move.collaboratorId] || 'Salón';
         clientData[clientName].services.push({
           id: move.id,
           description: move.description,
@@ -674,7 +704,7 @@ const TabClientes = () => {
     return Object.entries(clientData)
       .map(([name, data]) => ({
         name: name,
-        clientId: clients.find(c => c.name === name)?.id,
+        clientId: clientMap[name],
         totalSpent: data.totalSpent,
         visitCount: data.visits.size,
         services: data.services,
