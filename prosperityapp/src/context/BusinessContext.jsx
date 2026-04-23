@@ -69,116 +69,10 @@ export const BusinessProvider = ({ children }) => {
 
     const handleSession = async (session) => {
       const sbUser = session?.user ?? null;
-      setSupabaseUser(sbUser);
-      if (sbUser) {
-        if (currentUserRef.current === sbUser.id && businessIdRef.current !== null && !noBusinessFoundRef.current) {
-           setLoadingAuth(false);
-           return;
-        }
 
-        setNoBusinessFound(false);
-        noBusinessFoundRef.current = false;
-        let resolved = false;
-
-        const TIMEOUT_MS = 10000;
-        let timeoutHandle;
-        const timeoutPromise = new Promise((_, reject) => {
-          timeoutHandle = setTimeout(() => reject(new Error('Auth queries timeout')), TIMEOUT_MS);
-        });
-
-        const loadPlan = async (bizId) => {
-          try {
-            const { data: bData } = await supabase
-              .from('businesses')
-              .select('plan')
-              .eq('id', bizId)
-              .single();
-            if (mounted) setBusinessPlan(bData?.plan || 'free');
-          } catch {
-            if (mounted) setBusinessPlan('free');
-          }
-        };
-
-        try {
-          const [collabRes, userByIdRes, userByUidRes, userByEmailRes, clientRes] = await Promise.race([
-            Promise.all([
-              supabase.from('collaborators').select('id, business_id, role').eq('auth_user_id', sbUser.id).maybeSingle(),
-              supabase.from('users').select('business_id, role').eq('auth_user_id', sbUser.id).maybeSingle(),
-              supabase.from('users').select('business_id, role').eq('firebase_uid', sbUser.id).maybeSingle(),
-              supabase.from('users').select('business_id, role').eq('email', sbUser.email).maybeSingle(),
-              supabase.from('clients').select('id, business_id').eq('auth_user_id', sbUser.id).maybeSingle(),
-            ]),
-            timeoutPromise
-          ]);
-
-          clearTimeout(timeoutHandle);
-          
-          if (collabRes.data?.business_id) {
-            if (mounted) {
-              setRealRole(collabRes.data.role || 'staff');
-              setBusinessId(collabRes.data.business_id);
-              businessIdRef.current = collabRes.data.business_id;
-              setIsClient(false);
-            }
-            loadPlan(collabRes.data.business_id);
-            resolved = true;
-          } else if (userByIdRes.data?.business_id) {
-            if (mounted) {
-              setRealRole(userByIdRes.data.role || 'owner');
-              setBusinessId(userByIdRes.data.business_id);
-              businessIdRef.current = userByIdRes.data.business_id;
-              setIsClient(false);
-            }
-            loadPlan(userByIdRes.data.business_id);
-            resolved = true;
-          } else if (userByUidRes.data?.business_id) {
-            if (mounted) {
-              setRealRole(userByUidRes.data.role || 'owner');
-              setBusinessId(userByUidRes.data.business_id);
-              businessIdRef.current = userByUidRes.data.business_id;
-              setIsClient(false);
-            }
-            loadPlan(userByUidRes.data.business_id);
-            resolved = true;
-          } else if (userByEmailRes.data?.business_id) {
-            if (mounted) {
-              setRealRole(userByEmailRes.data.role || 'owner');
-              setBusinessId(userByEmailRes.data.business_id);
-              businessIdRef.current = userByEmailRes.data.business_id;
-              setIsClient(false);
-            }
-            loadPlan(userByEmailRes.data.business_id);
-            resolved = true;
-          } else if (clientRes.data?.business_id) {
-            if (mounted) {
-              setRealRole('client');
-              setBusinessId(clientRes.data.business_id);
-              businessIdRef.current = clientRes.data.business_id;
-              setIsClient(true);
-            }
-            loadPlan(clientRes.data.business_id);
-            resolved = true;
-          }
-        } catch (err) {
-          clearTimeout(timeoutHandle);
-          if (mounted) setAuthErrorDetail(err?.message || String(err));
-        }
-
-        if (!resolved) {
-          if (mounted) {
-            setRealRole(null);
-            setBusinessId(null);
-            businessIdRef.current = null;
-            setIsClient(false);
-            setNoBusinessFound(true);
-            noBusinessFoundRef.current = true;
-            currentUserRef.current = null;
-          }
-        } else {
-          currentUserRef.current = sbUser.id;
-        }
-      } else {
+      if (!sbUser) {
         if (mounted) {
+          setSupabaseUser(null);
           setRealRole(null);
           setBusinessId(null);
           businessIdRef.current = null;
@@ -186,7 +80,121 @@ export const BusinessProvider = ({ children }) => {
           setNoBusinessFound(false);
           noBusinessFoundRef.current = false;
           currentUserRef.current = null;
+          setLoadingAuth(false);
         }
+        return;
+      }
+
+      setSupabaseUser(sbUser);
+
+      if (currentUserRef.current === sbUser.id && businessIdRef.current !== null && !noBusinessFoundRef.current) {
+          if (mounted) setLoadingAuth(false);
+          return;
+      }
+
+      if (mounted) {
+        setNoBusinessFound(false);
+        noBusinessFoundRef.current = false;
+      }
+
+      let resolved = false;
+
+      const TIMEOUT_MS = 10000;
+      let timeoutHandle;
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutHandle = setTimeout(() => reject(new Error('Auth queries timeout')), TIMEOUT_MS);
+      });
+
+      const loadPlan = async (bizId) => {
+        try {
+          const { data: bData } = await supabase
+            .from('businesses')
+            .select('plan')
+            .eq('id', bizId)
+            .single();
+          if (mounted) setBusinessPlan(bData?.plan || 'free');
+        } catch {
+          if (mounted) setBusinessPlan('free');
+        }
+      };
+
+      try {
+        const [collabRes, userByIdRes, userByUidRes, userByEmailRes, clientRes] = await Promise.race([
+          Promise.all([
+            supabase.from('collaborators').select('id, business_id, role').eq('auth_user_id', sbUser.id).maybeSingle(),
+            supabase.from('users').select('business_id, role').eq('auth_user_id', sbUser.id).maybeSingle(),
+            supabase.from('users').select('business_id, role').eq('firebase_uid', sbUser.id).maybeSingle(),
+            supabase.from('users').select('business_id, role').eq('email', sbUser.email).maybeSingle(),
+            supabase.from('clients').select('id, business_id').eq('auth_user_id', sbUser.id).maybeSingle(),
+          ]),
+          timeoutPromise
+        ]);
+
+        clearTimeout(timeoutHandle);
+
+        if (collabRes.data?.business_id) {
+          if (mounted) {
+            setRealRole(collabRes.data.role || 'staff');
+            setBusinessId(collabRes.data.business_id);
+            businessIdRef.current = collabRes.data.business_id;
+            setIsClient(false);
+          }
+          loadPlan(collabRes.data.business_id);
+          resolved = true;
+        } else if (userByIdRes.data?.business_id) {
+          if (mounted) {
+            setRealRole(userByIdRes.data.role || 'owner');
+            setBusinessId(userByIdRes.data.business_id);
+            businessIdRef.current = userByIdRes.data.business_id;
+            setIsClient(false);
+          }
+          loadPlan(userByIdRes.data.business_id);
+          resolved = true;
+        } else if (userByUidRes.data?.business_id) {
+          if (mounted) {
+            setRealRole(userByUidRes.data.role || 'owner');
+            setBusinessId(userByUidRes.data.business_id);
+            businessIdRef.current = userByUidRes.data.business_id;
+            setIsClient(false);
+          }
+          loadPlan(userByUidRes.data.business_id);
+          resolved = true;
+        } else if (userByEmailRes.data?.business_id) {
+          if (mounted) {
+            setRealRole(userByEmailRes.data.role || 'owner');
+            setBusinessId(userByEmailRes.data.business_id);
+            businessIdRef.current = userByEmailRes.data.business_id;
+            setIsClient(false);
+          }
+          loadPlan(userByEmailRes.data.business_id);
+          resolved = true;
+        } else if (clientRes.data?.business_id) {
+          if (mounted) {
+            setRealRole('client');
+            setBusinessId(clientRes.data.business_id);
+            businessIdRef.current = clientRes.data.business_id;
+            setIsClient(true);
+          }
+          loadPlan(clientRes.data.business_id);
+          resolved = true;
+        }
+      } catch (err) {
+        clearTimeout(timeoutHandle);
+        if (mounted) setAuthErrorDetail(err?.message || String(err));
+      }
+
+      if (!resolved) {
+        if (mounted) {
+          setRealRole(null);
+          setBusinessId(null);
+          businessIdRef.current = null;
+          setIsClient(false);
+          setNoBusinessFound(true);
+          noBusinessFoundRef.current = true;
+          currentUserRef.current = null;
+        }
+      } else {
+        currentUserRef.current = sbUser.id;
       }
 
       if (mounted) setLoadingAuth(false);
@@ -206,7 +214,7 @@ export const BusinessProvider = ({ children }) => {
 
     return () => {
       mounted = false;
-      sbSub?.unsubscribe();
+      if (sbSub) sbSub.unsubscribe();
     };
   }, []);
 

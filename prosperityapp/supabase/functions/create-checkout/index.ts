@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import Stripe from 'https://esm.sh/stripe@14.18.0?target=deno';
 
 const corsHeaders = {
@@ -13,13 +14,40 @@ serve(async (req) => {
     }
 
     try {
-        const { plan, businessId, provider = 'mercadopago', userEmail } = await req.json();
+        const supabaseClient = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+            { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+        );
+
+        // 1. Verificar identidad del usuario
+        const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+        if (userError || !user) {
+            return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers: corsHeaders });
+        }
+
+        const { plan, businessId, provider = 'mercadopago' } = await req.json();
+        const userEmail = user.email; // Usar el email del token, no de la UI
         
         // Use req origin for dynamic URLs
         const origin = req.headers.get('origin') || 'https://agendiapp.app';
 
         if (!plan || !businessId) {
             throw new Error("El plan y businessId son obligatorios.");
+        }
+
+        // 2. Verificar que el usuario tenga permiso sobre este businessId
+        // Un usuario puede ser dueño (tabla users) o colaborador (tabla collaborators)
+        // Pero típicamente solo el dueño gestiona suscripciones.
+        const { data: userData, error: bizError } = await supabaseClient
+            .from('users')
+            .select('business_id, role')
+            .eq('auth_user_id', user.id)
+            .eq('business_id', businessId)
+            .maybeSingle();
+
+        if (bizError || !userData || (userData.role !== 'owner' && userData.role !== 'admin')) {
+             return new Response(JSON.stringify({ error: 'No tienes permisos para gestionar la suscripción de este negocio' }), { status: 403, headers: corsHeaders });
         }
 
         if (provider === 'stripe') {
