@@ -145,13 +145,13 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
             <tr>
               <th className="p-3 font-semibold">{t('inventory.table.product')}</th>
               <th className="p-3 font-semibold text-center">{t('inventory.table.stock')}</th>
-              <th className="p-3 font-semibold text-right">{t('inventory.table.minStock')}</th>
-              <th className="p-3 font-semibold text-right">{t('inventory.table.size')}</th>
+              <th className="p-3 font-semibold text-right hidden sm:table-cell">{t('inventory.table.minStock')}</th>
+              <th className="p-3 font-semibold text-right hidden sm:table-cell">{t('inventory.table.size')}</th>
               <th className="p-3 font-semibold text-center">Modo</th>
-              <th className="p-3 font-semibold text-right">{t('inventory.table.invoiceCost')}</th>
-              <th className="p-3 font-semibold text-right">{t('inventory.table.collabCost')}</th>
+              <th className="p-3 font-semibold text-right hidden sm:table-cell">{t('inventory.table.invoiceCost')}</th>
+              <th className="p-3 font-semibold text-right hidden md:table-cell">{t('inventory.table.collabCost')}</th>
               <th className="p-3 font-semibold text-right">Costo Unitario</th>
-              <th className="p-3 font-semibold">{t('inventory.table.created')}</th>
+              <th className="p-3 font-semibold hidden lg:table-cell">{t('inventory.table.created')}</th>
               <th className="p-3 font-semibold text-right">{t('inventory.table.actions')}</th>
             </tr>
           </thead>
@@ -175,8 +175,8 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
                         </button>
                       </div>
                     </td>
-                    <td className="p-3 text-right text-text-muted">{p.minStock || 3}</td>
-                    <td className="p-3 text-right text-text-main">{p.sellMode === 'whole' ? 'Unidad' : `${p.unitSize} ${p.unitOfMeasure}`}</td>
+                    <td className="p-3 text-right text-text-muted hidden sm:table-cell">{p.minStock || 3}</td>
+                    <td className="p-3 text-right text-text-main hidden sm:table-cell">{p.sellMode === 'whole' ? 'Unidad' : `${p.unitSize} ${p.unitOfMeasure}`}</td>
                     <td className="p-3 text-center">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
                         p.sellMode === 'whole'
@@ -186,15 +186,15 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
                         {p.sellMode === 'whole' ? '📦 Completo' : '⚗️ Fraccionado'}
                       </span>
                     </td>
-                    <td className="p-3 text-right font-medium text-yellow-700 dark:text-yellow-400">{formatCurrency(p.facturaCost)}</td>
-                    <td className="p-3 text-right font-medium text-blue-700 dark:text-cyan-400">{formatCurrency(p.collabCost)}</td>
+                    <td className="p-3 text-right font-medium text-yellow-700 dark:text-yellow-400 hidden sm:table-cell">{formatCurrency(p.facturaCost)}</td>
+                    <td className="p-3 text-right font-medium text-blue-700 dark:text-cyan-400 hidden md:table-cell">{formatCurrency(p.collabCost)}</td>
                     <td className="p-3 text-right font-bold text-text-main">
                       {p.sellMode === 'whole'
                         ? formatCurrency(p.collabCost)
                         : `${formatCurrency(p.costPerGram)}/${p.unitOfMeasure || 'g'}`
                       }
                     </td>
-                    <td className="p-3 text-text-muted text-xs">{formatDate(p.createdAt)}</td>
+                    <td className="p-3 text-text-muted text-xs hidden lg:table-cell">{formatDate(p.createdAt)}</td>
                     <td className="p-3 text-right">
                       <button onClick={() => handleOpenEditModal(p)} className="p-1 text-text-muted hover:text-accent">
                         <i data-feather="edit" className="w-4 h-4"></i>
@@ -325,12 +325,12 @@ const TabInventarioRetail = ({ handleOpenStockModal }) => {
             <tr>
               <th className="p-3 font-semibold">{t('inventory.table.product')}</th>
               <th className="p-3 font-semibold text-center">{t('inventory.table.stock')}</th>
-              <th className="p-3 font-semibold text-right">{t('inventory.table.minStock')}</th>
-              <th className="p-3 font-semibold text-right">{t('inventory.table.invoiceCost')}</th>
+              <th className="p-3 font-semibold text-right hidden sm:table-cell">{t('inventory.table.minStock')}</th>
+              <th className="p-3 font-semibold text-right hidden md:table-cell">{t('inventory.table.invoiceCost')}</th>
               <th className="p-3 font-semibold text-right">{t('inventory.table.salePrice')}</th>
-              <th className="p-3 font-semibold text-right">{t('inventory.table.profit')}</th>
-              <th className="p-3 font-semibold text-right">{t('inventory.table.totalValue')}</th>
-              <th className="p-3 font-semibold">{t('inventory.table.created')}</th>
+              <th className="p-3 font-semibold text-right hidden lg:table-cell">{t('inventory.table.profit')}</th>
+              <th className="p-3 font-semibold text-right hidden lg:table-cell">{t('inventory.table.totalValue')}</th>
+              <th className="p-3 font-semibold hidden xl:table-cell">{t('inventory.table.created')}</th>
               <th className="p-3 font-semibold text-right">{t('inventory.table.actions')}</th>
             </tr>
           </thead>
@@ -352,12 +352,12 @@ const TabInventarioRetail = ({ handleOpenStockModal }) => {
                         </button>
                       </div>
                     </td>
-                    <td className="p-3 text-right text-text-muted">{p.minStock || 3}</td>
-                    <td className="p-3 text-right font-medium text-yellow-700 dark:text-yellow-400">{formatCurrency(p.cost)}</td>
+                    <td className="p-3 text-right text-text-muted hidden sm:table-cell">{p.minStock || 3}</td>
+                    <td className="p-3 text-right font-medium text-yellow-700 dark:text-yellow-400 hidden md:table-cell">{formatCurrency(p.cost)}</td>
                     <td className="p-3 text-right font-medium text-blue-700 dark:text-cyan-400">{formatCurrency(p.price)}</td>
-                    <td className="p-3 text-right font-medium text-green-700 dark:text-green-400">{formatCurrency(p.ganancia)}</td>
-                    <td className="p-3 text-right font-bold text-text-main">{formatCurrency(p.totalStockValue)}</td>
-                    <td className="p-3 text-text-muted text-xs">{formatDate(p.createdAt)}</td>
+                    <td className="p-3 text-right font-medium text-green-700 dark:text-green-400 hidden lg:table-cell">{formatCurrency(p.ganancia)}</td>
+                    <td className="p-3 text-right font-bold text-text-main hidden lg:table-cell">{formatCurrency(p.totalStockValue)}</td>
+                    <td className="p-3 text-text-muted text-xs hidden xl:table-cell">{formatDate(p.createdAt)}</td>
                     <td className="p-3 text-right">
                       <button onClick={() => handleOpenEditModal(p)} className="p-1 text-text-muted hover:text-accent">
                         <i data-feather="edit" className="w-4 h-4"></i>

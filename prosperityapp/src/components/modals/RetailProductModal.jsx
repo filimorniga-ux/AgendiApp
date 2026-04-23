@@ -64,8 +64,8 @@ const RetailProductModal = ({ isOpen, onClose, productToEdit }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 modal-backdrop">
-      <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-2xl modal-content flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-70 modal-backdrop">
+      <div className="bg-bg-secondary rounded-t-[20px] sm:rounded-lg shadow-xl border border-border-main w-full sm:max-w-md modal-content flex flex-col max-h-[90vh] sm:max-h-[85vh]">
         <div className="p-4 border-b border-border-main flex justify-between items-center">
           <h3 className="text-xl font-bold text-text-main">{isEditMode ? t('modals.retailProduct.editTitle') : t('modals.retailProduct.newTitle')}</h3>
           <button onClick={onClose} className="text-text-muted hover:text-text-main text-3xl leading-none">&times;</button>
