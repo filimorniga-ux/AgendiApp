@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import feather from 'feather-icons';
+import ErrorBoundary from '../components/ErrorBoundary';
 import { useData } from '../context/DataContext';
 import ClientModal from '../components/modals/ClientModal';
 import ContactImportModal from '../components/modals/ContactImportModal';
@@ -10,6 +11,14 @@ import { useTranslation } from 'react-i18next';
 import { useDebounce } from '../hooks/useDebounce';
 
 const ClientesPage = () => {
+  return (
+    <ErrorBoundary>
+      <ClientesContent />
+    </ErrorBoundary>
+  );
+};
+
+const ClientesContent = () => {
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
