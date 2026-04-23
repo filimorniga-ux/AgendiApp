@@ -25,8 +25,8 @@ export default function CashSessionModal({ isOpen, onClose, summaryData, session
 
   if (!isOpen || !summaryData) return null;
 
-  const expectedCash = summaryData.efectivoEnCaja || 0;
-  const difference = actualCash - expectedCash;
+  const expectedCash = safeNum(summaryData.efectivoEnCaja);
+  const difference = safeNum(actualCash) - expectedCash;
   const isCierre = sessionType === 'cierre';
 
   const handleSubmit = async (e) => {

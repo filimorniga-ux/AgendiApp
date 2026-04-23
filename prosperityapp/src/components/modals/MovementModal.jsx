@@ -200,7 +200,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       if (item.cartId === cartId) {
         const updatedItem = { ...item, [field]: value };
         if (field === 'amount') {
-          updatedItem[field] = parseFloat(value) || 0;
+          updatedItem[field] = safeNum(value);
         }
         return updatedItem;
       }
@@ -219,7 +219,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       cartId: Date.now(),
       type: 'Servicio',
       description: rapidoServicio.desc,
-      amount: parseFloat(rapidoServicio.monto),
+      amount: safeNum(rapidoServicio.monto),
       collaboratorId: collab.id,
       collaboratorName: collab.name,
       paymentMethod: 'Efectivo',
@@ -236,7 +236,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       cartId: Date.now(),
       type: 'Servicio',
       description: service.name,
-      amount: service.price,
+      amount: safeNum(service.price),
       collaboratorId: collab.id,
       collaboratorName: collab.name,
       serviceId: service.id,
@@ -255,9 +255,9 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
     // Validar stock considerando lo que ya está en el carrito
     const enCarrito = cart
       .filter(item => item.productId === prod.id)
-      .reduce((sum, item) => sum + item.quantity, 0);
+      .reduce((sum, item) => sum + (item.quantity || 0), 0);
 
-    if ((enCarrito + prodCant) > stockDisponible) {
+    if ((enCarrito + safeNum(prodCant)) > stockDisponible) {
       toast.error(`${t('modals.errors.stockCheck')} ${stockDisponible}, ${t('modals.forms.inCart')}: ${enCarrito}.`);
       return;
     }
@@ -268,19 +268,19 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
     let commissionAmount = 0;
     let commissionType = 'auto';
     if (prodCollab) {
-      const rate = (prodCollab.salesCommissionPercent || 10) / 100;
-      commissionAmount = (prod.price * prodCant) * rate;
+      const rate = (safeNum(prodCollab.salesCommissionPercent, 10)) / 100;
+      commissionAmount = (safeNum(prod.price) * safeNum(prodCant)) * rate;
     }
 
     setCart(prev => [...prev, {
       cartId: Date.now(),
       type: 'Venta',
       description: `${prodCant}x ${prod.name}`,
-      amount: prod.price * prodCant,
+      amount: safeNum(prod.price) * safeNum(prodCant),
       collaboratorId: prodCollab ? prodCollab.id : null,
       collaboratorName: collaboratorName,
       productId: prod.id,
-      quantity: prodCant,
+      quantity: safeNum(prodCant),
       paymentMethod: 'Efectivo',
       commissionType: commissionType,
       commissionAmount: commissionAmount
@@ -298,19 +298,19 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
     let commissionAmount = 0;
     let commissionType = 'auto';
     if (collab) {
-      const rate = (collab.salesCommissionPercent || 10) / 100;
-      commissionAmount = (parseFloat(rapidoVenta.monto) * parseInt(rapidoVenta.cant)) * rate;
+      const rate = (safeNum(collab.salesCommissionPercent, 10)) / 100;
+      commissionAmount = (safeNum(rapidoVenta.monto) * safeNum(rapidoVenta.cant)) * rate;
     }
 
     setCart(prev => [...prev, {
       cartId: Date.now(),
       type: 'Venta',
       description: `${rapidoVenta.cant}x ${rapidoVenta.desc}`,
-      amount: parseFloat(rapidoVenta.monto) * parseInt(rapidoVenta.cant),
+      amount: safeNum(rapidoVenta.monto) * safeNum(rapidoVenta.cant),
       collaboratorId: collab ? collab.id : null,
       collaboratorName: collaboratorName,
       productId: null,
-      quantity: parseInt(rapidoVenta.cant),
+      quantity: safeNum(rapidoVenta.cant),
       paymentMethod: 'Efectivo',
       commissionType: commissionType,
       commissionAmount: commissionAmount
@@ -324,7 +324,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       cartId: Date.now(),
       type: 'Gasto',
       description: gasto.desc,
-      amount: -Math.abs(parseFloat(gasto.monto)),
+      amount: -Math.abs(safeNum(gasto.monto)),
       paymentMethod: 'Efectivo',
     }]);
     setGasto({ desc: '', monto: '' });
@@ -337,7 +337,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       cartId: Date.now(),
       type: 'Adelanto',
       description: `${t('modals.forms.advanceFor')} ${collab.name}`,
-      amount: -Math.abs(parseFloat(adelanto.monto)),
+      amount: -Math.abs(safeNum(adelanto.monto)),
       collaboratorId: collab.id,
       collaboratorName: collab.name,
       paymentMethod: 'Efectivo',
@@ -358,7 +358,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       cartId: Date.now(),
       type: 'Propina',
       description: descripcion,
-      amount: parseFloat(propina.monto),
+      amount: safeNum(propina.monto),
       collaboratorId: collab.id,
       collaboratorName: collab.name,
       paymentMethod: propina.paymentMethod,
@@ -376,7 +376,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       cartId: Date.now(),
       type: 'VentaGiftCard',
       description: `${t('modals.forms.gcSaleDesc')} #${giftCard.code}`,
-      amount: parseFloat(giftCard.amount),
+      amount: safeNum(giftCard.amount),
       paymentMethod: giftCard.paymentMethod,
       gcCode: giftCard.code,
       gcClientName: giftCard.clientName,
@@ -396,7 +396,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       cartId: Date.now(),
       type: 'PagoGiftCard',
       description: `${t('modals.forms.gcPaymentDesc')} #${pagoGiftCard.code}`,
-      amount: -Math.abs(parseFloat(pagoGiftCard.amount)),
+      amount: -Math.abs(safeNum(pagoGiftCard.amount)),
       paymentMethod: 'Gift Card',
       gcCode: pagoGiftCard.code,
       gcRedeemReceiptUrl: pagoGiftCard.receiptUrl || null, // Evidencia de canje
@@ -477,8 +477,10 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
       // 1. Si editamos, borrar movimientos y giftCards anteriores por transactionId
       if (isEditMode) {
         if (navigator.onLine) {
-          await supabase.from('movements').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
-          await supabase.from('gift_cards').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
+          const { error: delMvErr } = await supabase.from('movements').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
+          if (delMvErr) throw delMvErr;
+          const { error: delGcErr } = await supabase.from('gift_cards').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
+          if (delGcErr) throw delGcErr;
         } else {
           // Offline: encolar deletes
           await batchEnqueueWrite('movements_delete_by_txid', [{ transaction_id: transactionId, business_id: businessId }]);
@@ -496,16 +498,16 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
           business_id: businessId,
           type: item.type,
           description: item.description,
-          amount: item.amount,
+          amount: safeNum(item.amount),
           collaborator_id: item.collaboratorId || null,
           collaborator_name: item.collaboratorName || null,
           client_name: clientName,
           client_id: selectedClient?.id || null,
           service_id: item.serviceId || null,
           product_id: item.productId || null,
-          quantity: item.quantity || 1,
+          quantity: safeNum(item.quantity, 1),
           payment_method: effectivePaymentMethod,
-          technical_cost: item.technicalCost || 0,
+          technical_cost: safeNum(item.technicalCost),
           products_used: item.productsUsed || [],
           date: todayISO,
           transaction_id: transactionId,
@@ -521,7 +523,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
               business_id: businessId,
               type: 'Gasto',
               description: `${t('modals.forms.tipsTitle')}: ${item.description} -> ${item.collaboratorName}`,
-              amount: -Math.abs(item.amount),
+              amount: -Math.abs(safeNum(item.amount)),
               payment_method: item.paymentMethod || 'Efectivo',
               date: todayISO,
               transaction_id: transactionId,
@@ -531,7 +533,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
               business_id: businessId,
               type: 'ComisionPropina',
               description: item.description,
-              amount: item.amount,
+              amount: safeNum(item.amount),
               collaborator_id: item.collaboratorId || null,
               collaborator_name: item.collaboratorName || null,
               date: todayISO,
@@ -545,27 +547,29 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
           let gcClientId = item.gcClientId || null;
           if (!gcClientId && item.gcClientName) {
             // Crear cliente (con soporte offline)
-            const { data: newClient } = await sbCreate('clients', {
+            const { data: newClient, error: clientErr } = await sbCreate('clients', {
               name: item.gcClientName,
               phone: item.gcContact || '',
               lastVisit: todayISO,
               notes: 'Cliente creado automáticamente desde venta de Gift Card'
             }, businessId);
+            if (clientErr) throw clientErr;
             gcClientId = newClient?.id || null;
           }
           // Insertar gift card (con soporte offline)
-          await sbCreate('giftCards', {
+          const { error: gcErr } = await sbCreate('giftCards', {
             code: item.gcCode,
-            initialValue: item.amount,
-            balance: item.amount,
+            initialValue: safeNum(item.amount),
+            balance: safeNum(item.amount),
             buyerName: item.gcClientName,
             buyerContact: item.gcContact || null,
             clientId: gcClientId,
             receiptUrl: item.gcReceiptUrl || null,
             status: 'Activa',
             transactionId: transactionId,
-            history: [{ date: today.toISOString(), action: 'Compra', amount: item.amount }]
+            history: [{ date: today.toISOString(), action: 'Compra', amount: safeNum(item.amount) }]
           }, businessId);
+          if (gcErr) throw gcErr;
         }
 
         // 4. Pago con Gift Card → actualizar balance de forma atómica
@@ -573,7 +577,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
           const { data: gcResult, error: rpcErr } = await supabase.rpc('update_gift_card_balance', {
             p_code: item.gcCode,
             p_business_id: businessId,
-            p_delta: item.amount // negativo
+            p_delta: safeNum(item.amount) // negativo
           });
           if (rpcErr) throw rpcErr;
           if (gcResult?.error) throw new Error(gcResult.error);
@@ -584,7 +588,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
           const { error: decErr } = await supabase.rpc('decrement_retail_stock', {
             p_product_id: item.productId,
             p_business_id: businessId,
-            p_quantity: item.quantity || 1
+            p_quantity: safeNum(item.quantity, 1)
           });
           if (decErr) throw decErr;
         }
@@ -592,7 +596,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
         // 5b. Descuento de stock técnico (Servicio con productos completos)
         if (item.type === 'Servicio' && item.productsUsed && item.productsUsed.length > 0) {
           for (const techProd of item.productsUsed) {
-            if (techProd.id && techProd.sellMode === 'whole' && techProd.quantity > 0) {
+            if (techProd.id && techProd.sellMode === 'whole' && safeNum(techProd.quantity) > 0) {
               const { data: currentItem, error: fetchErr } = await supabase
                 .from('technical_inventory')
                 .select('stock_current, name, barcode')
@@ -600,7 +604,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                 .single();
 
               if (!fetchErr && currentItem) {
-                const newStock = Math.max(0, (currentItem.stock_current || 0) - techProd.quantity);
+                const newStock = Math.max(0, (safeNum(currentItem.stock_current) || 0) - safeNum(techProd.quantity));
                 const { error: updErr } = await supabase
                   .from('technical_inventory')
                   .update({ stock_current: newStock, updated_at: new Date().toISOString() })
@@ -611,7 +615,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                   business_id: businessId,
                   product_id: techProd.id,
                   product_name: currentItem.name,
-                  amount: -techProd.quantity,
+                  amount: -Math.abs(safeNum(techProd.quantity)),
                   new_stock: newStock,
                   movement_type: 'exit',
                   inventory_type: 'technical',
@@ -629,7 +633,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
         if (item.type === 'Venta' && item.collaboratorId) {
           let finalCommission = 0;
           if (item.commissionType === 'manual') {
-            finalCommission = item.commissionAmount;
+            finalCommission = safeNum(item.commissionAmount);
           } else {
             const collaborator = collaborators.find(c => c.id === item.collaboratorId);
             const rate = (safeNum(collaborator?.salesCommissionPercent, settings.salesCommissionGeneral || 10)) / 100;
@@ -640,7 +644,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
               business_id: businessId,
               type: 'ComisionVenta',
               description: `${t('modals.forms.commission')}: ${item.description}`,
-              amount: finalCommission,
+              amount: safeNum(finalCommission),
               collaborator_id: item.collaboratorId,
               collaborator_name: item.collaboratorName,
               date: todayISO,
@@ -665,7 +669,8 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
 
       // 8. Actualizar última visita del cliente
       if (selectedClient && navigator.onLine) {
-        await supabase.from('clients').update({ last_visit: todayISO }).eq('id', selectedClient.id);
+        const { error: clientUpdErr } = await supabase.from('clients').update({ last_visit: todayISO }).eq('id', selectedClient.id);
+        if (clientUpdErr) console.warn('Error updating client last visit:', clientUpdErr);
       }
 
 
@@ -747,8 +752,10 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
     try {
       // Borrar todos los movimientos de esta transacción (con soporte offline)
       if (navigator.onLine) {
-        await supabase.from('movements').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
-        await supabase.from('gift_cards').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
+        const { error: delMvErr } = await supabase.from('movements').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
+        if (delMvErr) throw delMvErr;
+        const { error: delGcErr } = await supabase.from('gift_cards').delete().eq('transaction_id', transactionId).eq('business_id', businessId);
+        if (delGcErr) throw delGcErr;
       } else {
         // Offline: encolar la eliminación para cuando haya red
         await batchEnqueueWrite('movements_delete_by_txid', [{ transaction_id: transactionId, business_id: businessId }]);
@@ -763,6 +770,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
     } catch (error) {
       console.warn('Error al eliminar: ', error);
       toast.error(t('common.error') + ': ' + error.message);
+    } finally {
       setIsSaving(false);
     }
   };
