@@ -12,6 +12,7 @@
 import { useState } from 'react';
 import { supabase } from '../../supabase/client.js';
 import { useBusiness } from '../../context/BusinessContext.jsx';
+import { safeNum } from '../../lib/mathUtils';
 
 const STATUS_OPTIONS = [
   { value: 'complete',  label: '✅ Completo',           color: '#22c55e' },
@@ -32,8 +33,8 @@ export default function ClosureStep({ sessionData, onFinished }) {
   const [error, setError]     = useState('');
 
   // Calcular totales
-  const totalInvoiced  = Math.round(items.reduce((s, it) => s + (it.totalCost || it.unitCost * it.quantityInvoiced || 0), 0));
-  const totalReceived  = Math.round(items.reduce((s, it) => s + (it.unitCost * (it.quantityReceived ?? it.quantityInvoiced) || 0), 0));
+  const totalInvoiced  = Math.round(items.reduce((s, it) => s + safeNum(it.totalCost || (safeNum(it.unitCost) * safeNum(it.quantityInvoiced))), 0));
+  const totalReceived  = Math.round(items.reduce((s, it) => s + (safeNum(it.unitCost) * safeNum(it.quantityReceived ?? it.quantityInvoiced)), 0));
   const newProducts    = items.filter(it => it.isNewProduct);
   const discrepant     = items.filter(it => ['partial', 'missing', 'damaged'].includes(it.status));
 

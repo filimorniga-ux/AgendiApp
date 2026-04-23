@@ -6,6 +6,7 @@
  */
 import { useState } from 'react';
 import { BarcodeScanner } from '../barcode/BarcodeScanner.jsx';
+import { safeNum } from '../../lib/mathUtils';
 
 const ITEM_STATUS_OPTIONS = [
   { value: 'received', label: '✅ Recibido',       color: '#22c55e' },
@@ -25,11 +26,19 @@ export default function PhysicalReceptionStep({ items: initialItems, onNext }) {
   const updateItem = (idx, key, val) => {
     setItems(prev => prev.map((it, i) => {
       if (i !== idx) return it;
-      const updated = { ...it, [key]: val };
+
+      let finalVal = val;
+      if (key === 'quantityReceived') {
+        const invoiced = safeNum(it.quantityInvoiced);
+        // Regla de negocio: Máximo 10 unidades sobre lo facturado
+        finalVal = Math.min(safeNum(val), invoiced + 10);
+      }
+
+      const updated = { ...it, [key]: finalVal };
       // Auto-calcular status por cantidad
       if (key === 'quantityReceived') {
-        if (val <= 0)              updated.status = 'missing';
-        else if (val < it.quantityInvoiced) updated.status = 'partial';
+        if (finalVal <= 0)              updated.status = 'missing';
+        else if (finalVal < it.quantityInvoiced) updated.status = 'partial';
         else                       updated.status = 'received';
       }
       return updated;
@@ -37,8 +46,8 @@ export default function PhysicalReceptionStep({ items: initialItems, onNext }) {
   };
 
   const handleBlur = (idx, val) => {
-    const num = parseFloat(val) || 0;
-    updateItem(idx, 'quantityReceived', parseFloat(num.toFixed(4)));
+    const num = safeNum(val);
+    updateItem(idx, 'quantityReceived', Number(num.toFixed(4)));
   };
 
   // Modo scanner: buscar ítem por código de barras y marcar como recibido
