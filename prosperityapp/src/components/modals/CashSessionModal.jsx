@@ -4,8 +4,9 @@ import feather from 'feather-icons';
 import { useData } from '../../context/DataContext';
 import { useSupabaseCollection } from '../../hooks/useSupabaseCollection';
 import { supabase } from '../../supabase/client';
+import { safeNum, safeSum } from '../../lib/mathUtils';
 
-const formatCurrency = (val) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(val || 0);
+const formatCurrency = (val) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(safeNum(val));
 
 export default function CashSessionModal({ isOpen, onClose, summaryData, sessionType, authData }) {
   const { t } = useTranslation();
@@ -30,6 +31,7 @@ export default function CashSessionModal({ isOpen, onClose, summaryData, session
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
@@ -40,11 +42,11 @@ export default function CashSessionModal({ isOpen, onClose, summaryData, session
         business_id: businessId,
         type: sessionType, // 'arqueo' or 'cierre'
         expected_cash: expectedCash,
-        actual_cash: actualCash,
-        difference: difference,
-        total_sales: summaryData.totalVentas + summaryData.totalServicios + summaryData.totalVentasGC,
-        total_expenses: summaryData.totalGastos,
-        total_advances: summaryData.totalAdelantos,
+        actual_cash: safeNum(actualCash),
+        difference: safeNum(difference),
+        total_sales: safeSum([summaryData.totalVentas, summaryData.totalServicios, summaryData.totalVentasGC]),
+        total_expenses: safeNum(summaryData.totalGastos),
+        total_advances: safeNum(summaryData.totalAdelantos),
         observations: finalObservations,
       };
 

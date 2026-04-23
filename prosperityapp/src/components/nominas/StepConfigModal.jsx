@@ -59,10 +59,18 @@ const StepConfigModal = ({ isOpen, onClose, onSave, initialStep = null }) => {
 
   const handleSave = () => {
     if (!form.label.trim()) return;
+    
+    let finalValue = form.value;
+    if ((form.value === '' || form.value === null) && ['tax_pct', 'commission_pct'].includes(form.source)) {
+      finalValue = null;
+    } else {
+      finalValue = Number(form.value) || 0;
+    }
+
     onSave({
       ...form,
       id: initialStep?.id || `step_${Date.now()}`,
-      value: Number(form.value) || 0,
+      value: finalValue,
     });
     onClose();
   };
@@ -124,7 +132,8 @@ const StepConfigModal = ({ isOpen, onClose, onSave, initialStep = null }) => {
                 min="0"
                 step="0.01"
                 className="w-full bg-bg-tertiary border border-border-main rounded-lg p-2.5 text-text-main focus:border-accent focus:outline-none"
-                value={form.value}
+                value={form.value === null ? '' : form.value}
+                placeholder={['tax_pct', 'commission_pct'].includes(form.source) ? '(Automático)' : '0'}
                 onChange={e => setForm({ ...form, value: e.target.value })}
               />
             </div>

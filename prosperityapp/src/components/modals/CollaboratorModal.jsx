@@ -92,9 +92,19 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const numValue = ['commissionPercent', 'salesCommissionPercent', 'displayOrder'].includes(name)
-      ? parseFloat(value)
+      ? (value === '' ? '' : parseFloat(value))
       : value;
     setFormData(prev => ({ ...prev, [name]: numValue }));
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    if (typeof value === 'string') {
+      setFormData(prev => ({ ...prev, [name]: value.trim() }));
+    }
+    if (['commissionPercent', 'salesCommissionPercent'].includes(name)) {
+      setFormData(prev => ({ ...prev, [name]: value === '' || isNaN(parseFloat(value)) ? 0 : parseFloat(value) }));
+    }
   };
 
   const handleFileChange = async (e, type) => {
@@ -315,8 +325,8 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
           {/* ── Tab: Personal ── */}
           <div className={activeTab === 'personal' ? 'space-y-4' : 'hidden'}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input type="text" name="name" value={formData.name || ''} onChange={handleInputChange} placeholder={t('collaborators.modal.form.name')} className="input-themed" required />
-              <input type="text" name="lastName" value={formData.lastName || ''} onChange={handleInputChange} placeholder={t('collaborators.modal.form.lastName')} className="input-themed" />
+              <input type="text" name="name" value={formData.name || ''} onChange={handleInputChange} onBlur={handleBlur} placeholder={t('collaborators.modal.form.name')} className="input-themed" required />
+              <input type="text" name="lastName" value={formData.lastName || ''} onChange={handleInputChange} onBlur={handleBlur} placeholder={t('collaborators.modal.form.lastName')} className="input-themed" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <select name="docType" value={formData.docType || 'DNI'} onChange={handleInputChange} className="input-themed">
@@ -327,14 +337,14 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
               <input type="text" name="docNumber" value={formData.docNumber || ''} onChange={handleInputChange} placeholder={t('collaborators.modal.form.docNumber')} className="input-themed" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input type="tel" name="whatsapp" value={formData.whatsapp || ''} onChange={handleInputChange} placeholder={t('collaborators.modal.form.phone')} className="input-themed" />
-              <input type="email" name="email" value={formData.email || ''} onChange={handleInputChange} placeholder={t('collaborators.modal.form.email')} className="input-themed" />
+              <input type="tel" name="whatsapp" value={formData.whatsapp || ''} onChange={handleInputChange} onBlur={handleBlur} placeholder={t('collaborators.modal.form.phone')} className="input-themed" />
+              <input type="email" name="email" value={formData.email || ''} onChange={handleInputChange} onBlur={handleBlur} placeholder={t('collaborators.modal.form.email')} className="input-themed" />
             </div>
             <hr className="border-border-main/50" />
             <h4 className="font-semibold text-text-main">{t('collaborators.modal.form.emergencyHeader')}</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input type="text" name="emergencyContactName" value={formData.emergencyContactName || ''} onChange={handleInputChange} placeholder={t('collaborators.modal.form.emergencyName')} className="input-themed" />
-              <input type="tel" name="emergencyContactPhone" value={formData.emergencyContactPhone || ''} onChange={handleInputChange} placeholder={t('collaborators.modal.form.emergencyPhone')} className="input-themed" />
+              <input type="text" name="emergencyContactName" value={formData.emergencyContactName || ''} onChange={handleInputChange} onBlur={handleBlur} placeholder={t('collaborators.modal.form.emergencyName')} className="input-themed" />
+              <input type="tel" name="emergencyContactPhone" value={formData.emergencyContactPhone || ''} onChange={handleInputChange} onBlur={handleBlur} placeholder={t('collaborators.modal.form.emergencyPhone')} className="input-themed" />
             </div>
           </div>
 
@@ -367,11 +377,11 @@ const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs text-text-muted">{t('collaborators.modal.form.commService')}</label>
-                <input type="number" name="commissionPercent" value={formData.commissionPercent || 0} onChange={handleInputChange} className="input-themed mt-1" />
+                <input type="number" name="commissionPercent" value={formData.commissionPercent || ''} onChange={handleInputChange} onBlur={handleBlur} className="input-themed mt-1" />
               </div>
               <div>
                 <label className="text-xs text-text-muted">{t('collaborators.modal.form.commSales')}</label>
-                <input type="number" name="salesCommissionPercent" value={formData.salesCommissionPercent || 0} onChange={handleInputChange} className="input-themed mt-1" />
+                <input type="number" name="salesCommissionPercent" value={formData.salesCommissionPercent || ''} onChange={handleInputChange} onBlur={handleBlur} className="input-themed mt-1" />
               </div>
             </div>
             {formData.status === 'terminated' && (

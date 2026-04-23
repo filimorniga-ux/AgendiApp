@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { supabase } from '../../supabase/client';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 import Step1Service from '../../components/public/booking/Step1Service';
 import Step2Stylist from '../../components/public/booking/Step2Stylist';
@@ -210,39 +211,41 @@ const PublicAgenda = () => {
       </div>
 
       <div className="min-h-[400px]">
-        {step === 1 && (
-          <Step1Service 
-            business={business} 
-            onNext={handleNextStep1}
-            initialService={selectedService}
-          />
-        )}
-        {step === 2 && (
-          <Step2Stylist 
-            business={business} 
-            onNext={handleNextStep2} 
-            onBack={() => setStep(1)}
-            initialStylist={selectedStylist}
-          />
-        )}
-        {step === 3 && (
-          <Step3DateTime 
-            business={business}
-            selectedStylist={selectedStylist}
-            selectedService={selectedService}
-            onNext={handleNextStep3}
-            onBack={() => setStep(2)}
-            initialDate={selectedDate}
-            initialTime={selectedTime}
-          />
-        )}
-        {step === 4 && (
-          <Step4Form 
-            onNext={handleFinalSubmit}
-            onBack={() => setStep(3)}
-            loading={loading}
-          />
-        )}
+        <ErrorBoundary>
+          {step === 1 && (
+            <Step1Service 
+              business={business} 
+              onNext={handleNextStep1}
+              initialService={selectedService}
+            />
+          )}
+          {step === 2 && (
+            <Step2Stylist 
+              business={business} 
+              onNext={handleNextStep2} 
+              onBack={() => setStep(1)}
+              initialStylist={selectedStylist}
+            />
+          )}
+          {step === 3 && (
+            <Step3DateTime 
+              business={business}
+              selectedStylist={selectedStylist}
+              selectedService={selectedService}
+              onNext={handleNextStep3}
+              onBack={() => setStep(2)}
+              initialDate={selectedDate}
+              initialTime={selectedTime}
+            />
+          )}
+          {step === 4 && (
+            <Step4Form 
+              onNext={handleFinalSubmit}
+              onBack={() => setStep(3)}
+              loading={loading}
+            />
+          )}
+        </ErrorBoundary>
       </div>
     </div>
   );

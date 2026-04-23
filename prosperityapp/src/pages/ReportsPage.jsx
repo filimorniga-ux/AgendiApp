@@ -37,6 +37,7 @@ const ReportsPage = () => {
   // State
   const [activeTab, setActiveTab] = useState('financial');
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [filters, setFilters] = useState({
     dateRange: 'month', // today, week, month, year, custom
     startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
@@ -165,94 +166,104 @@ const ReportsPage = () => {
 
   // --- EXPORT LOGIC ---
   const handleExport = () => {
-    try {
-      const wb = XLSX.utils.book_new();
-      const dateStr = new Date().toISOString().split('T')[0];
+    setIsExporting(true);
+    setTimeout(() => {
+      try {
+        const wb = XLSX.utils.book_new();
+        const dateStr = new Date().toISOString().split('T')[0];
 
-      if (activeTab === 'financial') {
-        const ws = XLSX.utils.json_to_sheet(filteredMovements.map(m => ({
-          Fecha: parseDate(m.date).toLocaleDateString(),
-          Descripcion: m.description,
-          Monto: m.amount,
-          Tipo: m.type,
-          MetodoPago: m.paymentMethod,
-          Colaborador: m.collaboratorName || 'N/A'
-        })));
-        XLSX.utils.book_append_sheet(wb, ws, "Finanzas");
-      } else if (activeTab === 'inventory') {
-        const ws = XLSX.utils.json_to_sheet(filteredInventory.map(i => ({
-          Nombre: i.name,
-          Marca: i.brand,
-          Categoria: i.category,
-          Stock: i.stock || i.stockUnits,
-          Tipo: i.type
-        })));
-        XLSX.utils.book_append_sheet(wb, ws, "Inventario");
-      } else if (activeTab === 'crm') {
-        const ws = XLSX.utils.json_to_sheet(filteredClients);
-        XLSX.utils.book_append_sheet(wb, ws, "Clientes");
-      } else if (activeTab === 'hr') {
-        const ws = XLSX.utils.json_to_sheet(filteredCollaborators);
-        XLSX.utils.book_append_sheet(wb, ws, "Colaboradores");
-      } else if (activeTab === 'payroll') {
-        const ws = XLSX.utils.json_to_sheet(payrollData);
-        XLSX.utils.book_append_sheet(wb, ws, "Nomina_Calculada");
-      } else if (activeTab === 'closings') {
-        const ws = XLSX.utils.json_to_sheet(filteredClosings);
-        XLSX.utils.book_append_sheet(wb, ws, "Cierres_Mensuales");
+        if (activeTab === 'financial') {
+          const ws = XLSX.utils.json_to_sheet(filteredMovements.map(m => ({
+            Fecha: parseDate(m.date).toLocaleDateString(),
+            Descripcion: m.description,
+            Monto: m.amount,
+            Tipo: m.type,
+            MetodoPago: m.paymentMethod,
+            Colaborador: m.collaboratorName || 'N/A'
+          })));
+          XLSX.utils.book_append_sheet(wb, ws, "Finanzas");
+        } else if (activeTab === 'inventory') {
+          const ws = XLSX.utils.json_to_sheet(filteredInventory.map(i => ({
+            Nombre: i.name,
+            Marca: i.brand,
+            Categoria: i.category,
+            Stock: i.stock || i.stockUnits,
+            Tipo: i.type
+          })));
+          XLSX.utils.book_append_sheet(wb, ws, "Inventario");
+        } else if (activeTab === 'crm') {
+          const ws = XLSX.utils.json_to_sheet(filteredClients);
+          XLSX.utils.book_append_sheet(wb, ws, "Clientes");
+        } else if (activeTab === 'hr') {
+          const ws = XLSX.utils.json_to_sheet(filteredCollaborators);
+          XLSX.utils.book_append_sheet(wb, ws, "Colaboradores");
+        } else if (activeTab === 'payroll') {
+          const ws = XLSX.utils.json_to_sheet(payrollData);
+          XLSX.utils.book_append_sheet(wb, ws, "Nomina_Calculada");
+        } else if (activeTab === 'closings') {
+          const ws = XLSX.utils.json_to_sheet(filteredClosings);
+          XLSX.utils.book_append_sheet(wb, ws, "Cierres_Mensuales");
+        }
+
+        XLSX.writeFile(wb, `Reporte_${activeTab}_${dateStr}.xlsx`);
+      } catch (error) {
+        console.warn("Error exporting:", error);
+        alert("Error al exportar");
+      } finally {
+        setIsExporting(false);
       }
-
-      XLSX.writeFile(wb, `Reporte_${activeTab}_${dateStr}.xlsx`);
-    } catch (error) {
-      console.warn("Error exporting:", error);
-      alert("Error al exportar");
-    }
+    }, 100);
   };
 
   // --- FULL BACKUP LOGIC ---
   const handleFullBackup = () => {
-    try {
-      const wb = XLSX.utils.book_new();
-      const dateStr = new Date().toISOString().split('T')[0];
+    setIsExporting(true);
+    setTimeout(() => {
+      try {
+        const wb = XLSX.utils.book_new();
+        const dateStr = new Date().toISOString().split('T')[0];
 
-      // 1. Clients
-      if (clients && clients.length > 0) {
-        const ws = XLSX.utils.json_to_sheet(clients);
-        XLSX.utils.book_append_sheet(wb, ws, "Clientes");
-      }
-      // 2. Inventory
-      if (technicalInventory && technicalInventory.length > 0) {
-        const ws = XLSX.utils.json_to_sheet(technicalInventory);
-        XLSX.utils.book_append_sheet(wb, ws, "Inv_Tecnico");
-      }
-      if (retailInventory && retailInventory.length > 0) {
-        const ws = XLSX.utils.json_to_sheet(retailInventory);
-        XLSX.utils.book_append_sheet(wb, ws, "Inv_Retail");
-      }
-      // 3. Financial
-      if (movements && movements.length > 0) {
-        const ws = XLSX.utils.json_to_sheet(movements.map(m => ({
-          ...m,
-          date: m.date ? parseDate(m.date).toISOString() : null
-        })));
-        XLSX.utils.book_append_sheet(wb, ws, "Movimientos");
-      }
-      // 4. HR
-      if (collaborators && collaborators.length > 0) {
-        const ws = XLSX.utils.json_to_sheet(collaborators);
-        XLSX.utils.book_append_sheet(wb, ws, "Colaboradores");
-      }
-      // 5. Services
-      if (services && services.length > 0) {
-        const ws = XLSX.utils.json_to_sheet(services);
-        XLSX.utils.book_append_sheet(wb, ws, "Servicios");
-      }
+        // 1. Clients
+        if (clients && clients.length > 0) {
+          const ws = XLSX.utils.json_to_sheet(clients);
+          XLSX.utils.book_append_sheet(wb, ws, "Clientes");
+        }
+        // 2. Inventory
+        if (technicalInventory && technicalInventory.length > 0) {
+          const ws = XLSX.utils.json_to_sheet(technicalInventory);
+          XLSX.utils.book_append_sheet(wb, ws, "Inv_Tecnico");
+        }
+        if (retailInventory && retailInventory.length > 0) {
+          const ws = XLSX.utils.json_to_sheet(retailInventory);
+          XLSX.utils.book_append_sheet(wb, ws, "Inv_Retail");
+        }
+        // 3. Financial
+        if (movements && movements.length > 0) {
+          const ws = XLSX.utils.json_to_sheet(movements.map(m => ({
+            ...m,
+            date: m.date ? parseDate(m.date).toISOString() : null
+          })));
+          XLSX.utils.book_append_sheet(wb, ws, "Movimientos");
+        }
+        // 4. HR
+        if (collaborators && collaborators.length > 0) {
+          const ws = XLSX.utils.json_to_sheet(collaborators);
+          XLSX.utils.book_append_sheet(wb, ws, "Colaboradores");
+        }
+        // 5. Services
+        if (services && services.length > 0) {
+          const ws = XLSX.utils.json_to_sheet(services);
+          XLSX.utils.book_append_sheet(wb, ws, "Servicios");
+        }
 
-      XLSX.writeFile(wb, `Respaldo_Completo_AgendiApp_${dateStr}.xlsx`);
-    } catch (error) {
-      console.warn("Error generating full backup:", error);
-      alert("Error al generar el respaldo completo.");
-    }
+        XLSX.writeFile(wb, `Respaldo_Completo_AgendiApp_${dateStr}.xlsx`);
+      } catch (error) {
+        console.warn("Error generating full backup:", error);
+        alert("Error al generar el respaldo completo.");
+      } finally {
+        setIsExporting(false);
+      }
+    }, 100);
   };
 
   // --- PRINT LOGIC ---
@@ -399,12 +410,17 @@ const ReportsPage = () => {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => setIsExportModalOpen(true)}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+            onClick={handleFullBackup}
+            disabled={isExporting}
+            className={`flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg transition-colors shadow-lg ${isExporting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
             title={t('reports.fullBackup')}
           >
-            <Icon name="database" className="w-4 h-4" />
-            <span className="font-semibold hidden sm:inline text-sm">{t('reports.fullBackup')}</span>
+            {isExporting ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <Icon name="database" className="w-4 h-4" />
+            )}
+            <span className="font-semibold hidden sm:inline text-sm">{isExporting ? 'Procesando...' : t('reports.fullBackup')}</span>
           </button>
           <button
             onClick={handlePrint}
@@ -416,11 +432,16 @@ const ReportsPage = () => {
           </button>
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            disabled={isExporting}
+            className={`flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg transition-colors ${isExporting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'}`}
             title={t('reports.exportExcel')}
           >
-            <Icon name="download" className="w-4 h-4" />
-            <span className="font-semibold hidden sm:inline text-sm">{t('reports.exportExcel')}</span>
+            {isExporting ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <Icon name="download" className="w-4 h-4" />
+            )}
+            <span className="font-semibold hidden sm:inline text-sm">{isExporting ? 'Exportando...' : t('reports.exportExcel')}</span>
           </button>
         </div>
       </div>

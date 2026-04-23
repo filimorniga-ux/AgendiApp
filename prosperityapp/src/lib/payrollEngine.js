@@ -26,7 +26,8 @@ export function calculatePayroll(data, steps) {
     totalAdvances     = 0,
     totalSalesCommissions = 0,
     totalPropinas     = 0,
-    commissionPercent = 0,
+    commissionPercent,
+    globalCommission  = 0,
     taxPercent        = 19,
   } = data || {};
 
@@ -37,7 +38,10 @@ export function calculatePayroll(data, steps) {
     return Number.isNaN(num) || !Number.isFinite(num) ? fallback : num;
   };
 
-  const safeCommissionPct = safeNum(commissionPercent, 0);
+  const effCommission = (commissionPercent === null || commissionPercent === undefined || commissionPercent === '') 
+    ? globalCommission 
+    : commissionPercent;
+  const safeCommissionPct = safeNum(effCommission, 0);
   const safeTaxPct = safeNum(taxPercent, 19);
 
   // Registros disponibles por fuente

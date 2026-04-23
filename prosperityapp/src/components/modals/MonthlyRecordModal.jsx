@@ -4,6 +4,7 @@ import { sbCreate, sbUpdate } from '../../supabase/db';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { parseDate } from '../../lib/dateUtils';
+import { safeNum } from '../../lib/mathUtils';
 
 const MonthlyRecordModal = ({ isOpen, onClose, recordToEdit, yearMonth, businessId }) => {
   const { t } = useTranslation();
@@ -51,6 +52,7 @@ const MonthlyRecordModal = ({ isOpen, onClose, recordToEdit, yearMonth, business
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (isSaving) return;
     setIsSaving(true);
     
     try {
@@ -59,7 +61,7 @@ const MonthlyRecordModal = ({ isOpen, onClose, recordToEdit, yearMonth, business
         date: formData.date,
         description: formData.description,
         category_key: formData.category,
-        amount_value: parseFloat(formData.amount) || 0,
+        amount_value: safeNum(formData.amount),
       };
       if (isEditMode) {
         const { error } = await sbUpdate('monthly_closing_records', recordToEdit.id, dataToSave);

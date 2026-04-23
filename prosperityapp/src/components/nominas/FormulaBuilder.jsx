@@ -69,7 +69,9 @@ const SortableStep = ({ step, onEdit, onRemove, onToggle }) => {
         </p>
         <p className="text-[11px] text-text-muted/60 mt-0.5">
           {step.source} · {step.operator}
-          {step.value ? ` · ${step.value}${['percent_add','percent_subtract','tax_pct','commission_pct'].some(o => step.operator === o || step.source === o) ? '%' : ''}` : ''}
+          {step.value !== null && step.value !== undefined && step.value !== '' 
+            ? ` · ${step.value}${['percent_add','percent_subtract','tax_pct','commission_pct'].some(o => step.operator === o || step.source === o) ? '%' : ''}` 
+            : ['tax_pct', 'commission_pct'].includes(step.source) ? ' · (auto)' : ''}
         </p>
       </div>
 

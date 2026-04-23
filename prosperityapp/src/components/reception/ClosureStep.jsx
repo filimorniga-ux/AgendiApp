@@ -32,8 +32,8 @@ export default function ClosureStep({ sessionData, onFinished }) {
   const [error, setError]     = useState('');
 
   // Calcular totales
-  const totalInvoiced  = items.reduce((s, it) => s + (it.totalCost || it.unitCost * it.quantityInvoiced || 0), 0);
-  const totalReceived  = items.reduce((s, it) => s + (it.unitCost * (it.quantityReceived ?? it.quantityInvoiced) || 0), 0);
+  const totalInvoiced  = Math.round(items.reduce((s, it) => s + (it.totalCost || it.unitCost * it.quantityInvoiced || 0), 0));
+  const totalReceived  = Math.round(items.reduce((s, it) => s + (it.unitCost * (it.quantityReceived ?? it.quantityInvoiced) || 0), 0));
   const newProducts    = items.filter(it => it.isNewProduct);
   const discrepant     = items.filter(it => ['partial', 'missing', 'damaged'].includes(it.status));
 

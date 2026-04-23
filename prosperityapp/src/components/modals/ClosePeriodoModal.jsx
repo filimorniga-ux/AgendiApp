@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { safeNum, safeSum } from '../../lib/mathUtils';
 
 const formatCurrency = (value) => {
-  if (typeof value !== 'number') value = 0;
-  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
+  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(safeNum(value));
 };
 
 const ClosePeriodoModal = ({ isOpen, onClose, onSave, summaryData, dateRangeString }) => {
@@ -21,6 +21,7 @@ const ClosePeriodoModal = ({ isOpen, onClose, onSave, summaryData, dateRangeStri
   }, [isOpen, dateRangeString]);
 
   const handleSubmit = async () => {
+    if (isSaving) return;
     if (!closingName) {
       toast.error(t('payroll.errors.nameRequired'));
       return;
@@ -40,7 +41,7 @@ const ClosePeriodoModal = ({ isOpen, onClose, onSave, summaryData, dateRangeStri
 
   if (!isOpen) return null;
 
-  const totalGeneral = summaryData.reduce((sum, collab) => sum + collab.finalPayment, 0);
+  const totalGeneral = safeSum(summaryData.map(collab => collab.finalPayment));
   const totalCollabs = summaryData.length;
 
   return (

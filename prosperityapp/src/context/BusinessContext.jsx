@@ -24,6 +24,9 @@ export const BusinessProvider = ({ children }) => {
   const [noBusinessFound, setNoBusinessFound] = useState(false);
   const [authErrorDetail, setAuthErrorDetail] = useState('');
   
+  const businessIdRef = React.useRef(null);
+  const noBusinessFoundRef = React.useRef(false);
+  
   // Ref to track the currently resolved user ID to prevent redundant requests
   const currentUserRef = React.useRef(null);
 
@@ -41,6 +44,9 @@ export const BusinessProvider = ({ children }) => {
     setRealRole(null);
     setIsClient(false);
     setBusinessId(null);
+    businessIdRef.current = null;
+    setNoBusinessFound(false);
+    noBusinessFoundRef.current = false;
     currentUserRef.current = null;
 
     // 3. Clean up ALL Supabase auth tokens from localStorage (safe)
@@ -65,12 +71,13 @@ export const BusinessProvider = ({ children }) => {
       const sbUser = session?.user ?? null;
       setSupabaseUser(sbUser);
       if (sbUser) {
-        if (currentUserRef.current === sbUser.id && businessId !== null && !noBusinessFound) {
+        if (currentUserRef.current === sbUser.id && businessIdRef.current !== null && !noBusinessFoundRef.current) {
            setLoadingAuth(false);
            return;
         }
 
         setNoBusinessFound(false);
+        noBusinessFoundRef.current = false;
         let resolved = false;
 
         const TIMEOUT_MS = 10000;
@@ -110,6 +117,7 @@ export const BusinessProvider = ({ children }) => {
             if (mounted) {
               setRealRole(collabRes.data.role || 'staff');
               setBusinessId(collabRes.data.business_id);
+              businessIdRef.current = collabRes.data.business_id;
               setIsClient(false);
             }
             loadPlan(collabRes.data.business_id);
@@ -118,6 +126,7 @@ export const BusinessProvider = ({ children }) => {
             if (mounted) {
               setRealRole(userByIdRes.data.role || 'owner');
               setBusinessId(userByIdRes.data.business_id);
+              businessIdRef.current = userByIdRes.data.business_id;
               setIsClient(false);
             }
             loadPlan(userByIdRes.data.business_id);
@@ -126,6 +135,7 @@ export const BusinessProvider = ({ children }) => {
             if (mounted) {
               setRealRole(userByUidRes.data.role || 'owner');
               setBusinessId(userByUidRes.data.business_id);
+              businessIdRef.current = userByUidRes.data.business_id;
               setIsClient(false);
             }
             loadPlan(userByUidRes.data.business_id);
@@ -134,6 +144,7 @@ export const BusinessProvider = ({ children }) => {
             if (mounted) {
               setRealRole(userByEmailRes.data.role || 'owner');
               setBusinessId(userByEmailRes.data.business_id);
+              businessIdRef.current = userByEmailRes.data.business_id;
               setIsClient(false);
             }
             loadPlan(userByEmailRes.data.business_id);
@@ -142,6 +153,7 @@ export const BusinessProvider = ({ children }) => {
             if (mounted) {
               setRealRole('client');
               setBusinessId(clientRes.data.business_id);
+              businessIdRef.current = clientRes.data.business_id;
               setIsClient(true);
             }
             loadPlan(clientRes.data.business_id);
@@ -156,8 +168,10 @@ export const BusinessProvider = ({ children }) => {
           if (mounted) {
             setRealRole(null);
             setBusinessId(null);
+            businessIdRef.current = null;
             setIsClient(false);
             setNoBusinessFound(true);
+            noBusinessFoundRef.current = true;
             currentUserRef.current = null;
           }
         } else {
@@ -167,8 +181,10 @@ export const BusinessProvider = ({ children }) => {
         if (mounted) {
           setRealRole(null);
           setBusinessId(null);
+          businessIdRef.current = null;
           setIsClient(false);
           setNoBusinessFound(false);
+          noBusinessFoundRef.current = false;
           currentUserRef.current = null;
         }
       }
@@ -189,9 +205,10 @@ export const BusinessProvider = ({ children }) => {
     );
 
     return () => {
-      sbSub.unsubscribe();
+      mounted = false;
+      sbSub?.unsubscribe();
     };
-  }, [businessId, noBusinessFound]);
+  }, []);
 
   return (
     <BusinessContext.Provider value={{

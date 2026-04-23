@@ -21,6 +21,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import CollaboratorModal from '../components/modals/CollaboratorModal';
 import { useTranslation } from 'react-i18next';
+import { useDebounce } from '../hooks/useDebounce';
 
 // Componente Sortable para cada fila
 const SortableCollaboratorRow = ({ collaborator, sortBy, t, onEdit, onDelete }) => {
@@ -111,14 +112,16 @@ const ColaboradoresPage = () => {
     }
   }, [collaborators]);
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
   const filteredCollabList = useMemo(() => {
     if (!collabList) return [];
 
     let filtered = collabList;
-    if (searchTerm) {
+    if (debouncedSearchTerm) {
       filtered = collabList.filter(c =>
-        c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.lastName && c.lastName.toLowerCase().includes(searchTerm.toLowerCase()))
+        c.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        (c.lastName && c.lastName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
       );
     }
 
@@ -134,7 +137,7 @@ const ColaboradoresPage = () => {
       if (orderA !== orderB) return orderA - orderB;
       return a.name.localeCompare(b.name);
     });
-  }, [collabList, searchTerm, sortBy]);
+  }, [collabList, debouncedSearchTerm, sortBy]);
 
   useEffect(() => {
     if (!isLoading) {

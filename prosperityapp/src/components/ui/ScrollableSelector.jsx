@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import feather from 'feather-icons';
+import { useDebounce } from '../../hooks/useDebounce';
 
 const ScrollableSelector = ({
   items = [],
@@ -33,8 +34,10 @@ const ScrollableSelector = ({
     }
   }, [initialValue, allowManual]);
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
   const filteredItems = items.filter(item =>
-    (item.name ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+    (item.name ?? '').toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
   const handleSelect = (item) => {

@@ -4,7 +4,9 @@ import feather from 'feather-icons';
 import { useData } from '../context/DataContext';
 import RetailProductModal from '../components/modals/RetailProductModal';
 import { sbDelete } from '../supabase/db';
+import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
+import { useDebounce } from '../hooks/useDebounce';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -20,6 +22,8 @@ const VentaPublicoPage = () => {
   const { retailInventory, isLoading: loading } = useData();
   const error = null; // Removed as context handles it globally
   
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  
   const filteredItems = useMemo(() => {
     if (!retailInventory) return [];
     let items = retailInventory.map(p => ({
@@ -31,9 +35,9 @@ const VentaPublicoPage = () => {
     if (selectedCategory !== 'all') {
       items = items.filter(item => item.category === selectedCategory);
     }
-    if (searchTerm) {
+    if (debouncedSearchTerm) {
       items = items.filter(item =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+        item.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
     }
     items.sort((a, b) => {
@@ -47,7 +51,7 @@ const VentaPublicoPage = () => {
       }
     });
     return items;
-  }, [retailInventory, searchTerm, selectedCategory, sortOrder]);
+  }, [retailInventory, debouncedSearchTerm, selectedCategory, sortOrder]);
 
   const categories = useMemo(() => {
     if (!retailInventory) return [];

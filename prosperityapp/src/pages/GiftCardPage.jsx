@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useStorage } from '../hooks/useStorage';
 import { sbUpdate } from '../supabase/db';
 import toast from 'react-hot-toast';
+import { useDebounce } from '../hooks/useDebounce';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -62,6 +63,8 @@ const GiftCardPage = () => {
     }
   };
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
   const filteredGiftCards = useMemo(() => {
     if (!giftCards) return [];
 
@@ -71,15 +74,15 @@ const GiftCardPage = () => {
       return timeB - timeA;
     });
 
-    if (!searchTerm) return sorted;
+    if (!debouncedSearchTerm) return sorted;
 
-    const term = searchTerm.toLowerCase();
+    const term = debouncedSearchTerm.toLowerCase();
     return sorted.filter(gc =>
       gc.code.toLowerCase().includes(term) ||
       gc.buyerName.toLowerCase().includes(term) ||
       (gc.buyerContact && gc.buyerContact.toLowerCase().includes(term))
     );
-  }, [giftCards, searchTerm]);
+  }, [giftCards, debouncedSearchTerm]);
 
   if (loading || isDataLoading) {
     return null;

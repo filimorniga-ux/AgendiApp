@@ -42,6 +42,8 @@ const PublicLayout = () => {
 
   // Check if a client is already logged in
   useEffect(() => {
+    let mounted = true;
+
     const checkClientAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
@@ -51,7 +53,7 @@ const PublicLayout = () => {
           .eq('auth_user_id', session.user.id)
           .maybeSingle();
         
-        if (client) setClientUser(client);
+        if (mounted && client) setClientUser(client);
       }
     };
     checkClientAuth();
@@ -63,13 +65,16 @@ const PublicLayout = () => {
           .select('id, name')
           .eq('auth_user_id', session.user.id)
           .maybeSingle();
-        setClientUser(client || null);
+        if (mounted) setClientUser(client || null);
       } else {
-        setClientUser(null);
+        if (mounted) setClientUser(null);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription?.unsubscribe();
+    };
   }, []);
 
   const handleClientLogout = useCallback(async () => {

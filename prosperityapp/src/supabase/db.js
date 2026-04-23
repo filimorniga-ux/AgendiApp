@@ -16,7 +16,7 @@
 
 import { supabase }      from './client';
 import { COLLECTION_TO_TABLE, objToSnake } from './tableMap';
-import { enqueueWrite, syncOfflineQueue, optimisticWrite, optimisticDelete } from '../lib/offlineQueue';
+import { enqueueWrite, enqueueRpc, syncOfflineQueue, optimisticWrite, optimisticDelete } from '../lib/offlineQueue';
 
 function getTable(collectionName) {
   return COLLECTION_TO_TABLE[collectionName] || collectionName;
@@ -124,4 +124,16 @@ export async function sbGetAll(collectionName, businessId, options = {}) {
   }
 
   return query;
+}
+
+/**
+ * Ejecuta un RPC en Supabase con soporte offline.
+ * Si no hay red, encola el RPC.
+ */
+export async function sbRpc(rpcName, payload) {
+  if (!navigator.onLine) {
+    await enqueueRpc(rpcName, payload);
+    return { data: null, error: null, queued: true };
+  }
+  return supabase.rpc(rpcName, payload);
 }

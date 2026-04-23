@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import feather from 'feather-icons';
+import { useDebounce } from '../../hooks/useDebounce';
 
 /**
  * SearchableDropdown
@@ -81,8 +82,10 @@ const SearchableDropdown = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, selectedItem, searchTerm, allowManual]);
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
   const filteredItems = items.filter(item =>
-    (item.name ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+    (item.name ?? '').toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
   const handleSelect = (item) => {

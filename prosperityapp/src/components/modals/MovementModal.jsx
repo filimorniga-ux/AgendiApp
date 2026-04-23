@@ -17,6 +17,7 @@ import Swal from 'sweetalert2';
 import { BarcodeScanner } from '../barcode/BarcodeScanner';
 import { BarcodeScannerButton } from '../barcode/BarcodeScannerButton';
 import { useBarcodeLookup } from '../../hooks/useBarcodeLookup';
+import { safeNum, safeSum } from '../../lib/mathUtils';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') {
@@ -192,7 +193,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
   }, [cart, isTechModalOpen, isCommissionModalOpen, showManualService, showManualProduct]);
 
   const handleClose = () => { setIsSaving(false); onClose(); };
-  const totalCart = useMemo(() => cart.reduce((sum, item) => sum + item.amount, 0), [cart]);
+  const totalCart = useMemo(() => safeSum(cart.map(item => item.amount)), [cart]);
 
   const handleCartItemChange = (cartId, field, value) => {
     setCart(prev => prev.map(item => {
@@ -459,6 +460,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
 
   // --- GUARDAR OPERACIÓN (migrado a Supabase) ---
   const handleSaveOperation = async () => {
+    if (isSaving) return;
     if (cart.length === 0) {
       if (isEditMode) return await handleDeleteOperation();
       toast.error(t('modals.errors.noItems'));
@@ -568,21 +570,23 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
 
         // 4. Pago con Gift Card → actualizar balance de forma atómica
         if (item.type === 'PagoGiftCard') {
-          const { data: gcResult } = await supabase.rpc('update_gift_card_balance', {
+          const { data: gcResult, error: rpcErr } = await supabase.rpc('update_gift_card_balance', {
             p_code: item.gcCode,
             p_business_id: businessId,
             p_delta: item.amount // negativo
           });
+          if (rpcErr) throw rpcErr;
           if (gcResult?.error) throw new Error(gcResult.error);
         }
 
         // 5. Descuento de stock retail (Venta con productId)
         if (item.type === 'Venta' && item.productId) {
-          await supabase.rpc('decrement_retail_stock', {
+          const { error: decErr } = await supabase.rpc('decrement_retail_stock', {
             p_product_id: item.productId,
             p_business_id: businessId,
             p_quantity: item.quantity || 1
           });
+          if (decErr) throw decErr;
         }
 
         // 5b. Descuento de stock técnico (Servicio con productos completos)
@@ -597,12 +601,13 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
 
               if (!fetchErr && currentItem) {
                 const newStock = Math.max(0, (currentItem.stock_current || 0) - techProd.quantity);
-                await supabase
+                const { error: updErr } = await supabase
                   .from('technical_inventory')
                   .update({ stock_current: newStock, updated_at: new Date().toISOString() })
                   .eq('id', techProd.id);
+                if (updErr) throw updErr;
 
-                await supabase.from('stock_movements').insert({
+                const { error: insErr } = await supabase.from('stock_movements').insert({
                   business_id: businessId,
                   product_id: techProd.id,
                   product_name: currentItem.name,
@@ -614,6 +619,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
                   reason: 'Consumo Técnico (Caja)',
                   notes: `Transacción ${transactionId}`
                 });
+                if (insErr) throw insErr;
               }
             }
           }
@@ -626,8 +632,8 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
             finalCommission = item.commissionAmount;
           } else {
             const collaborator = collaborators.find(c => c.id === item.collaboratorId);
-            const rate = (collaborator?.salesCommissionPercent || settings.salesCommissionGeneral || 10) / 100;
-            finalCommission = item.amount * rate;
+            const rate = (safeNum(collaborator?.salesCommissionPercent, settings.salesCommissionGeneral || 10)) / 100;
+            finalCommission = safeNum(item.amount) * rate;
           }
           if (finalCommission > 0) {
             movementsToInsert.push({
@@ -676,7 +682,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
           type: item.type,
           collaboratorName: item.collaboratorName,
         })),
-        total: cart.reduce((sum, item) => sum + item.amount, 0),
+        total: safeSum(cart.map(item => item.amount)),
         paymentMethod,
         client: clientLabel,
         date: new Date(),
@@ -729,6 +735,7 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
   };
 
   const handleDeleteOperation = async () => {
+    if (isSaving) return;
     if (!window.confirm(t('common.confirmDelete'))) { return; }
     setIsSaving(true);
     const transactionId = movementToEdit?.transactionId;

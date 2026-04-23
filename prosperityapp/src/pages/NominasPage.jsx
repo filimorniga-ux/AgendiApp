@@ -192,7 +192,7 @@ const NominasPage = () => {
       const salesCommissionItems  = collaboratorMovements.filter(m => m.type === 'ComisionVenta');
       const propinaItems          = collaboratorMovements.filter(m => m.type === 'ComisionPropina');
 
-      const defaultSettings       = { taxGeneral: 19, taxOverrides: {} };
+      const defaultSettings       = { taxGeneral: 19, taxOverrides: {}, commissionPercent: 0 };
       const foundSettings         = config?.find(c => c.id === 'settings');
       const settings              = { ...defaultSettings, ...foundSettings };
 
@@ -202,7 +202,8 @@ const NominasPage = () => {
         totalAdvances:         advanceItems.reduce((s, m) => s + (m.amount || 0), 0),
         totalSalesCommissions: salesCommissionItems.reduce((s, m) => s + (m.amount || 0), 0),
         totalPropinas:         propinaItems.reduce((s, m) => s + (m.amount || 0), 0),
-        commissionPercent:     col.commissionPercent || 0,
+        commissionPercent:     col.commissionPercent,
+        globalCommission:      settings.commissionPercent || 0,
         taxPercent:            settings.taxOverrides?.[col.id] || settings.taxGeneral,
       };
 

@@ -62,6 +62,23 @@ export async function enqueueWrite(operation, table, payload, recordId = null) {
 }
 
 /**
+ * Encola una llamada RPC (función de base de datos).
+ * @param {string} rpcName Nombre del RPC.
+ * @param {Object} payload Parámetros del RPC.
+ */
+export async function enqueueRpc(rpcName, payload) {
+  await localDb.offline_queue.add({
+    operation: 'rpc',
+    table: rpcName,
+    payload,
+    recordId: null,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+  });
+  console.info(`[offlineQueue] RPC encolado: ${rpcName}`);
+}
+
+/**
  * Encola un batch de inserciones para una tabla (ej: movements).
  * Se ejecuta como un solo insert cuando se recupera la red.
  *
@@ -100,6 +117,10 @@ export async function syncOfflineQueue() {
     try {
       if (item.operation === 'insert') {
         const { error } = await supabase.from(item.table).insert(item.payload);
+        if (error) throw error;
+
+      } else if (item.operation === 'rpc') {
+        const { error } = await supabase.rpc(item.table, item.payload);
         if (error) throw error;
 
       } else if (item.operation === 'batch_insert') {

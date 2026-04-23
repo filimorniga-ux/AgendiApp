@@ -13,10 +13,11 @@ import { BarcodeScanner } from '../barcode/BarcodeScanner';
 import { BarcodeScannerButton } from '../barcode/BarcodeScannerButton';
 import { QuickCreateProductModal } from '../inventory/QuickCreateProductModal';
 import { useBarcodeLookup } from '../../hooks/useBarcodeLookup';
+import { safeNum, safeSum } from '../../lib/mathUtils';
 
 const formatCurrency = (value) => {
-  if (typeof value !== 'number') value = 0;
-  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
+  const safeValue = safeNum(value);
+  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(safeValue);
 };
 
 const SummaryCard = ({ title, value, icon, colorClass = 'text-accent' }) => (
@@ -31,7 +32,7 @@ const SummaryCard = ({ title, value, icon, colorClass = 'text-accent' }) => (
 
 const DailyColumn = ({ title, icon, movements, accentClass = 'border-t-gray-500', onEditItem, onHeaderClick = null }) => {
   const { t } = useTranslation();
-  const total = useMemo(() => movements.reduce((sum, m) => sum + m.amount, 0), [movements]);
+  const total = useMemo(() => safeSum(movements.map(m => m.amount)), [movements]);
   const headerClasses = `p-4 border-b border-border-main ${onHeaderClick ? 'cursor-pointer hover:bg-bg-tertiary' : ''}`;
 
   return (
@@ -116,16 +117,16 @@ export default function CurrentCashTab({ onArqueoClick }) {
     const advances = dailyMovements.filter(m => m.type === 'Adelanto');
     const pagosGC = dailyMovements.filter(m => m.type === 'PagoGiftCard');
     
-    const totalServicios = services.reduce((sum, m) => sum + m.amount, 0);
-    const totalVentas = sales.reduce((sum, m) => sum + m.amount, 0);
-    const totalPropinas = propinas.reduce((sum, m) => sum + m.amount, 0);
-    const totalVentasGC = ventasGC.reduce((sum, m) => sum + m.amount, 0);
+    const totalServicios = safeSum(services.map(m => m.amount));
+    const totalVentas = safeSum(sales.map(m => m.amount));
+    const totalPropinas = safeSum(propinas.map(m => m.amount));
+    const totalVentasGC = safeSum(ventasGC.map(m => m.amount));
     const incomeMovements = [...services, ...sales, ...propinas, ...ventasGC];
-    const totalTarjetas = incomeMovements.filter(m => m.paymentMethod === 'Tarjeta').reduce((sum, m) => sum + m.amount, 0);
-    const totalTransferencias = incomeMovements.filter(m => m.paymentMethod === 'Transferencia').reduce((sum, m) => sum + m.amount, 0);
-    const totalGastos = expenses.reduce((sum, m) => sum + m.amount, 0);
-    const totalAdelantos = advances.reduce((sum, m) => sum + m.amount, 0);
-    const totalPagosGC = pagosGC.reduce((sum, m) => sum + m.amount, 0);
+    const totalTarjetas = safeSum(incomeMovements.filter(m => m.paymentMethod === 'Tarjeta').map(m => m.amount));
+    const totalTransferencias = safeSum(incomeMovements.filter(m => m.paymentMethod === 'Transferencia').map(m => m.amount));
+    const totalGastos = safeSum(expenses.map(m => m.amount));
+    const totalAdelantos = safeSum(advances.map(m => m.amount));
+    const totalPagosGC = safeSum(pagosGC.map(m => m.amount));
     
     // Efectivo en caja (Todo el ingreso que NO es por Tarjeta o Transferencia) MENOS Gastos MENOS Adelantos
     // En el futuro, agregar caja chica inicial si es necesario.

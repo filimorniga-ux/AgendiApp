@@ -23,6 +23,7 @@ const PreciosPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortOrder, setSortOrder] = useState('name-asc');
+  const [visibleCount, setVisibleCount] = useState(5);
 
   const servicesByCategory = useMemo(() => {
     if (!services) return {};
@@ -57,7 +58,7 @@ const PreciosPage = () => {
       }, {});
     }
     Object.keys(categories).forEach(category => {
-      categories[category].sort((a, b) => {
+      categories[category] = [...categories[category]].sort((a, b) => {
         switch (sortOrder) {
           case 'price-asc': return a.price - b.price;
           case 'price-desc': return b.price - a.price;
@@ -148,8 +149,8 @@ const PreciosPage = () => {
         </div>
       </div>
       <div id="servicios-list-container" className="flex-grow overflow-y-auto space-y-3 pb-24 sm:pb-4">
-        {Object.keys(filteredAndSortedCategories).map(category => (
-          <details key={category} className="bg-bg-secondary rounded-lg border border-border-main" open>
+        {Object.keys(filteredAndSortedCategories).slice(0, visibleCount).map((category, index) => (
+          <details key={category} className="bg-bg-secondary rounded-lg border border-border-main" open={index < 5}>
             <summary className="p-3 sm:p-4 font-semibold text-base sm:text-lg cursor-pointer flex justify-between items-center text-text-main hover:bg-bg-tertiary rounded-lg">
               <span>{category}</span>
               <i data-feather="chevron-down" className="text-text-muted w-4 h-4 flex-shrink-0"></i>
@@ -179,6 +180,16 @@ const PreciosPage = () => {
          {Object.keys(filteredAndSortedCategories).length === 0 && (
             <div className="text-center p-8 bg-bg-secondary rounded-lg">
               <p className="text-text-muted">{t('prices.noServices')}</p>
+            </div>
+         )}
+         {visibleCount < Object.keys(filteredAndSortedCategories).length && (
+            <div className="flex justify-center pt-4">
+              <button 
+                onClick={() => setVisibleCount(prev => prev + 5)}
+                className="px-6 py-2 bg-bg-tertiary text-text-main rounded-lg hover:bg-bg-main border border-border-main"
+              >
+                {t('prices.loadMore') || 'Cargar más'}
+              </button>
             </div>
          )}
       </div>

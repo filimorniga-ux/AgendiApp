@@ -36,6 +36,11 @@ export default function PhysicalReceptionStep({ items: initialItems, onNext }) {
     }));
   };
 
+  const handleBlur = (idx, val) => {
+    const num = parseFloat(val) || 0;
+    updateItem(idx, 'quantityReceived', parseFloat(num.toFixed(4)));
+  };
+
   // Modo scanner: buscar ítem por código de barras y marcar como recibido
   const handleScannedBarcode = (barcode) => {
     const idx = items.findIndex(it => it.barcode === barcode);
@@ -156,6 +161,7 @@ export default function PhysicalReceptionStep({ items: initialItems, onNext }) {
                       className="recepcion-table-input-num"
                       value={item.quantityReceived ?? item.quantityInvoiced}
                       onChange={e => updateItem(idx, 'quantityReceived', parseFloat(e.target.value) || 0)}
+                      onBlur={e => handleBlur(idx, e.target.value)}
                       disabled={mode === 'scanner'}
                       style={{ width: '70px', padding: '5px 8px', borderRadius: '8px', border: '1px solid var(--color-border-main)', background: 'var(--color-bg-main)', borderBottom: 'none' }}
                     />

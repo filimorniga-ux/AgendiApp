@@ -32,14 +32,18 @@ const AppointmentCard = ({ appointment, onClick }) => {
   };
 
   const borderClass = statusStyles[appointment.status] || 'border-l-accent bg-bg-tertiary';
+  const isPendingSync = appointment._isPending;
 
   return (
     <div
       onClick={() => onClick(appointment)}
-      className={`p-3 mb-3 rounded-r-md shadow-sm border-l-4 ${borderClass} hover:brightness-110 cursor-pointer transition-all group`}
+      className={`p-3 mb-3 rounded-r-md shadow-sm border-l-4 ${borderClass} hover:brightness-110 cursor-pointer transition-all group ${isPendingSync ? 'opacity-70 border-dashed' : ''}`}
     >
       <div className="flex justify-between items-start mb-1">
-        <span className="font-bold text-text-main text-sm truncate">{appointment.clientName}</span>
+        <span className="font-bold text-text-main text-sm truncate">
+          {appointment.clientName}
+          {isPendingSync && <i data-feather="cloud-off" className="w-3 h-3 inline ml-1 text-yellow-500" title="Pendiente de sincronizar"></i>}
+        </span>
         <span className="text-[10px] font-mono text-text-muted bg-bg-main/50 px-1 rounded ml-2 whitespace-nowrap">
           {formatTime(appointment.start)}
         </span>

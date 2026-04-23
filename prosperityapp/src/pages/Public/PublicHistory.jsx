@@ -32,8 +32,8 @@ const PublicHistory = () => {
         // Fetch purchase history (movements linked to this client)
         const { data: mvData } = await supabase
           .from('movements')
-          .select('id, date, type, concept, amount, collaborator')
-          .or(`clientId.eq.${clientUser.id},client.eq.${clientUser.name}`)
+          .select('id, date, type, description, amount, collaborator_name')
+          .or(`client_id.eq.${clientUser.id},client.eq.${clientUser.name}`)
           .eq('business_id', business.id)
           .order('date', { ascending: false })
           .limit(50);
@@ -175,9 +175,9 @@ const PublicHistory = () => {
                 {movements.map(mv => (
                   <div key={mv.id} className="bg-bg-secondary rounded-xl border border-border-main p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-accent/30 transition-colors">
                     <div className="flex-1">
-                      <h4 className="font-semibold text-text-main">{mv.concept || mv.type}</h4>
+                      <h4 className="font-semibold text-text-main">{mv.description || mv.type}</h4>
                       <p className="text-sm text-text-muted">
-                        {mv.collaborator && <span className="capitalize">con {mv.collaborator} · </span>}
+                        {mv.collaborator_name && <span className="capitalize">con {mv.collaborator_name} · </span>}
                         {formatDate(mv.date)}
                       </p>
                     </div>

@@ -7,6 +7,7 @@ import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useDebounce } from '../hooks/useDebounce';
 
 const ClientesPage = () => {
   const { t } = useTranslation();
@@ -18,15 +19,17 @@ const ClientesPage = () => {
   const loading = isLoading;
   const error = null;
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
   const filteredClients = useMemo(() => {
     if (!clients) return [];
-    if (!searchTerm) return clients;
+    if (!debouncedSearchTerm) return clients;
     return clients.filter(c =>
-      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (c.lastName && c.lastName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (c.phone && c.phone.includes(searchTerm))
+      c.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      (c.lastName && c.lastName.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) ||
+      (c.phone && c.phone.includes(debouncedSearchTerm))
     );
-  }, [clients, searchTerm]);
+  }, [clients, debouncedSearchTerm]);
 
   useEffect(() => {
     if (!isLoading) {
