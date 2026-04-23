@@ -167,12 +167,15 @@ const ReportsPage = () => {
   // --- EXPORT LOGIC ---
   const handleExport = () => {
     setIsExporting(true);
-    setTimeout(() => {
-      try {
-        const wb = XLSX.utils.book_new();
-        const dateStr = new Date().toISOString().split('T')[0];
+    // Usamos requestAnimationFrame para asegurar que el estado isExporting: true
+    // se pinte antes de bloquear el hilo con XLSX
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        try {
+          const wb = XLSX.utils.book_new();
+          const dateStr = new Date().toISOString().split('T')[0];
 
-        if (activeTab === 'financial') {
+          if (activeTab === 'financial') {
           const ws = XLSX.utils.json_to_sheet(filteredMovements.map(m => ({
             Fecha: parseDate(m.date).toLocaleDateString(),
             Descripcion: m.description,
@@ -205,22 +208,24 @@ const ReportsPage = () => {
           XLSX.utils.book_append_sheet(wb, ws, "Cierres_Mensuales");
         }
 
-        XLSX.writeFile(wb, `Reporte_${activeTab}_${dateStr}.xlsx`);
-      } catch (error) {
-        console.warn("Error exporting:", error);
-        alert("Error al exportar");
-      } finally {
-        setIsExporting(false);
-      }
-    }, 100);
+          XLSX.writeFile(wb, `Reporte_${activeTab}_${dateStr}.xlsx`);
+        } catch (error) {
+          console.warn("Error exporting:", error);
+          alert("Error al exportar");
+        } finally {
+          setIsExporting(false);
+        }
+      }, 0);
+    });
   };
 
   // --- FULL BACKUP LOGIC ---
   const handleFullBackup = () => {
     setIsExporting(true);
-    setTimeout(() => {
-      try {
-        const wb = XLSX.utils.book_new();
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        try {
+          const wb = XLSX.utils.book_new();
         const dateStr = new Date().toISOString().split('T')[0];
 
         // 1. Clients
@@ -256,14 +261,15 @@ const ReportsPage = () => {
           XLSX.utils.book_append_sheet(wb, ws, "Servicios");
         }
 
-        XLSX.writeFile(wb, `Respaldo_Completo_AgendiApp_${dateStr}.xlsx`);
-      } catch (error) {
-        console.warn("Error generating full backup:", error);
-        alert("Error al generar el respaldo completo.");
-      } finally {
-        setIsExporting(false);
-      }
-    }, 100);
+          XLSX.writeFile(wb, `Respaldo_Completo_AgendiApp_${dateStr}.xlsx`);
+        } catch (error) {
+          console.warn("Error generating full backup:", error);
+          alert("Error al generar el respaldo completo.");
+        } finally {
+          setIsExporting(false);
+        }
+      }, 0);
+    });
   };
 
   // --- PRINT LOGIC ---

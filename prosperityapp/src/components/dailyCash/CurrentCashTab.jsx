@@ -46,8 +46,11 @@ const DailyColumn = ({ title, icon, movements, accentClass = 'border-t-gray-500'
       </div>
       <ul className="p-2 space-y-1 max-h-96 overflow-y-auto">
         {movements.map(m => (
-          <li key={m.id} className="flex justify-between items-center p-2 rounded-md hover:bg-bg-tertiary group">
-            <span className="text-sm text-text-secondary flex-1 truncate pr-2">{m.description}</span>
+          <li key={m.id} className={`flex justify-between items-center p-2 rounded-md hover:bg-bg-tertiary group ${m._isPending ? 'opacity-70 bg-amber-500/5' : ''}`}>
+            <span className="text-sm text-text-secondary flex-1 truncate pr-2">
+              {m.description}
+              {m._isPending && <i data-feather="cloud-off" className="w-3 h-3 inline ml-1 text-amber-500" title="Pendiente de sincronizar"></i>}
+            </span>
             <span className={`text-sm font-semibold ${m.amount > 0 ? 'text-green-400' : 'text-red-400'}`}>
               {formatCurrency(m.amount)}
             </span>
