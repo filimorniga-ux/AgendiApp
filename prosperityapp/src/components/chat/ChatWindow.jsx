@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { ArrowLeft, MoreVertical, Phone, Video } from 'lucide-react';
-import MessageBubble from './MessageBubble';
-import MessageInput from './MessageInput';
+import MessageBubble from './MessageBubble.jsx';
+import MessageInput from './MessageInput.jsx';
 
 export default function ChatWindow({ chatContext, onBack }) {
   const { activeChat, messages, sendMessage, currentUser, getCollaboratorInfo } = chatContext;

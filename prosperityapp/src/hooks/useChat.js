@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../supabase/client';
-import { useAuth } from './useAuth';
+
 import { useBusiness } from '../context/BusinessContext';
 
 export function useChat() {
-  const { user } = useAuth();
+  const { supabaseUser: user } = useBusiness();
   const { businessId } = useBusiness();
   const [chats, setChats] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
@@ -12,6 +12,19 @@ export function useChat() {
   const [collaborators, setCollaborators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Use refs for stable values inside the realtime subscription to avoid memory leaks
+  // and constant re-subscriptions when these states change.
+  const activeChatRef = useRef(activeChat);
+  const userRef = useRef(user);
+
+  useEffect(() => {
+    activeChatRef.current = activeChat;
+  }, [activeChat]);
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   // 1. Fetch Collaborators (to map user_id -> name/avatar)
   useEffect(() => {
@@ -69,8 +82,8 @@ export function useChat() {
       
       // Map the messages to just get the latest one
       const formattedChats = chatsData.map(chat => {
-        // Sort messages manually as Supabase JS nested select order is sometimes tricky
-        const sortedMessages = chat.messages ? chat.messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) : [];
+        // Fix: Do not mutate the original array, create a shallow copy before sorting
+        const sortedMessages = chat.messages ? [...chat.messages].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) : [];
         const lastMessage = sortedMessages.length > 0 ? sortedMessages[0] : null;
         
         return {
@@ -94,7 +107,7 @@ export function useChat() {
 
   // 3. Fetch Messages for Active Chat
   const fetchMessages = useCallback(async (chatId) => {
-    if (!chatId) {
+    if (!chatId || !user?.id) {
       setMessages([]);
       return;
     }
@@ -115,10 +128,16 @@ export function useChat() {
         .map(m => m.id);
         
       if (unreadIds.length > 0) {
-        await supabase
-          .from('messages')
-          .update({ is_read: true })
-          .in('id', unreadIds);
+        // Use the RPC to safely mark messages as read
+        await supabase.rpc('mark_messages_as_read', { p_message_ids: unreadIds });
+
+        // Update local chats state so the unread indicator clears
+        setChats(prev => prev.map(c => {
+          if (c.id === chatId && c.lastMessage && unreadIds.includes(c.lastMessage.id)) {
+             return { ...c, lastMessage: { ...c.lastMessage, is_read: true }};
+          }
+          return c;
+        }));
       }
       
     } catch (err) {
@@ -141,43 +160,73 @@ export function useChat() {
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'messages'
         },
         (payload) => {
-          const newMessage = payload.new;
-          
-          // If the message is for the currently open chat
-          if (activeChat && newMessage.chat_id === activeChat.id) {
-            setMessages(prev => [...prev, newMessage]);
-            
-            // Mark as read if not sent by me
-            if (newMessage.sender_id !== user.id) {
-              supabase
-                .from('messages')
-                .update({ is_read: true })
-                .eq('id', newMessage.id)
-                .then();
-            }
-          }
-          
-          // Update the chats list with the new message (and re-sort)
-          setChats(prevChats => {
-            const chatExists = prevChats.find(c => c.id === newMessage.chat_id);
-            if (!chatExists) {
-              // If we received a message for a new chat we don't have loaded, we should refresh chats
-              fetchChats();
-              return prevChats;
-            }
-            
-            return prevChats.map(c => {
-              if (c.id === newMessage.chat_id) {
-                return { ...c, lastMessage: newMessage, updated_at: newMessage.created_at };
+          const { eventType, new: newRecord } = payload;
+          const currentActiveChat = activeChatRef.current;
+          const currentUser = userRef.current;
+
+          if (eventType === 'INSERT') {
+            // Deduplicate: If we already have this message (via optimistic update), ignore or update it
+            setMessages(prev => {
+              if (currentActiveChat && newRecord.chat_id === currentActiveChat.id) {
+                const exists = prev.some(m => m.id === newRecord.id);
+                if (exists) {
+                  return prev.map(m => m.id === newRecord.id ? newRecord : m);
+                }
+                return [...prev, newRecord];
               }
-              return c;
-            }).sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
-          });
+              return prev;
+            });
+            
+            // Mark as read if it's for the open chat and not sent by me
+            if (currentActiveChat && newRecord.chat_id === currentActiveChat.id && newRecord.sender_id !== currentUser?.id) {
+              supabase.rpc('mark_messages_as_read', { p_message_ids: [newRecord.id] }).then(() => {
+                // Also update local unread state
+                setChats(prevChats => prevChats.map(c => {
+                  if (c.id === currentActiveChat.id && c.lastMessage?.id === newRecord.id) {
+                    return { ...c, lastMessage: { ...c.lastMessage, is_read: true } };
+                  }
+                  return c;
+                }));
+              });
+            }
+            
+            // Update the chats list with the new message
+            setChats(prevChats => {
+              const chatExists = prevChats.some(c => c.id === newRecord.chat_id);
+              if (!chatExists) {
+                // If it's a new chat we don't have, we should probably fetch it,
+                // but doing it directly here might be an anti-pattern.
+                // Using a flag to trigger fetch outside the state updater is better.
+                setTimeout(fetchChats, 0);
+                return prevChats;
+              }
+
+              const updatedChats = prevChats.map(c => {
+                if (c.id === newRecord.chat_id) {
+                  return { ...c, lastMessage: newRecord, updated_at: newRecord.created_at };
+                }
+                return c;
+              });
+
+              // Fix mutation bug
+              return updatedChats.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+            });
+          } else if (eventType === 'UPDATE') {
+             // Handle read receipts
+             setMessages(prev => prev.map(m => m.id === newRecord.id ? newRecord : m));
+
+             setChats(prevChats => prevChats.map(c => {
+                if (c.id === newRecord.chat_id && c.lastMessage?.id === newRecord.id) {
+                  return { ...c, lastMessage: newRecord };
+                }
+                return c;
+             }));
+          }
         }
       )
       .subscribe();
@@ -185,14 +234,19 @@ export function useChat() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [activeChat, user?.id, fetchChats]);
+  // Intentionally omitting activeChat and fetchChats from deps to prevent re-subscriptions
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   // 5. Send Message
   const sendMessage = async (content) => {
     if (!activeChat || !user?.id || !content.trim()) return;
     
+    // Generate a secure UUID locally so we can insert it and know its ID immediately
+    const messageId = crypto.randomUUID();
+
     const tempMessage = {
-      id: crypto.randomUUID(), // Optimistic UI id
+      id: messageId, // Use real UUID for deduplication
       chat_id: activeChat.id,
       sender_id: user.id,
       content: content.trim(),
@@ -208,6 +262,7 @@ export function useChat() {
       const { data, error } = await supabase
         .from('messages')
         .insert({
+          id: messageId, // Send the explicit UUID
           chat_id: activeChat.id,
           sender_id: user.id,
           content: content.trim()
@@ -217,8 +272,9 @@ export function useChat() {
         
       if (error) throw error;
       
-      // Update the optimistic message with the real one
-      setMessages(prev => prev.map(m => m.id === tempMessage.id ? data : m));
+      // The realtime subscription UPDATE/INSERT might beat this,
+      // but if it doesn't, we update the status locally.
+      setMessages(prev => prev.map(m => m.id === messageId ? data : m));
       
       // Also update the `chats` table `updated_at` to trigger sorting for other users
       await supabase
@@ -229,7 +285,7 @@ export function useChat() {
     } catch (err) {
       console.error('Error sending message:', err);
       // Revert optimistic update on failure, or mark as failed
-      setMessages(prev => prev.map(m => m.id === tempMessage.id ? { ...m, status: 'error' } : m));
+      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, status: 'error' } : m));
     }
   };
   
@@ -240,8 +296,8 @@ export function useChat() {
     // First check if a 1:1 chat already exists with this user
     const existingChat = chats.find(c => 
       !c.is_group && 
-      c.chat_members.some(m => m.user_id === targetUserId) &&
-      c.chat_members.some(m => m.user_id === user.id)
+      c.chat_members?.some(m => m.user_id === targetUserId) &&
+      c.chat_members?.some(m => m.user_id === user.id)
     );
     
     if (existingChat) {
@@ -251,9 +307,11 @@ export function useChat() {
     
     // If not, create a new one
     try {
+      const chatId = crypto.randomUUID();
       const { data: chatData, error: chatError } = await supabase
         .from('chats')
         .insert({
+          id: chatId, // Explicit UUID
           business_id: businessId,
           is_group: false
         })
