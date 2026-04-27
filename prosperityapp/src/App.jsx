@@ -3,7 +3,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { BusinessProvider } from './context/BusinessContext';
-import { DataProvider } from './context/DataContext';
+import { AppProviders as DataProvider } from './context/AppProviders';
 import { TimerProvider } from './context/TimerContext';
 import { Toaster } from 'react-hot-toast';
 import PWAInstallBanner from './components/PWAInstallBanner';
@@ -37,7 +37,7 @@ const RecepcionPage              = lazy(() => import('./pages/RecepcionPage.jsx'
 const PedidoInteligentePage      = lazy(() => import('./pages/PedidoInteligentePage'));
 const HistorialInventarioPage    = lazy(() => import('./pages/HistorialInventarioPage'));
 const SubscriptionPage           = lazy(() => import('./pages/SubscriptionPage'));
-const ChatPage                   = lazy(() => import('./pages/Chat/ChatPage'));
+const ChatPage                   = lazy(() => import('./pages/ChatPage'));
 const WebsiteApp                 = lazy(() => import('./pages/Website/App'));
 
 // Módulos Legales (Meta)
