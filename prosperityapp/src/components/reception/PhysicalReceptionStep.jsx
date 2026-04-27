@@ -9,10 +9,10 @@ import { BarcodeScanner } from '../barcode/BarcodeScanner.jsx';
 import { safeNum } from '../../lib/mathUtils';
 
 const ITEM_STATUS_OPTIONS = [
-  { value: 'received', label: '✅ Recibido',       color: '#22c55e' },
-  { value: 'partial',  label: '⚠️  Parcial',        color: '#f59e0b' },
-  { value: 'missing',  label: '❌ Faltante',        color: '#ef4444' },
-  { value: 'damaged',  label: '🛠️  Dañado',          color: '#f97316' },
+  { value: 'received', label: '✅ Recibido',       themeColor: 'success' },
+  { value: 'partial',  label: '⚠️  Parcial',        themeColor: 'warning' },
+  { value: 'missing',  label: '❌ Faltante',        themeColor: 'error' },
+  { value: 'damaged',  label: '🛠️  Dañado',          themeColor: 'orange' },
 ];
 
 export default function PhysicalReceptionStep({ items: initialItems, onNext }) {
@@ -125,16 +125,16 @@ export default function PhysicalReceptionStep({ items: initialItems, onNext }) {
         {Object.entries(summary).map(([k, v]) => {
           const s = ITEM_STATUS_OPTIONS.find(s => s.value === k);
           return (
-            <div key={k} className="recepcion-summary-card" style={{ borderColor: s.color + '33' }}>
-              <div className="recepcion-summary-val" style={{ color: s.color }}>{v}</div>
-              <div className="recepcion-summary-label" style={{ color: s.color }}>{s.label.split(' ')[1]}</div>
+            <div key={k} className={`recepcion-summary-card recepcion-summary-card--${s.themeColor}`}>
+              <div className={`recepcion-summary-val recepcion-summary-val--${s.themeColor}`}>{v}</div>
+              <div className={`recepcion-summary-label recepcion-summary-label--${s.themeColor}`}>{s.label.split(' ')[1]}</div>
             </div>
           );
         })}
         {extraItems.length > 0 && (
-          <div className="recepcion-summary-card" style={{ borderColor: '#a855f733' }}>
-            <div className="recepcion-summary-val" style={{ color: '#a855f7' }}>{extraItems.length}</div>
-            <div className="recepcion-summary-label" style={{ color: '#a855f7' }}>Extra(s)</div>
+          <div className="recepcion-summary-card recepcion-summary-card--purple">
+            <div className="recepcion-summary-val recepcion-summary-val--purple">{extraItems.length}</div>
+            <div className="recepcion-summary-label recepcion-summary-label--purple">Extra(s)</div>
           </div>
         )}
       </div>
@@ -154,33 +154,28 @@ export default function PhysicalReceptionStep({ items: initialItems, onNext }) {
               const statusInfo = ITEM_STATUS_OPTIONS.find(s => s.value === item.status) || ITEM_STATUS_OPTIONS[0];
               const isHighlighted = scannedIdx === idx;
               return (
-                <tr key={idx} style={{
-                  background: isHighlighted ? 'rgba(34, 197, 94, 0.06)' : undefined,
-                  transition: 'background 0.4s',
-                }}>
+                <tr key={idx} className={isHighlighted ? 'recepcion-tr-highlight' : ''}>
                   <td>
-                    <div style={{ fontWeight: 600 }}>{item.description}</div>
-                    {item.barcode && <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>🔖 {item.barcode}</div>}
+                    <div className="recepcion-font-600">{item.description}</div>
+                    {item.barcode && <div className="recepcion-text-072rem recepcion-text-muted">🔖 {item.barcode}</div>}
                   </td>
-                  <td style={{ textAlign: 'center', fontWeight: 600 }}>{item.quantityInvoiced}</td>
+                  <td className="recepcion-text-center recepcion-font-600">{item.quantityInvoiced}</td>
                   <td>
                     <input
                       type="number"
                       min="0"
-                      className="recepcion-table-input-num"
+                      className="recepcion-table-input-num recepcion-table-input-physical"
                       value={item.quantityReceived ?? item.quantityInvoiced}
                       onChange={e => updateItem(idx, 'quantityReceived', parseFloat(e.target.value) || 0)}
                       onBlur={e => handleBlur(idx, e.target.value)}
                       disabled={mode === 'scanner'}
-                      style={{ width: '70px', padding: '5px 8px', borderRadius: '8px', border: '1px solid var(--color-border-main)', background: 'var(--color-bg-main)', borderBottom: 'none' }}
                     />
                   </td>
                   <td>
                     <select
                       value={item.status}
                       onChange={e => updateItem(idx, 'status', e.target.value)}
-                      className="recepcion-select"
-                      style={{ background: statusInfo.color + '18', color: statusInfo.color, borderColor: statusInfo.color + '44', fontWeight: 600 }}
+                      className={`recepcion-select recepcion-select--${statusInfo.themeColor}`}
                     >
                       {ITEM_STATUS_OPTIONS.map(opt => (
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -209,7 +204,7 @@ export default function PhysicalReceptionStep({ items: initialItems, onNext }) {
             🔮 Ítems recibidos NO incluidos en la factura
           </h4>
           {extraItems.map((ex, i) => (
-            <div key={i} style={{ fontSize: '0.85rem', color: 'var(--color-text-main)' }}>
+            <div key={i} className="recepcion-text-085rem recepcion-text-main">
               • {ex.description} × {ex.qty}
             </div>
           ))}

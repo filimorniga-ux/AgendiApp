@@ -9,10 +9,10 @@ import { supabase } from '../../supabase/client.js';
 import { useBusiness } from '../../context/BusinessContext.jsx';
 
 const STATUS_ICONS = {
-  found_retail:    { icon: '🛍️', label: 'Retail',       color: '#22c55e' },
-  found_technical: { icon: '🔧', label: 'Técnico',      color: '#3b82f6' },
-  new:             { icon: '🆕', label: 'Nuevo',         color: '#f59e0b' },
-  price_changed:   { icon: '⚠️',  label: 'Precio cambió',color: '#f97316' },
+  found_retail:    { icon: '🛍️', label: 'Retail',       themeColor: 'success' },
+  found_technical: { icon: '🔧', label: 'Técnico',      themeColor: 'info' },
+  new:             { icon: '🆕', label: 'Nuevo',         themeColor: 'warning' },
+  price_changed:   { icon: '⚠️',  label: 'Precio cambió',themeColor: 'orange' },
 };
 
 export default function OrderReviewStep({ items: initialItems, onNext }) {
@@ -95,7 +95,7 @@ export default function OrderReviewStep({ items: initialItems, onNext }) {
   };
 
   if (loading) return (
-    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>
+    <div className="recepcion-text-center recepcion-p-3rem recepcion-text-muted">
       🔍 Cruzando ítems con inventario…
     </div>
   );
@@ -105,14 +105,14 @@ export default function OrderReviewStep({ items: initialItems, onNext }) {
       {/* Resumen */}
       <div className="recepcion-summary-row">
         {[
-          { label: 'Total ítems', val: items.length, color: 'var(--color-text-main)' },
-          { label: 'Encontrados', val: Object.values(matches).filter(m => m?.found).length, color: '#22c55e' },
-          { label: 'Nuevos', val: Object.values(matches).filter(m => !m?.found).length, color: '#f59e0b' },
-          { label: 'Precio diferente', val: Object.values(matches).filter(m => m?.priceChanged).length, color: '#f97316' },
+          { label: 'Total ítems', val: items.length, themeColor: '' },
+          { label: 'Encontrados', val: Object.values(matches).filter(m => m?.found).length, themeColor: 'success' },
+          { label: 'Nuevos', val: Object.values(matches).filter(m => !m?.found).length, themeColor: 'warning' },
+          { label: 'Precio diferente', val: Object.values(matches).filter(m => m?.priceChanged).length, themeColor: 'orange' },
         ].map(s => (
-          <div key={s.label} className="recepcion-summary-card">
-            <div className="recepcion-summary-val" style={{ color: s.color }}>{s.val}</div>
-            <div className="recepcion-summary-label">{s.label}</div>
+          <div key={s.label} className={`recepcion-summary-card ${s.themeColor ? 'recepcion-summary-card--' + s.themeColor : ''}`}>
+            <div className={`recepcion-summary-val ${s.themeColor ? 'recepcion-summary-val--' + s.themeColor : ''}`}>{s.val}</div>
+            <div className={`recepcion-summary-label ${s.themeColor ? 'recepcion-summary-label--' + s.themeColor : ''}`}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -141,20 +141,19 @@ export default function OrderReviewStep({ items: initialItems, onNext }) {
                   {/* Estado */}
                   <td>
                     <span
-                      className="recepcion-status-badge"
-                      style={{ background: statusInfo.color + '18', color: statusInfo.color, border: `1px solid ${statusInfo.color}33` }}
+                      className={`recepcion-status-badge recepcion-status-badge--${statusInfo.themeColor}`}
                     >
                       {statusInfo.icon} {statusInfo.label}
                     </span>
                     {match?.priceChanged && (
-                      <div style={{ fontSize: '0.7rem', color: '#f97316', marginTop: '2px' }}>
+                      <div className="recepcion-text-07rem recepcion-disc-detail--orange recepcion-mt-2px">
                         ${match.prevCost?.toLocaleString()} → ${item.unitCost?.toLocaleString()}
                       </div>
                     )}
                   </td>
 
                   {/* Descripción editable */}
-                  <td style={{ minWidth: '160px' }}>
+                  <td className="recepcion-col-min-160">
                     <input
                       className="recepcion-table-input"
                       value={item.description}
@@ -165,55 +164,50 @@ export default function OrderReviewStep({ items: initialItems, onNext }) {
                   {/* Código de barras */}
                   <td>
                     <input
-                      className="recepcion-table-input"
+                      className="recepcion-table-input recepcion-col-w-110"
                       value={item.barcode || ''}
                       onChange={e => updateItem(idx, 'barcode', e.target.value)}
                       placeholder="—"
-                      style={{ width: '110px' }}
                     />
                   </td>
 
                   {/* SKU proveedor */}
                   <td>
                     <input
-                      className="recepcion-table-input"
+                      className="recepcion-table-input recepcion-col-w-90"
                       value={item.skuProveedor || ''}
                       onChange={e => updateItem(idx, 'skuProveedor', e.target.value)}
                       placeholder="—"
-                      style={{ width: '90px' }}
                     />
                   </td>
 
                   {/* Cantidad */}
                   <td>
                     <input
-                      className="recepcion-table-input-num"
+                      className="recepcion-table-input-num recepcion-col-w-60"
                       type="number"
                       value={item.quantityInvoiced}
                       onChange={e => updateItem(idx, 'quantityInvoiced', parseFloat(e.target.value) || 0)}
-                      style={{ width: '60px' }}
                     />
                   </td>
 
                   {/* Costo unitario */}
                   <td>
                     <input
-                      className="recepcion-table-input-num"
+                      className="recepcion-table-input-num recepcion-col-w-90"
                       type="number"
                       value={item.unitCost}
                       onChange={e => updateItem(idx, 'unitCost', parseFloat(e.target.value) || 0)}
-                      style={{ width: '90px' }}
                     />
                   </td>
 
                   {/* IVA% */}
                   <td>
                     <input
-                      className="recepcion-table-input-num"
+                      className="recepcion-table-input-num recepcion-col-w-50"
                       type="number"
                       value={item.ivaPct}
                       onChange={e => updateItem(idx, 'ivaPct', parseFloat(e.target.value) || 19)}
-                      style={{ width: '50px' }}
                     />
                   </td>
 
@@ -230,7 +224,7 @@ export default function OrderReviewStep({ items: initialItems, onNext }) {
                         <option value="technical">🔧 Técnico</option>
                       </select>
                     ) : (
-                      <span style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
+                      <span className="recepcion-text-muted recepcion-text-08rem">
                         {match.type === 'retail' ? '🛍️ Retail' : '🔧 Técnico'}
                       </span>
                     )}

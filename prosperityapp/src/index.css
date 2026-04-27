@@ -1144,7 +1144,33 @@
   margin-top: 2px;
 }
 
-/* Status badges */
+/* Status badges & Colors */
+:root {
+  --recepcion-status-success: #22c55e;
+  --recepcion-status-success-bg: rgba(34, 197, 94, 0.09);
+  --recepcion-status-success-border: rgba(34, 197, 94, 0.2);
+
+  --recepcion-status-warning: #f59e0b;
+  --recepcion-status-warning-bg: rgba(245, 158, 11, 0.09);
+  --recepcion-status-warning-border: rgba(245, 158, 11, 0.2);
+
+  --recepcion-status-error: #ef4444;
+  --recepcion-status-error-bg: rgba(239, 68, 68, 0.09);
+  --recepcion-status-error-border: rgba(239, 68, 68, 0.2);
+
+  --recepcion-status-info: #3b82f6;
+  --recepcion-status-info-bg: rgba(59, 130, 246, 0.09);
+  --recepcion-status-info-border: rgba(59, 130, 246, 0.2);
+
+  --recepcion-status-purple: #a855f7;
+  --recepcion-status-purple-bg: rgba(168, 85, 247, 0.09);
+  --recepcion-status-purple-border: rgba(168, 85, 247, 0.2);
+
+  --recepcion-status-orange: #f97316;
+  --recepcion-status-orange-bg: rgba(249, 115, 22, 0.09);
+  --recepcion-status-orange-border: rgba(249, 115, 22, 0.2);
+}
+
 .recepcion-status-badge {
   padding: 3px 10px;
   border-radius: 999px;
@@ -1155,6 +1181,152 @@
   align-items: center;
   gap: 3px;
 }
+
+.recepcion-status-badge--success {
+  background: var(--recepcion-status-success-bg);
+  color: var(--recepcion-status-success);
+  border: 1px solid var(--recepcion-status-success-border);
+}
+
+.recepcion-status-badge--warning {
+  background: var(--recepcion-status-warning-bg);
+  color: var(--recepcion-status-warning);
+  border: 1px solid var(--recepcion-status-warning-border);
+}
+
+.recepcion-status-badge--error {
+  background: var(--recepcion-status-error-bg);
+  color: var(--recepcion-status-error);
+  border: 1px solid var(--recepcion-status-error-border);
+}
+
+.recepcion-status-badge--info {
+  background: var(--recepcion-status-info-bg);
+  color: var(--recepcion-status-info);
+  border: 1px solid var(--recepcion-status-info-border);
+}
+
+.recepcion-status-badge--orange {
+  background: var(--recepcion-status-orange-bg);
+  color: var(--recepcion-status-orange);
+  border: 1px solid var(--recepcion-status-orange-border);
+}
+
+.recepcion-status-badge--purple {
+  background: var(--recepcion-status-purple-bg);
+  color: var(--recepcion-status-purple);
+  border: 1px solid var(--recepcion-status-purple-border);
+}
+
+/* Col Width Utilities for Reception Tables */
+.recepcion-col-w-50 { width: 50px; }
+.recepcion-col-w-60 { width: 60px; }
+.recepcion-col-w-70 { width: 70px; }
+.recepcion-col-w-90 { width: 90px; }
+.recepcion-col-w-110 { width: 110px; }
+.recepcion-col-min-160 { min-width: 160px; }
+.recepcion-w-250 { width: 250px; }
+
+/* Flex & Layout Utilities */
+.recepcion-flex-col { display: flex; flex-direction: column; }
+.recepcion-gap-05 { gap: 0.5rem; }
+.recepcion-gap-05-row { display: flex; gap: 0.5rem; }
+.recepcion-gap-1-5rem { gap: 1.5rem; }
+.recepcion-gap-05-row-wrap { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.recepcion-font-600 { font-weight: 600; }
+.recepcion-text-center { text-align: center; }
+.recepcion-p-3rem { padding: 3rem; }
+.recepcion-block-mb-05 { display: block; margin-bottom: 0.5rem; }
+.recepcion-btn-save { padding: 12px 36px; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+.recepcion-btn-save.saving { opacity: 0.7; }
+.recepcion-text-muted { color: var(--color-text-muted); }
+.recepcion-text-07rem { font-size: 0.7rem; }
+.recepcion-text-072rem { font-size: 0.72rem; }
+.recepcion-text-078rem { font-size: 0.78rem; }
+.recepcion-text-08rem { font-size: 0.8rem; }
+.recepcion-text-085rem { font-size: 0.85rem; }
+.recepcion-mt-2px { margin-top: 2px; }
+.recepcion-text-main { color: var(--color-text-main); }
+
+/* Discrepancy section cards - Color Variants */
+.recepcion-disc-card--warning { background: var(--recepcion-status-warning-bg); border: 1px solid var(--recepcion-status-warning-border); }
+.recepcion-disc-detail--warning { color: var(--recepcion-status-warning); }
+
+.recepcion-disc-card--error { background: var(--recepcion-status-error-bg); border: 1px solid var(--recepcion-status-error-border); }
+.recepcion-disc-detail--error { color: var(--recepcion-status-error); }
+
+.recepcion-disc-card--orange { background: var(--recepcion-status-orange-bg); border: 1px solid var(--recepcion-status-orange-border); }
+.recepcion-disc-detail--orange { color: var(--recepcion-status-orange); }
+
+.recepcion-disc-card--purple { background: var(--recepcion-status-purple-bg); border: 1px solid var(--recepcion-status-purple-border); }
+.recepcion-disc-detail--purple { color: var(--recepcion-status-purple); }
+
+/* Physical Reception Row Highlights */
+.recepcion-tr-highlight { background: var(--recepcion-status-success-bg); }
+
+/* Table Inputs overrides for Physical Reception */
+.recepcion-table-input-physical {
+  width: 70px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-main);
+  background: var(--color-bg-main);
+  border-bottom: none;
+}
+
+/* Status Selector overrides */
+.recepcion-status-btn--success.active { background: var(--recepcion-status-success); color: #fff; border: 1px solid var(--recepcion-status-success-border); }
+.recepcion-status-btn--success:not(.active) { background: var(--recepcion-status-success-bg); color: var(--recepcion-status-success); border: 1px solid var(--recepcion-status-success-border); }
+
+.recepcion-status-btn--warning.active { background: var(--recepcion-status-warning); color: #fff; border: 1px solid var(--recepcion-status-warning-border); }
+.recepcion-status-btn--warning:not(.active) { background: var(--recepcion-status-warning-bg); color: var(--recepcion-status-warning); border: 1px solid var(--recepcion-status-warning-border); }
+
+.recepcion-status-btn--orange.active { background: var(--recepcion-status-orange); color: #fff; border: 1px solid var(--recepcion-status-orange-border); }
+.recepcion-status-btn--orange:not(.active) { background: var(--recepcion-status-orange-bg); color: var(--recepcion-status-orange); border: 1px solid var(--recepcion-status-orange-border); }
+
+.recepcion-status-btn--error.active { background: var(--recepcion-status-error); color: #fff; border: 1px solid var(--recepcion-status-error-border); }
+.recepcion-status-btn--error:not(.active) { background: var(--recepcion-status-error-bg); color: var(--recepcion-status-error); border: 1px solid var(--recepcion-status-error-border); }
+
+/* Closure cards overrides */
+.recepcion-closure-card--info { border-color: var(--recepcion-status-info-border); }
+.recepcion-closure-val--info { color: var(--recepcion-status-info); }
+
+.recepcion-closure-card--success { border-color: var(--recepcion-status-success-border); }
+.recepcion-closure-val--success { color: var(--recepcion-status-success); }
+
+.recepcion-closure-card--warning { border-color: var(--recepcion-status-warning-border); }
+.recepcion-closure-val--warning { color: var(--recepcion-status-warning); }
+
+.recepcion-closure-card--error { border-color: var(--recepcion-status-error-border); }
+.recepcion-closure-val--error { color: var(--recepcion-status-error); }
+
+/* Summary Cards specific colors */
+.recepcion-summary-card--success { border-color: var(--recepcion-status-success-border); }
+.recepcion-summary-val--success { color: var(--recepcion-status-success); }
+.recepcion-summary-label--success { color: var(--recepcion-status-success); }
+
+.recepcion-summary-card--warning { border-color: var(--recepcion-status-warning-border); }
+.recepcion-summary-val--warning { color: var(--recepcion-status-warning); }
+.recepcion-summary-label--warning { color: var(--recepcion-status-warning); }
+
+.recepcion-summary-card--error { border-color: var(--recepcion-status-error-border); }
+.recepcion-summary-val--error { color: var(--recepcion-status-error); }
+.recepcion-summary-label--error { color: var(--recepcion-status-error); }
+
+.recepcion-summary-card--orange { border-color: var(--recepcion-status-orange-border); }
+.recepcion-summary-val--orange { color: var(--recepcion-status-orange); }
+.recepcion-summary-label--orange { color: var(--recepcion-status-orange); }
+
+.recepcion-summary-card--purple { border-color: var(--recepcion-status-purple-border); }
+.recepcion-summary-val--purple { color: var(--recepcion-status-purple); }
+.recepcion-summary-label--purple { color: var(--recepcion-status-purple); }
+
+/* Select specific colors */
+.recepcion-select--success { background: var(--recepcion-status-success-bg); color: var(--recepcion-status-success); border-color: var(--recepcion-status-success-border); font-weight: 600; }
+.recepcion-select--warning { background: var(--recepcion-status-warning-bg); color: var(--recepcion-status-warning); border-color: var(--recepcion-status-warning-border); font-weight: 600; }
+.recepcion-select--error { background: var(--recepcion-status-error-bg); color: var(--recepcion-status-error); border-color: var(--recepcion-status-error-border); font-weight: 600; }
+.recepcion-select--orange { background: var(--recepcion-status-orange-bg); color: var(--recepcion-status-orange); border-color: var(--recepcion-status-orange-border); font-weight: 600; }
+
 
 /* Mode toggle buttons */
 .recepcion-mode-toggle {

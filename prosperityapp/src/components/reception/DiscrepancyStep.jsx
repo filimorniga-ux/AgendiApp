@@ -59,7 +59,7 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
   }
 
   return (
-    <div className="recepcion-step-body" style={{ gap: '1.5rem' }}>
+    <div className="recepcion-step-body recepcion-gap-1-5rem">
 
       {/* Discrepancias de cantidad */}
       {discrepant.length > 0 && (
@@ -67,21 +67,22 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
           <h3 className="recepcion-section-title">
             ⚠️ Ítems con cantidad incorrecta o daño ({discrepant.length})
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className="recepcion-flex-col recepcion-gap-05">
             {discrepant.map((item, i) => {
-              const statusColors = { partial: '#f59e0b', missing: '#ef4444', damaged: '#f97316' };
-              const color = statusColors[item.status] || '#f59e0b';
+              const themeColors = { partial: 'warning', missing: 'error', damaged: 'orange' };
+              const themeColor = themeColors[item.status] || 'warning';
+
               return (
-                <div key={i} className="recepcion-disc-card" style={{ background: color + '0d', border: `1px solid ${color}33` }}>
+                <div key={i} className={`recepcion-disc-card recepcion-disc-card--${themeColor}`}>
                   <div>
                     <span className="recepcion-disc-title">{item.description}</span>
-                    <div className="recepcion-disc-detail" style={{ color }}>
+                    <div className={`recepcion-disc-detail recepcion-disc-detail--${themeColor}`}>
                       Facturado: {item.quantityInvoiced} · Recibido: {item.quantityReceived}
                       {item.status === 'damaged' && ' · Dañado'}
                     </div>
-                    {item.observations && <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>📝 {item.observations}</div>}
+                    {item.observations && <div className="recepcion-text-078rem recepcion-text-muted">📝 {item.observations}</div>}
                   </div>
-                  <span className="recepcion-status-badge" style={{ background: color + '18', color, border: `1px solid ${color}44` }}>
+                  <span className={`recepcion-status-badge recepcion-status-badge--${themeColor}`}>
                     {item.status === 'partial' ? '⚠️ Parcial' : item.status === 'missing' ? '❌ Faltante' : '🛠️ Dañado'}
                   </span>
                 </div>
@@ -100,16 +101,16 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
           <h3 className="recepcion-section-title">
             💰 Cambio de precio de costo ({priceChanged.length})
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className="recepcion-flex-col recepcion-gap-05">
             {priceChanged.map((item, i) => (
-              <div key={i} className="recepcion-disc-card" style={{ background: 'rgba(249, 115, 22, 0.06)', border: '1px solid rgba(249, 115, 22, 0.2)' }}>
+              <div key={i} className="recepcion-disc-card recepcion-disc-card--orange">
                 <div>
                   <span className="recepcion-disc-title">{item.description}</span>
-                  <div className="recepcion-disc-detail" style={{ color: '#f97316' }}>
+                  <div className="recepcion-disc-detail recepcion-disc-detail--orange">
                     Precio anterior: <strong>${item.prevCost?.toLocaleString()}</strong> → Nuevo: <strong>${item.unitCost?.toLocaleString()}</strong>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div className="recepcion-gap-05-row">
                   {[['update', '✅ Actualizar precio'], ['keep', '🔒 Mantener anterior']].map(([val, label]) => (
                     <button
                       key={val}
@@ -132,14 +133,14 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
           <h3 className="recepcion-section-title">
             🔮 Ítems extra recibidos no incluidos en la factura ({extraItems.length})
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className="recepcion-flex-col recepcion-gap-05">
             {extraItems.map((ex, i) => (
-              <div key={i} className="recepcion-disc-card" style={{ background: 'rgba(168, 85, 247, 0.06)', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
+              <div key={i} className="recepcion-disc-card recepcion-disc-card--purple">
                 <div>
                   <span className="recepcion-disc-title">{ex.description}</span>
-                  <div className="recepcion-disc-detail" style={{ color: '#a855f7' }}>Cantidad: {ex.qty}</div>
+                  <div className="recepcion-disc-detail recepcion-disc-detail--purple">Cantidad: {ex.qty}</div>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                <div className="recepcion-gap-05-row-wrap">
                   {[['create', '➕ Crear'], ['link', '🔗 Vincular'], ['return', '🔁 Devolver'], ['ignore', '✖️ Ignorar']].map(([val, label]) => (
                     <button
                       key={val}
@@ -162,7 +163,7 @@ export default function DiscrepancyStep({ items, extraItems, onNext }) {
                   )}
 
                   {extraDecisions[i] === 'link' && (
-                    <div style={{ width: '250px' }}>
+                    <div className="recepcion-w-250">
                       <SearchableDropdown
                         items={allProducts}
                         placeholder="Buscar producto existente..."
