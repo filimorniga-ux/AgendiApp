@@ -12,6 +12,7 @@ const ServiceModal = ({ isOpen, onClose, serviceToEdit }) => {
     businessId
   } = useBusiness();
   const [formData, setFormData] = useState({ name: '', category: '', price: '', duration: '' });
+  const modalRef = useRef(null);
   const [isSaving, setIsSaving] = useState(false);
   const isEditMode = !!serviceToEdit;
 

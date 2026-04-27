@@ -61,7 +61,7 @@ describe('ScrollableSelector Component', () => {
     const searchInput = screen.getByPlaceholderText('Buscar...');
     fireEvent.change(searchInput, { target: { value: 'miguel' } });
 
-    await new Promise(r => setTimeout(r, 350));
+    act(() => { vi.advanceTimersByTime(350); });
 
     expect(screen.getByText('Miguel Perdomo')).toBeInTheDocument();
     // expect(screen.queryByText('Lia Martinez')).not.toBeInTheDocument();
@@ -79,9 +79,7 @@ describe('ScrollableSelector Component', () => {
     
     const searchInput = screen.getByPlaceholderText('Buscar...');
     fireEvent.change(searchInput, { target: { value: 'Nuevo Cliente' } });
-        act(() => { vi.advanceTimersByTime(350); });
-
-    await new Promise(r => setTimeout(r, 350));
+    act(() => { vi.advanceTimersByTime(350); });
 
     // Should show the manual add button
     const addButton = screen.getByText('Agregar Cliente');

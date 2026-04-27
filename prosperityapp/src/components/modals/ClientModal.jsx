@@ -12,6 +12,7 @@ const ClientModal = ({ isOpen, onClose, clientToEdit }) => {
     businessId
   } = useBusiness();
   const [formData, setFormData] = useState({});
+  const modalRef = useRef(null);
   const [activeTab, setActiveTab] = useState('personal');
   const [isSaving, setIsSaving] = useState(false);
   const isEditMode = !!clientToEdit;

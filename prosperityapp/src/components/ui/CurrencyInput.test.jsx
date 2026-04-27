@@ -11,11 +11,15 @@ vi.mock('feather-icons', () => ({
 }));
 
 // Mock ConfigContext to control currentLocale
-vi.mock('../../context/collections/ConfigContext', () => ({
-    useAppConfig: () => ({
-        currentLocale: 'es-CL', // Default to Chilean Pesos for tests
-    }),
-}));
+vi.mock('../../context/collections/ConfigContext', async (importOriginal) => {
+    const actual = await importOriginal();
+    return {
+        ...actual,
+        useAppConfig: () => ({
+            currentLocale: 'es-CL', // Default to Chilean Pesos for tests
+        }),
+    };
+});
 
 // Mock useCurrencyFormat hook
 vi.mock('../../hooks/useCurrencyFormat', () => ({

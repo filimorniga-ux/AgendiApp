@@ -77,12 +77,10 @@ describe('SearchableDropdown', () => {
         fireEvent.change(input, { target: { value: 'Item' } });
         act(() => { vi.advanceTimersByTime(350); });
 
-        await waitFor(() => {
-            expect(screen.getByText('Item A')).toBeInTheDocument();
-            expect(screen.getByText('Item B')).toBeInTheDocument();
-            // 'Other C' shouldn't be matched
-            expect(screen.queryByText('Other C')).not.toBeInTheDocument();
-        });
+        expect(screen.getByText('Item A')).toBeInTheDocument();
+        expect(screen.getByText('Item B')).toBeInTheDocument();
+        // 'Other C' shouldn't be matched
+        expect(screen.queryByText('Other C')).not.toBeInTheDocument();
     });
 
     it('selects an item and updates input value', () => {
@@ -167,10 +165,8 @@ describe('SearchableDropdown', () => {
         fireEvent.change(input, { target: { value: 'New Item' } });
         act(() => { vi.advanceTimersByTime(350); });
 
-        await waitFor(() => {
-            expect(mockOnManualInput).toHaveBeenCalledWith('New Item');
-            expect(screen.getByText('Usar "New Item" como nuevo')).toBeInTheDocument();
-        });
+        expect(mockOnManualInput).toHaveBeenCalledWith('New Item');
+        expect(screen.getByText('Usar "New Item" como nuevo')).toBeInTheDocument();
     });
 
     it('handles disabled state', () => {

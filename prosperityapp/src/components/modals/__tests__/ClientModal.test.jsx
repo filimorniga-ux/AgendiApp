@@ -112,7 +112,11 @@ describe('ClientModal', () => {
 
     // Check history tab content
     expect(screen.getByText('modals.client.historyDesc')).toBeInTheDocument();
-    expect(screen.getByText('01-01-2023')).toBeInTheDocument(); // es-CL locale mapping
+    
+    // Compute the expected date string dynamically to account for timezone shifts in the test environment
+    const expectedDate = new Date(mockClient.createdAt).toLocaleDateString('es-CL');
+    expect(screen.getByText(expectedDate)).toBeInTheDocument();
+    
     expect(screen.getByText('2023-10-01')).toBeInTheDocument();
 
     // Click personal tab again
