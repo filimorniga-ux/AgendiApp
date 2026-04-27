@@ -1,5 +1,5 @@
 // ===== INICIO: src/components/modals/MovementModal.jsx (Sprint 87 - Lógica Restaurada) =====
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useRef,  useState, useMemo, useEffect, useCallback  } from 'react';
 import feather from 'feather-icons';
 import { supabase } from '../../supabase/client';
 import { sbCreate, sbDelete } from '../../supabase/db';
@@ -40,6 +40,7 @@ const formatCurrency = (value) => {
 
 const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) => {
   const { t } = useTranslation();
+  const modalRef = useRef(null);
 
   const {
     clients
@@ -177,6 +178,30 @@ const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) =
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
+        return;
+      }
+
+      // Simple focus trap
+      if (e.key === 'Tab' && isOpen && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement || document.activeElement === modalRef.current) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
       }
     };
     if (isOpen) {
