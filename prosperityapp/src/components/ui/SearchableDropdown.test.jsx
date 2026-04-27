@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, act } from '../../test/utils';
+import { render, screen, fireEvent, act, waitFor } from '../../test/utils';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SearchableDropdown from './SearchableDropdown';
 
@@ -63,7 +63,7 @@ describe('SearchableDropdown', () => {
         expect(screen.getByText('Other C')).toBeInTheDocument();
     });
 
-    it('filters items based on input', () => {
+    it('filters items based on input', async () => {
         render(
             <SearchableDropdown
                 items={mockItems}
@@ -77,10 +77,12 @@ describe('SearchableDropdown', () => {
         fireEvent.change(input, { target: { value: 'Item' } });
         act(() => { vi.advanceTimersByTime(350); });
 
-        expect(screen.getByText('Item A')).toBeInTheDocument();
-        expect(screen.getByText('Item B')).toBeInTheDocument();
-        // 'Other C' shouldn't be matched
-        expect(screen.queryByText('Other C')).not.toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.getByText('Item A')).toBeInTheDocument();
+            expect(screen.getByText('Item B')).toBeInTheDocument();
+            // 'Other C' shouldn't be matched
+            expect(screen.queryByText('Other C')).not.toBeInTheDocument();
+        });
     });
 
     it('selects an item and updates input value', () => {
@@ -149,7 +151,7 @@ describe('SearchableDropdown', () => {
         expect(input.value).toBe('');
     });
 
-    it('handles manual input when allowManual is true', () => {
+    it('handles manual input when allowManual is true', async () => {
         render(
             <SearchableDropdown
                 items={mockItems}
@@ -165,8 +167,10 @@ describe('SearchableDropdown', () => {
         fireEvent.change(input, { target: { value: 'New Item' } });
         act(() => { vi.advanceTimersByTime(350); });
 
-        expect(mockOnManualInput).toHaveBeenCalledWith('New Item');
-        expect(screen.getByText('Usar "New Item" como nuevo')).toBeInTheDocument();
+        await waitFor(() => {
+            expect(mockOnManualInput).toHaveBeenCalledWith('New Item');
+            expect(screen.getByText('Usar "New Item" como nuevo')).toBeInTheDocument();
+        });
     });
 
     it('handles disabled state', () => {
