@@ -41,10 +41,10 @@ const RetailProductModal = ({ isOpen, onClose, productToEdit }) => {
         name:       formData.name,
         brand:      formData.brand || null,
         category:   formData.category || null,
-        costPrice:  parseFloat(formData.cost) || 0,
-        salePrice:  parseFloat(formData.price) || 0,
-        stockCurrent: parseFloat(formData.stock) || 0,
-        stockMin:   parseFloat(formData.minStock) || 3,
+        costPrice:  Math.max(0, parseFloat(formData.cost) || 0),
+        salePrice:  Math.max(0, parseFloat(formData.price) || 0),
+        stockCurrent: Math.max(0, parseFloat(formData.stock) || 0),
+        stockMin:   Math.max(0, parseFloat(formData.minStock) || 3),
       };
       if (isEditMode) {
         const { error } = await sbUpdate('retailInventory', productToEdit.id, dataToSave);
