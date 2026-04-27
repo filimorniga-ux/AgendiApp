@@ -30,12 +30,8 @@ export default function TechnicalConsumptionTab() {
   });
   const [selectedCollab, setSelectedCollab] = useState('Todos');
 
-  // Request all stock_movements for technical inventory
-  const filters = useMemo(() => [
-    { field: 'inventory_type', op: 'eq', value: 'technical' },
-    // Salidas ('out') representan consumos. Pero también podríamos incluir 'in' si quieren ver "Mermas" (que también son out). 
-    { field: 'type', op: 'eq', value: 'out' }
-  ], []);
+  // Request all stock_movements
+  const filters = useMemo(() => [], []);
 
   const { data: stockMovements, loading } = useSupabaseCollection('stockMovements', filters);
 
@@ -43,6 +39,14 @@ export default function TechnicalConsumptionTab() {
     if (!stockMovements) return [];
     
     return stockMovements.filter(m => {
+      // Check if it's technical inventory (handle both legacy 'collection_name' and newer 'inventory_type')
+      const isTechnical = m.inventory_type === 'technical' || m.collection_name === 'technicalInventory';
+      if (!isTechnical) return false;
+
+      // Consumptions/Merma/Exits means amount < 0 (legacy manual adjustments) or type === 'out'
+      const isOut = m.type === 'out' || (safeNum(m.amount) < 0) || (safeNum(m.quantity) < 0);
+      if (!isOut) return false;
+
       // Filtrar por rango de fechas
       const mDate = parseDate(m.date || m.createdAt).toISOString().split('T')[0];
       if (mDate < dateRange.start || mDate > dateRange.end) return false;
@@ -56,20 +60,33 @@ export default function TechnicalConsumptionTab() {
     }).sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
   }, [stockMovements, dateRange, selectedCollab]);
 
+  const calculateCostPerUnit = (item) => {
+    if (!item) return 0;
+    if (item.sellMode === 'whole') return item.collabCost || item.costPerUnit || 0;
+    const collabCost = item.collabCost || item.costPerUnit || 0;
+    const unitSize = item.unitSize || 1;
+    return collabCost / unitSize;
+  };
+
   const formattedData = useMemo(() => {
     if (!filteredMovements) return [];
     return filteredMovements.map(m => {
-      const prod = technicalInventory?.find(p => p.id === m.productId);
-      const prodName = prod ? prod.name : 'Desc.';
-      const quantity = safeNum(m.quantity);
-      const costPerUnit = safeNum(m.costPerUnit);
+      const prod = technicalInventory?.find(p => p.id === (m.productId || m.product_id));
+      const prodName = prod ? prod.name : (m.product_name || 'Desc.');
+      // Quantities for consumptions should be positive for display, read from 'amount' or 'quantity'
+      const rawQty = safeNum(m.amount ?? m.quantity);
+      const quantity = Math.abs(rawQty);
+
+      const costPerUnit = safeNum(m.costPerUnit) || calculateCostPerUnit(prod);
+      const totalCost = Math.round(quantity * costPerUnit);
+
       return {
         'Fecha y Hora': new Date(m.createdAt || m.date).toLocaleString('es-CL'),
         'Producto': prodName,
         'Cant. Consumida': quantity,
-        'Costo Unitario': costPerUnit,
-        'Costo Total': (quantity * costPerUnit),
-        'Tipo': m.type.toUpperCase(),
+        'Costo Unitario': Math.round(costPerUnit),
+        'Costo Total': totalCost,
+        'Tipo': (m.type || 'out').toUpperCase(),
         'Motivo': m.reason || 'N/A',
         'Responsable/Colaborador': m.userId || 'Sistema'
       };
@@ -162,11 +179,13 @@ export default function TechnicalConsumptionTab() {
                 </tr>
               ) : (
                 filteredMovements.map((m) => {
-                  const prod = technicalInventory?.find(p => p.id === m.productId);
-                  const prodName = prod ? prod.name : 'Desconocido';
-                  const quantity = safeNum(m.quantity);
-                  const costPerUnit = safeNum(m.costPerUnit);
-                  const totalCost = quantity * costPerUnit;
+                  const prod = technicalInventory?.find(p => p.id === (m.productId || m.product_id));
+                  const prodName = prod ? prod.name : (m.product_name || 'Desconocido');
+                  const rawQty = safeNum(m.amount ?? m.quantity);
+                  const quantity = Math.abs(rawQty);
+
+                  const costPerUnit = safeNum(m.costPerUnit) || calculateCostPerUnit(prod);
+                  const totalCost = Math.round(quantity * costPerUnit);
 
                   return (
                     <tr key={m.id} className="hover:bg-bg-tertiary/50 transition-colors">

@@ -45,12 +45,12 @@ const TechProductModal = ({ isOpen, onClose, productToEdit }) => {
         name:       formData.name,
         brand:      formData.brand || null,
         category:   formData.category || null,
-        unitSize:   isWhole ? 1 : (parseFloat(formData.unitSize) || 0),
+        unitSize:   isWhole ? 1 : Math.max(0, parseFloat(formData.unitSize) || 0),
         unit:       isWhole ? 'unidad' : (formData.unitOfMeasure || 'g'),
-        stockCurrent: parseFloat(formData.stockUnits) || 0,
-        stockMin:   parseFloat(formData.minStock) || 3,
-        costPerUnit: parseFloat(formData.facturaCost) || 0,
-        collabCost:  parseFloat(formData.collabCost) || 0,
+        stockCurrent: Math.max(0, parseFloat(formData.stockUnits) || 0),
+        stockMin:   Math.max(0, parseFloat(formData.minStock) || 3),
+        costPerUnit: Math.max(0, parseFloat(formData.facturaCost) || 0),
+        collabCost:  Math.max(0, parseFloat(formData.collabCost) || 0),
         sellMode:   formData.sellMode || 'fractional',
       };
       if (isEditMode) {
