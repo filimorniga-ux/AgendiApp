@@ -15,10 +15,10 @@ import { useBusiness } from '../../context/BusinessContext.jsx';
 import { safeNum } from '../../lib/mathUtils';
 
 const STATUS_OPTIONS = [
-  { value: 'complete',  label: '✅ Completo',           color: '#22c55e' },
-  { value: 'partial',   label: '⚠️  Con faltantes',      color: '#f59e0b' },
-  { value: 'damaged',   label: '🛠️  Con daños',           color: '#f97316' },
-  { value: 'rejected',  label: '❌ Rechazado',           color: '#ef4444' },
+  { value: 'complete',  label: '✅ Completo',           themeColor: 'success' },
+  { value: 'partial',   label: '⚠️  Con faltantes',      themeColor: 'warning' },
+  { value: 'damaged',   label: '🛠️  Con daños',           themeColor: 'orange' },
+  { value: 'rejected',  label: '❌ Rechazado',           themeColor: 'error' },
 ];
 
 export default function ClosureStep({ sessionData, onFinished }) {
@@ -129,17 +129,17 @@ export default function ClosureStep({ sessionData, onFinished }) {
   };
 
   return (
-    <div className="recepcion-step-body" style={{ gap: '1.5rem' }}>
+    <div className="recepcion-step-body recepcion-gap-1-5rem">
       {/* Resumen de la recepción */}
       <div className="recepcion-closure-grid">
         {[
-          { label: 'Total facturado',   val: `$${totalInvoiced.toLocaleString()}`,  color: '#3b82f6' },
-          { label: 'Total recibido',    val: `$${totalReceived.toLocaleString()}`,   color: '#22c55e' },
-          { label: 'Productos nuevos',  val: newProducts.length,                     color: '#f59e0b' },
-          { label: 'Con discrepancias', val: discrepant.length,                      color: '#ef4444' },
+          { label: 'Total facturado',   val: `$${totalInvoiced.toLocaleString()}`,  themeColor: 'info' },
+          { label: 'Total recibido',    val: `$${totalReceived.toLocaleString()}`,   themeColor: 'success' },
+          { label: 'Productos nuevos',  val: newProducts.length,                     themeColor: 'warning' },
+          { label: 'Con discrepancias', val: discrepant.length,                      themeColor: 'error' },
         ].map(s => (
-          <div key={s.label} className="recepcion-closure-card" style={{ borderColor: s.color + '33' }}>
-            <div className="recepcion-closure-val" style={{ color: s.color }}>{s.val}</div>
+          <div key={s.label} className={`recepcion-closure-card recepcion-closure-card--${s.themeColor}`}>
+            <div className={`recepcion-closure-val recepcion-closure-val--${s.themeColor}`}>{s.val}</div>
             <div className="recepcion-closure-label">{s.label}</div>
           </div>
         ))}
@@ -147,7 +147,7 @@ export default function ClosureStep({ sessionData, onFinished }) {
 
       {/* Estado del pedido */}
       <div>
-        <label className="recepcion-field-label" style={{ display: 'block', marginBottom: '0.5rem' }}>
+        <label className="recepcion-field-label recepcion-block-mb-05">
           Estado del pedido
         </label>
         <div className="recepcion-status-selector">
@@ -155,12 +155,7 @@ export default function ClosureStep({ sessionData, onFinished }) {
             <button
               key={opt.value}
               onClick={() => setReceptionStatus(opt.value)}
-              className="recepcion-status-btn"
-              style={{
-                background: receptionStatus === opt.value ? opt.color : opt.color + '18',
-                color: receptionStatus === opt.value ? '#fff' : opt.color,
-                border: `1px solid ${opt.color}44`,
-              }}
+              className={`recepcion-status-btn recepcion-status-btn--${opt.themeColor} ${receptionStatus === opt.value ? 'active' : ''}`}
             >
               {opt.label}
             </button>
@@ -170,7 +165,7 @@ export default function ClosureStep({ sessionData, onFinished }) {
 
       {/* Observaciones */}
       <div>
-        <label className="recepcion-field-label" style={{ display: 'block', marginBottom: '0.5rem' }}>
+        <label className="recepcion-field-label recepcion-block-mb-05">
           Observaciones generales
         </label>
         <textarea
@@ -193,8 +188,7 @@ export default function ClosureStep({ sessionData, onFinished }) {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="recepcion-btn-primary"
-          style={{ padding: '12px 36px', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: saving ? 0.7 : 1 }}
+          className={`recepcion-btn-primary recepcion-btn-save ${saving ? 'saving' : ''}`}
         >
           {saving ? '⏳ Guardando…' : '💾 Confirmar recepción'}
         </button>
