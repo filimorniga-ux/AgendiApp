@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import MovementModal from './MovementModal';
-import * as DataContext from '../../context/DataContext';
+import * as AppConfigContext from '../../context/collections/ConfigContext';
+import * as ClientsContext from '../../context/collections/ClientsContext';
+import * as CollaboratorsContext from '../../context/collections/CollaboratorsContext';
+import * as ServicesContext from '../../context/collections/ServicesContext';
+import * as InventoryContext from '../../context/collections/InventoryContext';
+import * as MovementsContext from '../../context/collections/MovementsContext';
+import * as BusinessContext from '../../context/BusinessContext';
 import * as db from '../../supabase/db';
 
 vi.mock('../../supabase/db', () => ({
@@ -10,8 +16,27 @@ vi.mock('../../supabase/db', () => ({
   sbDelete: vi.fn(),
 }));
 
-vi.mock('../../context/DataContext', () => ({
-  useData: vi.fn(),
+vi.mock('../../context/collections/ConfigContext', () => ({
+  useAppConfig: vi.fn(),
+}));
+vi.mock('../../context/collections/ClientsContext', () => ({
+  useClients: vi.fn(),
+}));
+vi.mock('../../context/collections/CollaboratorsContext', () => ({
+  useCollaborators: vi.fn(),
+}));
+vi.mock('../../context/collections/ServicesContext', () => ({
+  useServices: vi.fn(),
+}));
+vi.mock('../../context/collections/InventoryContext', () => ({
+  useInventory: vi.fn(),
+}));
+vi.mock('../../context/collections/MovementsContext', () => ({
+  useMovements: vi.fn(),
+}));
+vi.mock('../../context/BusinessContext', () => ({
+  useBusiness: vi.fn(),
+  BusinessContext: { Consumer: ({ children }) => children({ businessId: 'biz123' }) }
 }));
 
 // Mockeamos algunos contextos hijos que no nos importan profundamente para este test unitario
@@ -40,15 +65,13 @@ describe('MovementModal', () => {
   
   beforeEach(() => {
     vi.clearAllMocks();
-    DataContext.useData.mockReturnValue({
-      businessId: 'bus-123',
-      clients: [{ id: 'c1', name: 'John Doe' }],
-      collaborators: [{ id: 'col1', name: 'Miguel', role: 'barbero' }],
-      services: [{ id: 's1', name: 'Corte de Pelo', price: 10 }],
-      retailInventory: [{ id: 'p1', name: 'Gel', salePrice: 5, stockCurrent: 10 }],
-      config: [{ id: 'settings', requireReceiptUpload: false }],
-      movements: []
-    });
+    BusinessContext.useBusiness.mockReturnValue({ businessId: 'bus-123' });
+    ClientsContext.useClients.mockReturnValue({ clients: [{ id: 'c1', name: 'John Doe' }] });
+    CollaboratorsContext.useCollaborators.mockReturnValue({ collaborators: [{ id: 'col1', name: 'Miguel', role: 'barbero' }] });
+    ServicesContext.useServices.mockReturnValue({ services: [{ id: 's1', name: 'Corte de Pelo', price: 10 }] });
+    InventoryContext.useInventory.mockReturnValue({ retailInventory: [{ id: 'p1', name: 'Gel', salePrice: 5, stockCurrent: 10 }] });
+    AppConfigContext.useAppConfig.mockReturnValue({ config: [{ id: 'settings', requireReceiptUpload: false }] });
+    MovementsContext.useMovements.mockReturnValue({ movements: [] });
   });
 
   it('no renderiza si isOpen es falso', () => {

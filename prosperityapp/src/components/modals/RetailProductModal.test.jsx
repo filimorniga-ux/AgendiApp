@@ -3,15 +3,15 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RetailProductModal from './RetailProductModal';
 import * as db from '../../supabase/db';
-import * as DataContext from '../../context/DataContext';
+import * as BusinessContext from '../../context/BusinessContext';
 
 vi.mock('../../supabase/db', () => ({
   sbCreate: vi.fn(),
   sbUpdate: vi.fn(),
 }));
 
-vi.mock('../../context/DataContext', () => ({
-  useData: vi.fn(),
+vi.mock('../../context/BusinessContext', () => ({
+  useBusiness: vi.fn(),
 }));
 
 // Mock minimal de componentes decoradores que causen errores, aunque usamos componentes limpios
@@ -31,7 +31,7 @@ describe('RetailProductModal', () => {
   
   beforeEach(() => {
     vi.clearAllMocks();
-    DataContext.useData.mockReturnValue({ businessId: 'bus-123' });
+    BusinessContext.useBusiness.mockReturnValue({ businessId: 'bus-123' });
   });
 
   it('no debería renderizar si isOpen es falso', () => {
