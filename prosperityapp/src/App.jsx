@@ -3,8 +3,8 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { BusinessProvider } from './context/BusinessContext';
-import { DataProvider } from './context/DataContext';
 import { TimerProvider } from './context/TimerContext';
+import { AppProviders } from './context/AppProviders';
 import { Toaster } from 'react-hot-toast';
 import PWAInstallBanner from './components/PWAInstallBanner';
 import OfflineIndicator from './components/OfflineIndicator';
@@ -88,8 +88,7 @@ const PlaceholderPage = ({ title }) => (
 function App() {
   return (
     <ThemeProvider>
-      <BusinessProvider>
-        <DataProvider>
+      <AppProviders>
           <TimerProvider>
           <Toaster
             position="bottom-right"
@@ -182,8 +181,7 @@ function App() {
             </ErrorBoundary>
           </BrowserRouter>
           </TimerProvider>
-        </DataProvider>
-      </BusinessProvider>
+      </AppProviders>
     </ThemeProvider>
   );
 }
