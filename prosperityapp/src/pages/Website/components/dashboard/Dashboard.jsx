@@ -231,7 +231,7 @@ export const Dashboard = ({ user, isDarkMode }) => {
         return (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className={`p-8 rounded-2xl bg-gradient-to-r from-[#f6e05e] to-[#f6c05e] text-[#1a202c] shadow-lg`}>
-                    <div className="flex justify-between items-start">
+                    <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-4">
                         <div>
                             <h3 className="font-bold text-xl mb-1">{t.dashboard.client_section.book_now}</h3>
                             <p className="opacity-80 text-sm max-w-xs">Reserva tu próxima cita en segundos.</p>
@@ -267,8 +267,9 @@ export const Dashboard = ({ user, isDarkMode }) => {
     return (
         <div className={`max-w-7xl mx-auto px-6 pt-28 pb-12 transition-all duration-300`}>
             <div className={`flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8`}>
+                <div className="w-full lg:w-auto">
                 <div>
-                    <h1 className={`text-3xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                    <h1 className={`text-3xl lg:text-4xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'} break-words`}>
                         {t.dashboard.welcome} <span className="text-[#f6e05e]">{user.displayName || user.email?.split('@')[0]}</span>
                     </h1>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -283,11 +284,11 @@ export const Dashboard = ({ user, isDarkMode }) => {
                     </div>
                 </div>
 
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 w-full lg:w-auto">
                     {/* BOTÓN PARA IR A LA APP OPERATIVA */}
                     <button
                         onClick={() => navigate('/app')}
-                        className="group px-6 py-3 rounded-xl bg-[#f6e05e] text-black font-bold hover:shadow-[0_0_30px_-5px_rgba(246,224,94,0.4)] transition-all flex items-center justify-center gap-3 relative overflow-hidden"
+                        className="group w-full lg:w-auto px-6 py-3 rounded-xl bg-[#f6e05e] text-black font-bold hover:shadow-[0_0_30px_-5px_rgba(246,224,94,0.4)] transition-all flex items-center justify-center gap-3 relative overflow-hidden"
                     >
                         <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
                         <span className="text-xl">🏢</span>
@@ -296,7 +297,7 @@ export const Dashboard = ({ user, isDarkMode }) => {
 
                     {/* SELECTOR DE VISTA: SOLO VISIBLE PARA EL SUPER ADMIN */}
                     {isSuperAdmin && (
-                        <div className={`flex items-center gap-2 p-1 rounded-lg border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                        <div className={`flex flex-wrap items-center gap-2 p-1 rounded-lg border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                             <span className={`text-xs px-3 font-bold uppercase ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>Vista Previa:</span>
                             {['admin', 'staff', 'client'].map(role => (
                                 <button

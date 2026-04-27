@@ -21,8 +21,8 @@ export const Header = ({ isDarkMode, toggleTheme, user, onLoginClick, onRegister
         <header className={`fixed top-0 z-50 w-full transition-all duration-500 border-b ${
             scrolled || user 
                 ? isDarkMode 
-                    ? 'py-2 bg-slate-950/80 backdrop-blur-xl border-white/10 shadow-2xl' 
-                    : 'py-2 bg-white/80 backdrop-blur-xl border-slate-200 shadow-sm'
+                    ? 'py-2 bg-slate-950/90 backdrop-blur-xl border-white/10 shadow-2xl'
+                    : 'py-2 bg-white/90 backdrop-blur-xl border-slate-200 shadow-sm'
                 : 'py-5 bg-gradient-to-b from-black/70 via-black/30 to-transparent border-transparent'
         }`}>
             <nav className="container mx-auto px-6 flex justify-between items-center max-w-7xl">
