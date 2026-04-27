@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef,  useEffect  } from 'react';
 import { useTranslation } from 'react-i18next';
 import feather from 'feather-icons';
 
@@ -17,10 +17,62 @@ const Icon = ({ name, className }) => {
 const PrintPreviewModal = ({ isOpen, onClose, onPrint, title, children }) => {
     const { t } = useTranslation();
 
-    if (!isOpen) return null;
+
+
+  const modalRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab' && isOpen && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement || document.activeElement === modalRef.current) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      // Foco inicial
+      setTimeout(() => {
+        if (modalRef.current && !modalRef.current.contains(document.activeElement)) {
+           const focusableElements = modalRef.current.querySelectorAll(
+             'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+           );
+           if (focusableElements.length > 0) {
+             focusableElements[0].focus();
+           }
+        }
+      }, 100);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, onClose]);
+
+
+  if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-md modal-backdrop">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-md modal-backdrop" ref={modalRef} tabIndex="-1">
             <div className="bg-bg-secondary rounded-lg shadow-2xl border border-border-main w-full max-w-4xl h-[90vh] flex flex-col modal-content">
                 {/* Header */}
                 <div className="p-4 border-b border-border-main flex justify-between items-center bg-bg-tertiary rounded-t-lg">

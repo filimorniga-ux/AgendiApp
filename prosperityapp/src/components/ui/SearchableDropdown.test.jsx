@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '../../test/utils';
+import { render, screen, fireEvent, act } from '../../test/utils';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SearchableDropdown from './SearchableDropdown';
 
@@ -17,6 +17,13 @@ const mockItems = [
 ];
 
 describe('SearchableDropdown', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+    });
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     let mockOnSelect;
     let mockOnManualInput;
 
@@ -68,6 +75,7 @@ describe('SearchableDropdown', () => {
         const input = screen.getByPlaceholderText('Search...');
         fireEvent.focus(input);
         fireEvent.change(input, { target: { value: 'Item' } });
+        act(() => { vi.advanceTimersByTime(350); });
 
         expect(screen.getByText('Item A')).toBeInTheDocument();
         expect(screen.getByText('Item B')).toBeInTheDocument();
@@ -155,6 +163,7 @@ describe('SearchableDropdown', () => {
         const input = screen.getByPlaceholderText('Search...');
         fireEvent.focus(input);
         fireEvent.change(input, { target: { value: 'New Item' } });
+        act(() => { vi.advanceTimersByTime(350); });
 
         expect(mockOnManualInput).toHaveBeenCalledWith('New Item');
         expect(screen.getByText('Usar "New Item" como nuevo')).toBeInTheDocument();

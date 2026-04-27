@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef,  useState, useEffect  } from 'react';
 import { useTranslation } from 'react-i18next';
 import feather from 'feather-icons';
 import { useSupabaseCollection } from '../../hooks/useSupabaseCollection';
@@ -24,6 +24,58 @@ export default function CashSessionModal({ isOpen, onClose, summaryData, session
       setObservations('');
     }
   }, [isOpen]);
+
+
+
+  const modalRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab' && isOpen && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement || document.activeElement === modalRef.current) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      // Foco inicial
+      setTimeout(() => {
+        if (modalRef.current && !modalRef.current.contains(document.activeElement)) {
+           const focusableElements = modalRef.current.querySelectorAll(
+             'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+           );
+           if (focusableElements.length > 0) {
+             focusableElements[0].focus();
+           }
+        }
+      }, 100);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, onClose]);
+
 
   if (!isOpen || !summaryData) return null;
 
@@ -70,7 +122,7 @@ export default function CashSessionModal({ isOpen, onClose, summaryData, session
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm sm:p-4 modal-backdrop">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm sm:p-4 modal-backdrop" ref={modalRef} tabIndex="-1">
       <div className="bg-bg-secondary border border-border-main rounded-t-[20px] sm:rounded-xl w-full sm:max-w-lg overflow-hidden shadow-2xl relative modal-content">
         
         {/* Header */}

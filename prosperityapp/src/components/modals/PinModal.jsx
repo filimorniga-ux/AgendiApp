@@ -136,10 +136,62 @@ const PinModal = ({ isOpen, onClose, onSuccess, operation = null }) => {
     }
   };
 
+
+
+  const modalRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab' && isOpen && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement || document.activeElement === modalRef.current) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      // Foco inicial
+      setTimeout(() => {
+        if (modalRef.current && !modalRef.current.contains(document.activeElement)) {
+           const focusableElements = modalRef.current.querySelectorAll(
+             'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+           );
+           if (focusableElements.length > 0) {
+             focusableElements[0].focus();
+           }
+        }
+      }, 100);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, onClose]);
+
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-md modal-backdrop">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-md modal-backdrop" ref={modalRef} tabIndex="-1">
       <div className="bg-bg-secondary rounded-xl shadow-2xl border border-border-main w-full max-w-sm mx-4 modal-content overflow-hidden">
 
         {/* Header */}

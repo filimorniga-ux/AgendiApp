@@ -1,5 +1,5 @@
 // ===== src/components/modals/ClientModal.jsx — Migrado a Supabase =====
-import React, { useState, useEffect } from 'react';
+import React, { useRef,  useState, useEffect  } from 'react';
 import feather from 'feather-icons';
 import { sbCreate, sbUpdate } from '../../supabase/db';
 import toast from 'react-hot-toast';
@@ -85,7 +85,7 @@ const ClientModal = ({ isOpen, onClose, clientToEdit }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 modal-backdrop">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 modal-backdrop" ref={modalRef} tabIndex="-1">
       <div className="bg-bg-secondary rounded-lg shadow-xl border border-border-main w-full max-w-2xl modal-content flex flex-col max-h-[90vh]">
         <div className="p-4 border-b border-border-main flex justify-between items-center">
           <h3 className="text-xl font-bold text-text-main">{isEditMode ? t('modals.client.editTitle') : t('modals.client.newTitle')}</h3>

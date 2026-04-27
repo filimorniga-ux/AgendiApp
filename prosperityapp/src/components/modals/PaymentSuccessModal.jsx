@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useEffect,  useState, useRef, useCallback  } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import TicketTemplate from '../reports/TicketTemplate';
 import CollaboratorVoucher from '../reports/CollaboratorVoucher';
@@ -65,6 +65,58 @@ const PaymentSuccessModal = ({ isOpen, onClose, ticketData, voucherData = [], co
     });
   };
 
+
+
+  const modalRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab' && isOpen && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement || document.activeElement === modalRef.current) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      // Foco inicial
+      setTimeout(() => {
+        if (modalRef.current && !modalRef.current.contains(document.activeElement)) {
+           const focusableElements = modalRef.current.querySelectorAll(
+             'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+           );
+           if (focusableElements.length > 0) {
+             focusableElements[0].focus();
+           }
+        }
+      }, 100);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, onClose]);
+
+
   if (!isOpen) return null;
 
   const tabs = [
@@ -79,7 +131,7 @@ const PaymentSuccessModal = ({ isOpen, onClose, ticketData, voucherData = [], co
   const activeVoucher = voucherData.find(v => v.collaboratorId === activeTab);
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm modal-backdrop">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm modal-backdrop" ref={modalRef} tabIndex="-1">
       <div className="bg-bg-secondary rounded-xl shadow-2xl border border-border-main w-full max-w-3xl max-h-[90vh] flex flex-col modal-content">
 
         {/* ── Header ──────────────────────────────────────────────── */}

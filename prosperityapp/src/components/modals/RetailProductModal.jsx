@@ -1,5 +1,5 @@
 // ===== INICIO: src/components/modals/RetailProductModal.jsx (Sprint 95) =====
-import React, { useState, useEffect } from 'react';
+import React, { useRef,  useState, useEffect  } from 'react';
 import { sbCreate, sbUpdate } from '../../supabase/db';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -63,10 +63,62 @@ const RetailProductModal = ({ isOpen, onClose, productToEdit }) => {
     }
   };
 
+
+
+  const modalRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab' && isOpen && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement || document.activeElement === modalRef.current) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      // Foco inicial
+      setTimeout(() => {
+        if (modalRef.current && !modalRef.current.contains(document.activeElement)) {
+           const focusableElements = modalRef.current.querySelectorAll(
+             'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+           );
+           if (focusableElements.length > 0) {
+             focusableElements[0].focus();
+           }
+        }
+      }, 100);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, onClose]);
+
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-70 modal-backdrop">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-70 modal-backdrop" ref={modalRef} tabIndex="-1">
       <div className="bg-bg-secondary rounded-t-[20px] sm:rounded-lg shadow-xl border border-border-main w-full sm:max-w-md modal-content flex flex-col max-h-[90vh] sm:max-h-[85vh]">
         <div className="p-4 border-b border-border-main flex justify-between items-center">
           <h3 className="text-xl font-bold text-text-main">{isEditMode ? t('modals.retailProduct.editTitle') : t('modals.retailProduct.newTitle')}</h3>

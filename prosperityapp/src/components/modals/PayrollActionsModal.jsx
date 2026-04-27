@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef,  useState, useEffect  } from 'react';
 import { useTranslation } from 'react-i18next';
 import feather from 'feather-icons';
 
@@ -12,7 +12,59 @@ const PayrollActionsModal = ({ isOpen, onClose, collaborators, onAction }) => {
         feather.replace();
     }, [isOpen, actionType, scope]);
 
-    if (!isOpen) return null;
+
+
+  const modalRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab' && isOpen && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement || document.activeElement === modalRef.current) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      // Foco inicial
+      setTimeout(() => {
+        if (modalRef.current && !modalRef.current.contains(document.activeElement)) {
+           const focusableElements = modalRef.current.querySelectorAll(
+             'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+           );
+           if (focusableElements.length > 0) {
+             focusableElements[0].focus();
+           }
+        }
+      }, 100);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, onClose]);
+
+
+  if (!isOpen) return null;
 
     const handleSubmit = () => {
         onAction(actionType, scope === 'specific' ? selectedCollaboratorId : null);
@@ -20,7 +72,7 @@ const PayrollActionsModal = ({ isOpen, onClose, collaborators, onAction }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-70 modal-backdrop">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-70 modal-backdrop" ref={modalRef} tabIndex="-1">
             <div className="bg-bg-secondary rounded-t-[20px] sm:rounded-lg shadow-xl border border-border-main w-full sm:max-w-md p-5 sm:p-6 max-h-[92dvh] overflow-y-auto modal-content">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold text-text-main">{t('payroll.actionsTitle')}</h3>
