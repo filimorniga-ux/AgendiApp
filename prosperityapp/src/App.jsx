@@ -3,7 +3,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { BusinessProvider } from './context/BusinessContext';
-import { DataProvider } from './context/DataContext';
+
 import { TimerProvider } from './context/TimerContext';
 import { Toaster } from 'react-hot-toast';
 import PWAInstallBanner from './components/PWAInstallBanner';

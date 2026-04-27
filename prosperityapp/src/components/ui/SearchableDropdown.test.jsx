@@ -56,7 +56,7 @@ describe('SearchableDropdown', () => {
         expect(screen.getByText('Other C')).toBeInTheDocument();
     });
 
-    it('filters items based on input', () => {
+    it('filters items based on input', async () => {
         render(
             <SearchableDropdown
                 items={mockItems}
@@ -68,6 +68,9 @@ describe('SearchableDropdown', () => {
         const input = screen.getByPlaceholderText('Search...');
         fireEvent.focus(input);
         fireEvent.change(input, { target: { value: 'Item' } });
+
+        // Wait for debounce (300ms) to update filtered list
+        await new Promise((r) => setTimeout(r, 350));
 
         expect(screen.getByText('Item A')).toBeInTheDocument();
         expect(screen.getByText('Item B')).toBeInTheDocument();
@@ -141,7 +144,7 @@ describe('SearchableDropdown', () => {
         expect(input.value).toBe('');
     });
 
-    it('handles manual input when allowManual is true', () => {
+    it('handles manual input when allowManual is true', async () => {
         render(
             <SearchableDropdown
                 items={mockItems}
@@ -155,6 +158,9 @@ describe('SearchableDropdown', () => {
         const input = screen.getByPlaceholderText('Search...');
         fireEvent.focus(input);
         fireEvent.change(input, { target: { value: 'New Item' } });
+
+        // Wait for debounce (300ms) to update text
+        await new Promise((r) => setTimeout(r, 350));
 
         expect(mockOnManualInput).toHaveBeenCalledWith('New Item');
         expect(screen.getByText('Usar "New Item" como nuevo')).toBeInTheDocument();

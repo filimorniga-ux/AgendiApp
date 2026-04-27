@@ -48,18 +48,20 @@ describe('ScrollableSelector Component', () => {
     expect(screen.getByText('Andres Felipe')).toBeInTheDocument();
   });
 
-  it('filters items correctly when typing in search input', () => {
+  it('filters items correctly when typing in search input', async () => {
     render(<ScrollableSelector items={dummyItems} onSelect={() => {}} />);
     
     const searchInput = screen.getByPlaceholderText('Buscar...');
     fireEvent.change(searchInput, { target: { value: 'miguel' } });
+
+    await new Promise(r => setTimeout(r, 350));
 
     expect(screen.getByText('Miguel Perdomo')).toBeInTheDocument();
     expect(screen.queryByText('Lia Martinez')).not.toBeInTheDocument();
     expect(screen.queryByText('Andres Felipe')).not.toBeInTheDocument();
   });
 
-  it('handles manual input correctly when allowManual is true', () => {
+  it('handles manual input correctly when allowManual is true', async () => {
     const mockManualInput = vi.fn();
     render(<ScrollableSelector 
              items={dummyItems} 
@@ -70,6 +72,8 @@ describe('ScrollableSelector Component', () => {
     
     const searchInput = screen.getByPlaceholderText('Buscar...');
     fireEvent.change(searchInput, { target: { value: 'Nuevo Cliente' } });
+
+    await new Promise(r => setTimeout(r, 350));
 
     // Should show the manual add button
     const addButton = screen.getByText('Agregar Cliente');
