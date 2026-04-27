@@ -7,10 +7,13 @@
  */
 import { useState, useMemo } from 'react';
 import SearchableDropdown from '../ui/SearchableDropdown.jsx';
-import { useData } from '../../context/DataContext.jsx';
+import { useInventory } from '../../context/collections/InventoryContext';
 
 export default function DiscrepancyStep({ items, extraItems, onNext }) {
-  const { retailInventory, technicalInventory } = useData();
+  const {
+    retailInventory,
+    technicalInventory
+  } = useInventory();
   const discrepant = items.filter(it => ['partial', 'missing', 'damaged'].includes(it.status));
   const priceChanged = items.filter(it => it.priceChanged);
 

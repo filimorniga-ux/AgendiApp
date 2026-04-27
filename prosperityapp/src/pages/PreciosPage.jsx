@@ -1,12 +1,12 @@
 // ===== INICIO: src/pages/PreciosPage.jsx (Sprint 94) =====
 import React, { useMemo, useEffect, useState } from 'react';
 import feather from 'feather-icons';
-import { useData } from '../context/DataContext';
 import ServiceModal from '../components/modals/ServiceModal';
 import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next'; // <-- Importar
 import { safeNum } from '../lib/mathUtils';
+import { useServices } from '../context/collections/ServicesContext';
 
 const formatCurrency = (value) => {
   const num = safeNum(value);
@@ -15,7 +15,13 @@ const formatCurrency = (value) => {
 
 const PreciosPage = () => {
   const { t } = useTranslation(); // <-- Hook
-  const { services, isLoading } = useData();
+
+  const {
+    services,
+    loading: loadingServices
+  } = useServices();
+
+  const isLoading = loadingServices;
   const loading = isLoading;
   const error = null;
 

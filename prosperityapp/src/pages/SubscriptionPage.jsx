@@ -1,14 +1,32 @@
 import React, { useEffect } from 'react';
 import feather from 'feather-icons';
 import { useTranslation } from 'react-i18next';
-import { useData } from '../context/DataContext';
 import { useBusiness } from '../context/BusinessContext';
 import { supabase } from '../supabase/client';
 import toast from 'react-hot-toast';
 
+import { useRole } from '../context/collections/RoleContext';
+import { useAppConfig } from '../context/collections/ConfigContext';
+import { useCollaborators } from '../context/collections/CollaboratorsContext';
+
 const SubscriptionPage = () => {
     const { t } = useTranslation();
-    const { userRole, isLoading, config, collaborators } = useData();
+
+    const {
+        userRole
+    } = useRole();
+
+    const {
+        config,
+        loading: loadingAppConfig
+    } = useAppConfig();
+
+    const {
+        collaborators,
+        loading: loadingCollaborators
+    } = useCollaborators();
+
+    const isLoading = loadingAppConfig || loadingCollaborators;
     const { realRole, businessId, businessPlan, user } = useBusiness();
     const [isCreatingCheckout, setIsCreatingCheckout] = React.useState(false);
 
@@ -20,7 +38,7 @@ const SubscriptionPage = () => {
 
     if (isLoading) return null;
 
-    const planName = businessPlan === 'pro' ? "AgendiApp PRO" : businessPlan === 'enterprise' ? "AgendiApp ENTERPRISE" : "AgendiApp FREE"; 
+    const planName = businessPlan === 'pro' ? "AgendiApp PRO" : businessPlan === 'enterprise' ? "AgendiApp ENTERPRISE" : "AgendiApp FREE";
     const planStatus = businessPlan === 'free' ? t('subscription.free', 'Gratuito') : t('subscription.active', 'Activo');
     const renewalDate = businessPlan === 'free' ? "-" : t('subscription.monthlyRenewal', 'Renovación Mensual');
     const planPrice = businessPlan === 'pro' ? '$14.990' : businessPlan === 'enterprise' ? '$29.990' : '$0';

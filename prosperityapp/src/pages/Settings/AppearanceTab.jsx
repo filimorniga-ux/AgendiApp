@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useData } from '../../context/DataContext';
 import { ThemeContext, THEME_LIST } from '../../context/ThemeContext';
 import { GLOBAL_CURRENCY_DATA } from '../../lib/currencyData';
 import feather from 'feather-icons';
@@ -8,9 +7,22 @@ import toast from 'react-hot-toast';
 import { useStorage } from '../../hooks/useStorage';
 import { sbUpdate } from '../../supabase/db';
 
+import { useAppConfig } from '../../context/collections/ConfigContext';
+import { useBusiness } from '../../context/BusinessContext';
+
 const AppearanceTab = () => {
     const { t, i18n } = useTranslation();
-    const { currentLocale, setCurrentCurrency, config, businessId } = useData();
+
+    const {
+        currentLocale,
+        setCurrentCurrency,
+        config
+    } = useAppConfig();
+
+    const {
+        businessId
+    } = useBusiness();
+
     const { theme: currentTheme, setTheme } = useContext(ThemeContext);
     const { uploadFile, progress, isUploading } = useStorage();
     const [selectedCountryCode, setSelectedCountryCode] = useState('');

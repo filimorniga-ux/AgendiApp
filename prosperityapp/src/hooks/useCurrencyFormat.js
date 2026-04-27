@@ -1,9 +1,11 @@
 import { useCallback } from 'react';
-import { useData } from '../context/DataContext';
 import { GLOBAL_CURRENCY_DATA } from '../lib/currencyData';
+import { useAppConfig } from '../context/collections/ConfigContext';
 
 export const useCurrencyFormat = () => {
-    const { currentLocale } = useData();
+    const {
+        currentLocale
+    } = useAppConfig();
 
     const formatCurrency = useCallback((value) => {
         if (typeof value !== 'number') value = 0;

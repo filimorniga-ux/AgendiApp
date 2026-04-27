@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../supabase/client';
-import { useData } from '../../context/DataContext';
 import { DEFAULT_TEMPLATE_STEPS } from '../../lib/payrollEngine';
 import FormulaBuilder from './FormulaBuilder';
 import EmptyState from '../ui/EmptyState';
 import toast from 'react-hot-toast';
+
+import { useCollaborators } from '../../context/collections/CollaboratorsContext';
+import { useBusiness } from '../../context/BusinessContext';
 
 const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
 
@@ -146,7 +148,14 @@ const CollaboratorOverrideCard = ({ collab, override, defaultSteps, businessId, 
 // ── Componente Principal ──────────────────────────────────────────────────────
 const TemplatesTab = () => {
   const isMounted = useRef(true);
-  const { collaborators, businessId } = useData();
+
+  const {
+    collaborators
+  } = useCollaborators();
+
+  const {
+    businessId
+  } = useBusiness();
 
   const [templates,   setTemplates]   = useState([]);
   const [overrides,   setOverrides]   = useState([]);

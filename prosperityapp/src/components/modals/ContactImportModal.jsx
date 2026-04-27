@@ -5,12 +5,14 @@ import Papa from 'papaparse';
 import VCard from 'vcf';
 import { supabase } from '../../supabase/client';
 import { sbCreate } from '../../supabase/db';
-import { useData } from '../../context/DataContext';
 import toast from 'react-hot-toast';
+import { useBusiness } from '../../context/BusinessContext';
 
 const ContactImportModal = ({ isOpen, onClose, onImportComplete }) => {
     const { t } = useTranslation();
-    const { businessId } = useData();
+    const {
+        businessId
+    } = useBusiness();
     const [isDragging, setIsDragging] = useState(false);
     const [parsedContacts, setParsedContacts] = useState([]);
     const [isImporting, setIsImporting] = useState(false);
@@ -258,7 +260,7 @@ const ContactImportModal = ({ isOpen, onClose, onImportComplete }) => {
                         </>
                     ) : (
                         /* Summary */
-                        <div className="text-center py-8">
+                        (<div className="text-center py-8">
                             <i data-feather="check-circle" className="w-16 h-16 mx-auto mb-4 text-green-500"></i>
                             <h4 className="text-2xl font-bold text-text-main mb-6">
                                 {t('clients.importModal.summary')}
@@ -279,7 +281,7 @@ const ContactImportModal = ({ isOpen, onClose, onImportComplete }) => {
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </div>)
                     )}
                 </div>
 

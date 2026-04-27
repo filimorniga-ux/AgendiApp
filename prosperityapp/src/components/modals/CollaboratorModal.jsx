@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import feather from 'feather-icons';
 import { sbCreate, sbUpdate, sbDelete, sbGetAll } from '../../supabase/db';
-import { useData } from '../../context/DataContext';
 import { useBusiness } from '../../context/BusinessContext';
 import { supabase } from '../../supabase/client';
 import toast from 'react-hot-toast';
@@ -9,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useStorage } from '../../hooks/useStorage';
 import { ROLE_CATALOG } from '../../lib/permissions';
 import PinModal from './PinModal';
+import { useAppConfig } from '../../context/collections/ConfigContext';
 
 // ── Helper: llamar a la Edge Function de gestión de auth ─────────────────────
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -38,7 +38,15 @@ async function callCollaboratorAuthFn(payload, businessId) {
 // ── Main modal ────────────────────────────────────────────────────────────────
 const CollaboratorModal = ({ isOpen, onClose, collaboratorToEdit }) => {
   const { t } = useTranslation();
-  const { businessId, config } = useData();
+
+  const {
+    businessId
+  } = useBusiness();
+
+  const {
+    config
+  } = useAppConfig();
+
   const { businessId: biz } = useBusiness();
   const effectiveBusinessId = businessId || biz;
 

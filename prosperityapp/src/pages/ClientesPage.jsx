@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import feather from 'feather-icons';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { useData } from '../context/DataContext';
 import ClientModal from '../components/modals/ClientModal';
 import ContactImportModal from '../components/modals/ContactImportModal';
 import { sbDelete } from '../supabase/db';
@@ -9,6 +8,7 @@ import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '../hooks/useDebounce';
+import { useClients } from '../context/collections/ClientsContext';
 
 const ClientesPage = () => {
   return (
@@ -24,7 +24,13 @@ const ClientesContent = () => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [clientToEdit, setClientToEdit] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const { clients, isLoading } = useData();
+
+  const {
+    clients,
+    loading: loadingClients
+  } = useClients();
+
+  const isLoading = loadingClients;
   const loading = isLoading;
   const error = null;
 

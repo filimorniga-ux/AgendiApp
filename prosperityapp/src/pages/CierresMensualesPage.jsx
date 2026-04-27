@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import feather from 'feather-icons';
 import { useMonthlyRecords } from '../hooks/useMonthlyRecords';
-import { useData } from '../context/DataContext';
 import MonthlyRecordModal from '../components/modals/MonthlyRecordModal';
 import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
@@ -9,6 +8,9 @@ import { useTranslation } from 'react-i18next';
 import * as XLSX from 'xlsx';
 import { parseDate } from '../lib/dateUtils';
 import { safeNum } from '../lib/mathUtils';
+
+import { useAppConfig } from '../context/collections/ConfigContext';
+import { useBusiness } from '../context/BusinessContext';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -70,7 +72,14 @@ const CierresMensualesPage = () => {
   const [recordToEdit, setRecordToEdit] = useState(null);
 
   const { records, partners, loading: loadingMonthly } = useMonthlyRecords(selectedMonth);
-  const { config, businessId } = useData();
+
+  const {
+    config
+  } = useAppConfig();
+
+  const {
+    businessId
+  } = useBusiness();
 
   // Usar useMemo para que las categorías se actualicen al cambiar el idioma
   const monthlyCategories = useMemo(() => ({

@@ -10,8 +10,12 @@ vi.mock('../../../context/BusinessContext', () => ({
   useBusiness: () => ({ realRole: global.__REAL_ROLE__ || 'owner', signOutAll: mockSignOutAll })
 }));
 
-vi.mock('../../../context/DataContext', () => ({
-  useData: () => ({ userRole: 'owner', config: [{ brandName: 'Test Brand' }] })
+vi.mock('../../../context/collections/RoleContext', () => ({
+  useRole: () => ({ userRole: 'owner' })
+}));
+
+vi.mock('../../../context/collections/ConfigContext', () => ({
+  useAppConfig: () => ({ config: [{ brandName: 'Test Brand' }] })
 }));
 
 vi.mock('../../../context/ThemeContext', () => ({

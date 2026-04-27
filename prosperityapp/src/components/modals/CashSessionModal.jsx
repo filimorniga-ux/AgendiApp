@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import feather from 'feather-icons';
-import { useData } from '../../context/DataContext';
 import { useSupabaseCollection } from '../../hooks/useSupabaseCollection';
 import { supabase } from '../../supabase/client';
 import { safeNum, safeSum } from '../../lib/mathUtils';
+import { useBusiness } from '../../context/BusinessContext';
 
 const formatCurrency = (val) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(safeNum(val));
 
 export default function CashSessionModal({ isOpen, onClose, summaryData, sessionType, authData }) {
   const { t } = useTranslation();
-  const { businessId } = useData();
+  const {
+    businessId
+  } = useBusiness();
   const [actualCash, setActualCash] = useState(0);
   const [observations, setObservations] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);

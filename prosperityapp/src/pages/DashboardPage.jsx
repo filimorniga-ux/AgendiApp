@@ -2,7 +2,6 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useBusiness } from '../context/BusinessContext';
 import feather from 'feather-icons';
-import { useData } from '../context/DataContext';
 import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -14,6 +13,11 @@ import { useReactToPrint } from 'react-to-print';
 import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { parseDate } from '../lib/dateUtils';
+
+import { useMovements } from '../context/collections/MovementsContext';
+import { useCollaborators } from '../context/collections/CollaboratorsContext';
+import { useAppConfig } from '../context/collections/ConfigContext';
+import { useClients } from '../context/collections/ClientsContext';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -55,7 +59,23 @@ const SummaryCard = ({ title, value, icon, colorClass = 'text-accent', stagger =
 // --- Pestaña 1: Análisis Diario (Con i18n) ---
 const TabDiario = () => {
   const { t } = useTranslation();
-  const { movements, collaborators, isLoading, config } = useData();
+
+  const {
+    movements,
+    loading: loadingMovements
+  } = useMovements();
+
+  const {
+    collaborators,
+    loading: loadingCollaborators
+  } = useCollaborators();
+
+  const {
+    config,
+    loading: loadingAppConfig
+  } = useAppConfig();
+
+  const isLoading = loadingMovements || loadingCollaborators || loadingAppConfig;
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const componentRef = useRef();
 
@@ -286,7 +306,18 @@ const getDatesForCurrentMonth = () => {
 // --- Pestaña 2: Nóminas (Con i18n) ---
 const TabNominas = () => {
   const { t } = useTranslation();
-  const { movements, isLoading, config } = useData();
+
+  const {
+    movements,
+    loading: loadingMovements
+  } = useMovements();
+
+  const {
+    config,
+    loading: loadingAppConfig
+  } = useAppConfig();
+
+  const isLoading = loadingMovements || loadingAppConfig;
   const [selectedDates, setSelectedDates] = useState([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const componentRef = useRef();
@@ -448,7 +479,9 @@ const TabNominas = () => {
 // --- Pestaña 3: Cierres (Con i18n) ---
 const TabCierres = () => {
   const { t } = useTranslation();
-  const { config } = useData();
+  const {
+    config
+  } = useAppConfig();
   const { data: closings, loading } = useSupabaseCollection('monthly_closings');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const componentRef = useRef();
@@ -586,7 +619,28 @@ const TabCierres = () => {
 // --- Pestaña 4: Clientes (Con i18n) ---
 const TabClientes = () => {
   const { t } = useTranslation();
-  const { movements, clients, collaborators, isLoading, config } = useData();
+
+  const {
+    movements,
+    loading: loadingMovements
+  } = useMovements();
+
+  const {
+    clients,
+    loading: loadingClients
+  } = useClients();
+
+  const {
+    collaborators,
+    loading: loadingCollaborators
+  } = useCollaborators();
+
+  const {
+    config,
+    loading: loadingAppConfig
+  } = useAppConfig();
+
+  const isLoading = loadingMovements || loadingClients || loadingCollaborators || loadingAppConfig;
   const [dateRange, setDateRange] = useState({ start: new Date(), end: new Date() });
   const [filterType, setFilterType] = useState('month');
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);

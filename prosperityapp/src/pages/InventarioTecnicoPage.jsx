@@ -1,7 +1,6 @@
 // ===== INICIO: src/pages/InventarioTecnicoPage.jsx =====
 import React, { useMemo, useEffect, useState } from 'react';
 import feather from 'feather-icons';
-import { useData } from '../context/DataContext';
 import TechProductModal from '../components/modals/TechProductModal';
 import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
@@ -12,6 +11,7 @@ import { StockEntryModal } from '../components/inventory/StockEntryModal';
 import { StockExitModal } from '../components/inventory/StockExitModal';
 import { QuickCreateProductModal } from '../components/inventory/QuickCreateProductModal';
 import { useBarcodeLookup } from '../hooks/useBarcodeLookup';
+import { useInventory } from '../context/collections/InventoryContext';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -24,7 +24,13 @@ const InventarioTecnicoPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [visibleCount, setVisibleCount] = useState(20);
-  const { technicalInventory: techInventory, isLoading: loading } = useData();
+
+  const {
+    technicalInventory: techInventory,
+    loading: loadingInventory
+  } = useInventory();
+
+  const loading = loadingInventory;
   const error = null;
 
   // ── Barcode scanner ─────────────────────────────────────────────────────

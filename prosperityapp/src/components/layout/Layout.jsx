@@ -4,9 +4,9 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import BottomNavigationBar from './BottomNavigationBar';
 import FloatingTimerWidget from '../timer/FloatingTimerWidget';
-import { useData } from '../../context/DataContext';
 import { Menu } from 'lucide-react';
 import '../../styles/mobile.css';
+import { useAppConfig } from '../../context/collections/ConfigContext';
 
 const GlobalLoader = () => (
   <div className="flex-1 flex flex-col items-center justify-center">
@@ -16,7 +16,12 @@ const GlobalLoader = () => (
 );
 
 const Layout = () => {
-  const { isLoading, brandName } = useData();
+  const {
+    brandName,
+    loading: loadingAppConfig
+  } = useAppConfig();
+
+  const isLoading = loadingAppConfig;
   const location = useLocation();
 
   // ── Scroll detection for topbar depth ───────────────────────────────────
@@ -86,11 +91,10 @@ const Layout = () => {
           aria-hidden="true"
         />
       )}
-
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
       {isMobile ? (
         /* Mobile: slide-in drawer */
-        <div
+        (<div
           id="sidebar"
           className={sidebarOpen ? 'sidebar-open' : ''}
         >
@@ -100,10 +104,10 @@ const Layout = () => {
             onClose={() => setSidebarOpen(false)}
             isMobile={true}
           />
-        </div>
+        </div>)
       ) : (
         /* Desktop: collapsible sidebar */
-        <div
+        (<div
           id="sidebar"
           style={{
             width: desktopSidebarWidth,
@@ -117,9 +121,8 @@ const Layout = () => {
             onToggleCollapse={toggleCollapsed}
             isMobile={false}
           />
-        </div>
+        </div>)
       )}
-
       {/* ── Main content ────────────────────────────────────────────────── */}
       <main className="flex flex-col flex-1 overflow-hidden min-w-0">
         {/* Mobile top bar with hamburger */}
@@ -161,10 +164,8 @@ const Layout = () => {
           )}
         </div>
       </main>
-
       {/* ── Bottom Navigation (mobile only) ─────────────────────────────── */}
       <BottomNavigationBar />
-
       {/* ── Timer Widget (floating) ──────────────────────────────────────── */}
       <FloatingTimerWidget />
     </div>

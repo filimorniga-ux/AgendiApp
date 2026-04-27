@@ -3,8 +3,13 @@ import { useNavigate } from 'react-router-dom';
 
 import { supabase } from '../../../../supabase/client';
 import { useLanguage } from '../../context/LanguageContext';
-import { useData } from '../../../../context/DataContext'; // Import useData
 import { Icons } from '../ui/Icons';
+
+import { useRole } from '../../../../context/collections/RoleContext';
+import { useBusiness } from '../../../../context/BusinessContext';
+import { useClients } from '../../../../context/collections/ClientsContext';
+import { useCollaborators } from '../../../../context/collections/CollaboratorsContext';
+import { useAppConfig } from '../../../../context/collections/ConfigContext';
 
 // --- CONFIGURACIÓN DE SUPER ADMIN ---
 // Solo este email podrá ver y usar el selector de roles
@@ -30,7 +35,29 @@ const RoleBadge = ({ role }) => {
 
 export const Dashboard = ({ user, isDarkMode }) => {
     const { t } = useLanguage();
-    const { userRole, updateRoleSimulation, realRole, businessId, clients, collaborators, config } = useData(); // Use global context
+
+    const {
+        userRole,
+        updateRoleSimulation,
+        realRole
+    } = useRole();
+
+    const {
+        businessId
+    } = useBusiness();
+
+    const {
+        clients
+    } = useClients();
+
+    const {
+        collaborators
+    } = useCollaborators();
+
+    const {
+        config
+    } = useAppConfig();
+
     const navigate = useNavigate();
 
     // Verificar si el usuario actual es el super admin

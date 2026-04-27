@@ -1,7 +1,6 @@
 // ===== INICIO: src/pages/GiftCardPage.jsx (Sprint 98 - Final Fix) =====
 import React, { useMemo, useState } from 'react';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { useData } from '../context/DataContext';
 import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import { useTranslation } from 'react-i18next';
 import { useStorage } from '../hooks/useStorage';
@@ -38,7 +37,7 @@ const GiftCardPage = () => {
 
 const GiftCardContent = () => {
   const { t } = useTranslation();
-  const { isLoading: isDataLoading } = useData();
+  const isDataLoading = false;
   const { data: giftCards, loading } = useSupabaseCollection('gift_cards');
   const { uploadFile, progress, isUploading } = useStorage();
   const [searchTerm, setSearchTerm] = useState('');

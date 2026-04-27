@@ -1,7 +1,6 @@
 // ===== INICIO: src/pages/NominasPage.jsx (Sprint - Plantillas de Nómina) =====
 import React, { useMemo, useEffect, useState, useRef } from 'react';
 import feather from 'feather-icons';
-import { useData } from '../context/DataContext';
 import DetailModal from '../components/modals/DetailModal';
 import ClosePeriodoModal from '../components/modals/ClosePeriodoModal';
 import Calendar from 'react-calendar';
@@ -20,6 +19,11 @@ import PayrollPrintTemplate from '../components/reports/PayrollPrintTemplate';
 import { useReactToPrint } from 'react-to-print';
 import { calculatePayroll, DEFAULT_TEMPLATE_STEPS } from '../lib/payrollEngine';
 import TemplatesTab from '../components/nominas/TemplatesTab';
+
+import { useMovements } from '../context/collections/MovementsContext';
+import { useCollaborators } from '../context/collections/CollaboratorsContext';
+import { useAppConfig } from '../context/collections/ConfigContext';
+import { useBusiness } from '../context/BusinessContext';
 
 const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
 
@@ -118,7 +122,27 @@ const CollaboratorCard = ({ card, onShowDetail, formatCurrency }) => {
 // ─── Página principal ─────────────────────────────────────────────────────────
 const NominasPage = () => {
   const { t } = useTranslation();
-  const { movements, collaborators, config, isLoading, businessId } = useData();
+
+  const {
+    movements,
+    loading: loadingMovements
+  } = useMovements();
+
+  const {
+    collaborators,
+    loading: loadingCollaborators
+  } = useCollaborators();
+
+  const {
+    config,
+    loading: loadingAppConfig
+  } = useAppConfig();
+
+  const {
+    businessId
+  } = useBusiness();
+
+  const isLoading = loadingMovements || loadingCollaborators || loadingAppConfig;
   const { formatCurrency } = useCurrencyFormat();
 
   const [tab,           setTab]           = useState('nomina'); // 'nomina' | 'plantillas'

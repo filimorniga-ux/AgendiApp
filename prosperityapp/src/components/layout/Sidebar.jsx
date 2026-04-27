@@ -4,9 +4,11 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import feather from 'feather-icons';
 import { ThemeContext } from '../../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { useData } from '../../context/DataContext';
 import { useBusiness } from '../../context/BusinessContext';
 import toast from 'react-hot-toast';
+
+import { useRole } from '../../context/collections/RoleContext';
+import { useAppConfig } from '../../context/collections/ConfigContext';
 
 // Helper para renderizar iconos de feather de forma segura
 const Icon = ({ name, size = 20, className = '' }) => {
@@ -39,7 +41,15 @@ const STAFF_MODULES = ['/app', '/app/nomina', '/app/precios'];
 const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClose }) => {
   const { toggleTheme, isDark } = useContext(ThemeContext);
   const { t, i18n } = useTranslation();
-  const { userRole, config } = useData();
+
+  const {
+    userRole
+  } = useRole();
+
+  const {
+    config
+  } = useAppConfig();
+
   const { realRole, signOutAll } = useBusiness();
   const navigate = useNavigate();
 
@@ -52,6 +62,7 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
   const allModules = [
     { to: '/app',               icon: 'calendar',    tKey: 'sidebar.agenda' },
     { to: '/app/dashboard',     icon: 'home',        tKey: 'sidebar.dashboard' },
+    { to: '/app/chat',          icon: 'message-square', tKey: 'Chat AI' },
     { to: '/app/caja',          icon: 'dollar-sign', tKey: 'sidebar.dailyCash' },
     { to: '/app/pedidos',       icon: 'truck',       tKey: 'orders.title' },
     { to: '/app/clientes',      icon: 'users',       tKey: 'sidebar.clients' },
@@ -168,11 +179,11 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
             />
           ) : (
             /* Fallback: isotipo AgendiApp moneda dorada */
-            <img
+            (<img
               src="/icons/icon-192x192.png"
               alt="AgendiApp"
               className="w-full h-full object-cover"
-            />
+            />)
           )}
         </div>
 
@@ -215,7 +226,6 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
           </button>
         )}
       </header>
-
       {/* ── Navegación ──────────────────────────────────────────────────────── */}
       <nav
         ref={navRef}
@@ -233,7 +243,6 @@ const Sidebar = ({ collapsed = false, onToggleCollapse, isMobile = false, onClos
           />
         ))}
       </nav>
-
       {/* ── Footer ──────────────────────────────────────────────────────────── */}
       <footer
         className={`flex-shrink-0 border-t border-border-main/60

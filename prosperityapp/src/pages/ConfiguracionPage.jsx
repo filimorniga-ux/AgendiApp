@@ -1,7 +1,6 @@
 // ===== INICIO: src/pages/ConfiguracionPage.jsx (Sprint 111 - Traducido) =====
 import React, { useState, useMemo, useEffect } from 'react';
 import feather from 'feather-icons';
-import { useData } from '../context/DataContext';
 import { useBusiness } from '../context/BusinessContext';
 import { sbUpdate } from '../supabase/db';
 import { supabase } from '../supabase/client';
@@ -12,9 +11,13 @@ import AppearanceTab from './Settings/AppearanceTab';
 import TicketEditorTab from './Settings/TicketEditorTab';
 import ClientAcquisitionTab from './Settings/ClientAcquisitionTab';
 import IntegrationsTab from './Settings/IntegrationsTab';
+import WhatsAppAgentTab from './Settings/WhatsAppAgentTab';
 import { useStorage } from '../hooks/useStorage';
 import { Country, State, City } from 'country-state-city';
 import { IMaskInput } from 'react-imask';
+
+import { useAppConfig } from '../context/collections/ConfigContext';
+import { useCollaborators } from '../context/collections/CollaboratorsContext';
 
 const getTaxIdMaskOptions = (countryCode) => {
   switch (countryCode) {
@@ -51,7 +54,23 @@ const getTaxIdMaskOptions = (countryCode) => {
 
 const ConfiguracionPage = () => {
   const { t } = useTranslation();
-  const { config, collaborators, isLoading, businessId, user } = useData();
+
+  const {
+    config,
+    loading: loadingAppConfig
+  } = useAppConfig();
+
+  const {
+    collaborators,
+    loading: loadingCollaborators
+  } = useCollaborators();
+
+  const {
+    businessId,
+    user
+  } = useBusiness();
+
+  const isLoading = loadingAppConfig || loadingCollaborators;
   const { uploadFile } = useStorage();
   const [whatsappPhone, setWhatsappPhone] = useState('');
   const [businessSlug, setBusinessSlug] = useState('');
@@ -379,6 +398,7 @@ const ConfiguracionPage = () => {
     { id: 'accounting', icon: 'dollar-sign', label: t('settings.tabs.accounting') },
     { id: 'security', icon: 'lock', label: t('settings.tabs.security') },
     { id: 'integrations', icon: 'link-2', label: 'Integraciones' },
+    { id: 'whatsapp-agent', icon: 'message-circle', label: 'Agente WhatsApp AI' },
   ];
 
   return (
@@ -840,6 +860,11 @@ const ConfiguracionPage = () => {
           {/* --- INTEGRACIONES --- */}
           <div className={`space-y-8 ${activeTab === 'integrations' ? '' : 'hidden'}`}>
             <IntegrationsTab />
+          </div>
+
+          {/* --- AGENTE WHATSAPP AI --- */}
+          <div className={`space-y-8 ${activeTab === 'whatsapp-agent' ? '' : 'hidden'}`}>
+            <WhatsAppAgentTab />
           </div>
 
         </div>

@@ -2,7 +2,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import feather from 'feather-icons';
 import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
-import { useData } from '../context/DataContext';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { parseDate } from '../lib/dateUtils';
@@ -17,7 +16,7 @@ const formatDate = (timestamp) => {
 
 const StockMovementsPage = () => {
   const { t } = useTranslation();
-  const { isLoading: isGlobalLoading } = useData();
+  const isGlobalLoading = false;
   // --- BUG CORREGIDO: Eliminamos 'orderBy' para evitar crash ---
   const { data: movements, loading } = useSupabaseCollection('stock_movements');
   const [searchTerm, setSearchTerm] = useState('');

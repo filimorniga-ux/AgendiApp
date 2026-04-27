@@ -6,15 +6,18 @@
  */
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSmartOrdering, PERIOD_OPTIONS, HORIZON_OPTIONS } from '../hooks/useSmartOrdering';
-import { useData } from '../context/DataContext';
 import { exportToExcel, exportToPDF } from '../lib/exportUtils';
 import { ShoppingCart, TrendingUp, AlertTriangle, FileSpreadsheet, FileText, Package, Filter, RefreshCw } from 'lucide-react';
+import { useInventory } from '../context/collections/InventoryContext';
 
 const formatCurrency = (v) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(v || 0);
 
 const PedidoInteligentePage = () => {
   const { suggestions, loading, error, calculate } = useSmartOrdering();
-  const { technicalInventory, retailInventory } = useData();
+  const {
+    technicalInventory,
+    retailInventory
+  } = useInventory();
 
   // Filtros
   const [period, setPeriod] = useState('month');

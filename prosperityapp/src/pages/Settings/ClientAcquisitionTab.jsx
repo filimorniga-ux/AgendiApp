@@ -1,11 +1,19 @@
 import React from 'react';
 import { QRCode } from 'react-qr-code';
 import { useTranslation } from 'react-i18next';
-import { useData } from '../../context/DataContext';
+import { useBusiness } from '../../context/BusinessContext';
+import { useAppConfig } from '../../context/collections/ConfigContext';
 
 const ClientAcquisitionTab = () => {
     const { t } = useTranslation();
-    const { businessId, config } = useData();
+
+    const {
+        businessId
+    } = useBusiness();
+
+    const {
+        config
+    } = useAppConfig();
 
     // Asumimos the momento que slug está en config, o armamos algo usando el id si no hay slug visible thentro the config.
     // El owner debería tener el "slug" the su comercio, pero si no lo tiene, enrutaremos por UUID o un slug que asignemos.
@@ -13,7 +21,7 @@ const ClientAcquisitionTab = () => {
     const settings = config?.[0] || {};
     const businessName = settings.brandName || settings.businessName || 'reserva';
     const slug = businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    
+
     // URL Pública Thel Comercio (Manejado luego por /reserva/:slug)
     const publicBookingUrl = `${window.location.origin}/reserva/${slug}?id=${businessId}`;
 

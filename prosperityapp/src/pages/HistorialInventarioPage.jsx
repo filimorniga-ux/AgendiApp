@@ -9,7 +9,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../supabase/client';
 import { useBusiness } from '../context/BusinessContext';
-import { useData } from '../context/DataContext';
 import {
   exportToExcel, exportToPDF,
   KARDEX_COLUMNS, LOTS_COLUMNS, CRITICAL_STOCK_COLUMNS, VALUATION_COLUMNS
@@ -19,6 +18,7 @@ import {
   Filter, ArrowDownCircle, ArrowUpCircle, Package, TrendingDown, TrendingUp
 } from 'lucide-react';
 import { parseDate } from '../lib/dateUtils';
+import { useInventory } from '../context/collections/InventoryContext';
 
 const formatCurrency = (v) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(v || 0);
 const formatDate = (d) => d ? parseDate(d).toLocaleDateString('es-CL') : '—';
@@ -48,7 +48,10 @@ const REPORT_TABS = [
 
 const HistorialInventarioPage = () => {
   const { businessId } = useBusiness();
-  const { technicalInventory, retailInventory } = useData();
+  const {
+    technicalInventory,
+    retailInventory
+  } = useInventory();
 
   const [activeTab, setActiveTab] = useState('movements');
   const [movements, setMovements] = useState([]);

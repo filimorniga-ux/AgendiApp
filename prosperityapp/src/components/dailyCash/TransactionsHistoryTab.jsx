@@ -3,16 +3,26 @@ import feather from 'feather-icons';
 import { useTranslation } from 'react-i18next';
 import { exportToExcel } from '../../lib/exportUtils';
 import { exportToPDF } from '../../lib/exportPDFUtils';
-import { useData } from '../../context/DataContext';
 import { parseDate } from '../../lib/dateUtils';
 
 import { safeNum } from '../../lib/mathUtils';
+
+import { useMovements } from '../../context/collections/MovementsContext';
+import { useCollaborators } from '../../context/collections/CollaboratorsContext';
 
 const formatCurrency = (val) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(safeNum(val));
 
 export default function TransactionsHistoryTab() {
   const { t } = useTranslation();
-  const { movements, collaborators } = useData();
+
+  const {
+    movements
+  } = useMovements();
+
+  const {
+    collaborators
+  } = useCollaborators();
+
   const [dateRange, setDateRange] = useState({ 
     start: new Date().toISOString().split('T')[0], 
     end: new Date().toISOString().split('T')[0] 

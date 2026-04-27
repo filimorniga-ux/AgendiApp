@@ -1,9 +1,8 @@
 // ===== INICIO: src/pages/VentaPublicoPage.jsx (CORREGIDO) =====
 import React, { useMemo, useEffect, useState } from 'react';
 import feather from 'feather-icons';
-import { useData } from '../context/DataContext';
+import { useInventory } from '../context/collections/InventoryContext';
 import RetailProductModal from '../components/modals/RetailProductModal';
-import { sbDelete } from '../supabase/db';
 import { sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
 import { useDebounce } from '../hooks/useDebounce';
@@ -19,7 +18,7 @@ const VentaPublicoPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortOrder, setSortOrder] = useState('name-asc');
-  const { retailInventory, isLoading: loading } = useData();
+  const { retailInventory, loading } = useInventory();
   const error = null; // Removed as context handles it globally
   
   const debouncedSearchTerm = useDebounce(searchTerm, 300);

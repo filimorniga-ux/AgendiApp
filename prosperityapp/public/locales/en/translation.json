@@ -656,5 +656,159 @@
       "registerPayment": "Register Payment",
       "history": "Payment History"
     }
+  },
+  "jobBoard": {
+    "tabLabel": "Job Board",
+    "title": "Job Board",
+    "subtitle": "Manage your business job listings",
+    "createCampaign": "Create Listing",
+    "editCampaign": "Edit Listing",
+    "noCampaigns": "No job listings published yet.",
+    "campaignTitle": "Position title",
+    "campaignDescription": "Job description",
+    "requirements": "Requirements",
+    "benefits": "Benefits",
+    "sector": "Sector",
+    "positionType": "Position type",
+    "salaryFixed": "Fixed salary",
+    "salaryApproximate": "Approximate salary",
+    "commissionPercentage": "Commission percentage",
+    "commissionDetails": "Commission details",
+    "contactWhatsapp": "Contact WhatsApp",
+    "contactEmail": "Contact email",
+    "expiresAt": "Expiration date",
+    "apply": "Apply",
+    "applyViaWhatsApp": "Apply via WhatsApp",
+    "viewDetails": "View details",
+    "views": "Views",
+    "applications": "Applications",
+    "status": {
+      "active": "Active",
+      "paused": "Paused",
+      "expired": "Expired"
+    },
+    "positionTypes": {
+      "full_time": "Full Time",
+      "part_time": "Part Time",
+      "freelance": "Freelance",
+      "temporary": "Temporary"
+    },
+    "sectors": {
+      "barbershop": "Barbershop",
+      "salon": "Beauty Salon",
+      "spa": "Spa",
+      "clinic": "Aesthetic Clinic",
+      "nails": "Nails",
+      "restaurant": "Restaurant",
+      "other": "Other"
+    },
+    "filters": {
+      "title": "Filters",
+      "country": "Country",
+      "state": "State/Region",
+      "city": "City",
+      "sector": "Sector",
+      "positionType": "Position type",
+      "search": "Search listings...",
+      "clearAll": "Clear filters",
+      "noResults": "No listings match these filters.",
+      "resultsCount": "{{count}} listings found"
+    },
+    "freemiumLimit": "Free plan: 1 active listing max. Upgrade your plan to post more.",
+    "saved": "Listing saved successfully",
+    "deleted": "Listing deleted",
+    "confirmDelete": "Delete this job listing?",
+    "noCampaignsDesc": "Publish your first job listing and connect with industry talent.",
+    "createFirst": "Publish first listing",
+    "campaignCreated": "Listing created successfully",
+    "campaignUpdated": "Listing updated successfully"
+  },
+  "businessProfile": {
+    "tabLabel": "Public Profile",
+    "title": "Public Profile",
+    "subtitle": "Manage how your business appears in the job board and public directory.",
+    "isPublic": "Show in public directory",
+    "isPublicHelp": "Enable this option so your business appears in the job board and directory.",
+    "description": "Business description",
+    "sector": "Primary sector",
+    "socialMedia": "Social Media",
+    "instagram": "Instagram",
+    "facebook": "Facebook",
+    "tiktok": "TikTok",
+    "websiteUrl": "Website",
+    "logoUrl": "Business logo",
+    "photos": "Business photos (max 5)",
+    "location": "Location",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "saved": "Public profile saved"
+  },
+  "phoneInput": {
+    "selectCountry": "Select a country first",
+    "invalidNumber": "Incomplete or invalid number",
+    "validNumber": "Valid number"
+  },
+  "chat": {
+    "title": "Team Chat",
+    "searchPlaceholder": "Search person or message...",
+    "newChannel": "New Channel",
+    "channelName": "Channel name",
+    "typeMessage": "Type a message...",
+    "noMessages": "No messages yet. Start the conversation!",
+    "unread": "Unread",
+    "contacts": "Contacts",
+    "ptt": "Hold to talk",
+    "attachFile": "Attach file",
+    "takePhoto": "Take photo",
+    "sendAudio": "Send audio",
+    "messageTypes": {
+      "text": "Text",
+      "image": "Image",
+      "video": "Video",
+      "audio": "Audio",
+      "file": "File"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "noNotifications": "You have no new notifications",
+    "markAllRead": "Mark all as read",
+    "types": {
+      "chat_message": "New message",
+      "appointment": "Appointment",
+      "job_apply": "Job application",
+      "system": "System",
+      "platinum_handoff": "Human handoff"
+    }
+  },
+  "platinum": {
+    "title": "AI WhatsApp Agent",
+    "subtitle": "Configure your virtual assistant to serve clients via WhatsApp 24/7.",
+    "agentName": "Agent name",
+    "welcomeMessage": "Welcome message",
+    "offHoursMessage": "Off-hours message",
+    "capabilities": "Capabilities",
+    "schedule": "Service hours",
+    "connectWhatsApp": "Connect WhatsApp Business",
+    "status": {
+      "active": "Agent active",
+      "inactive": "Agent inactive"
+    },
+    "capabilityLabels": {
+      "agenda": "Schedule appointments",
+      "prices": "Check prices",
+      "cancel": "Cancellations",
+      "reschedule": "Rescheduling",
+      "policies": "Business policies",
+      "reminders": "Reminders",
+      "handoff": "Transfer to human"
+    },
+    "language": "Agent language",
+    "languages": {
+      "es": "Español",
+      "en": "English",
+      "pt": "Português",
+      "auto": "Auto-detect"
+    }
   }
 }

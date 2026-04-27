@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useData } from '../context/DataContext';
 import * as XLSX from 'xlsx';
 import feather from 'feather-icons';
 import ReportFilters from '../components/reports/ReportFilters';
@@ -8,6 +7,13 @@ import { useMonthlyRecords } from '../hooks/useMonthlyRecords';
 
 import AdvancedExportModal from '../components/reports/AdvancedExportModal';
 import { parseDate } from '../lib/dateUtils';
+
+import { useClients } from '../context/collections/ClientsContext';
+import { useInventory } from '../context/collections/InventoryContext';
+import { useCollaborators } from '../context/collections/CollaboratorsContext';
+import { useMovements } from '../context/collections/MovementsContext';
+import { useServices } from '../context/collections/ServicesContext';
+import { useAppConfig } from '../context/collections/ConfigContext';
 
 // Helper para iconos
 const Icon = ({ name, className }) => {
@@ -23,16 +29,31 @@ const Icon = ({ name, className }) => {
 
 const ReportsPage = () => {
   const { t } = useTranslation();
+
   const {
-    clients,
-    inventory, // Assuming this is combined or we need to handle tech/retail
+    clients
+  } = useClients();
+
+  const {
     technicalInventory,
-    retailInventory,
-    collaborators,
-    movements,
-    services,
+    retailInventory
+  } = useInventory();
+
+  const {
+    collaborators
+  } = useCollaborators();
+
+  const {
+    movements
+  } = useMovements();
+
+  const {
+    services
+  } = useServices();
+
+  const {
     config
-  } = useData();
+  } = useAppConfig();
 
   // State
   const [activeTab, setActiveTab] = useState('financial');

@@ -1,9 +1,11 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { useData } from '../../context/DataContext';
 import { sbUpdate } from '../../supabase/db';
 import toast from 'react-hot-toast';
 import { useReactToPrint } from 'react-to-print';
 import feather from 'feather-icons';
+
+import { useAppConfig } from '../../context/collections/ConfigContext';
+import { useBusiness } from '../../context/BusinessContext';
 
 // ── defaults ──────────────────────────────────────────────────────────────────
 export const DEFAULT_TICKET_CONFIG = {
@@ -148,7 +150,14 @@ const TicketPreview = ({ cfg, settings }) => {
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 const TicketEditorTab = () => {
-  const { config, businessId } = useData();
+  const {
+    config
+  } = useAppConfig();
+
+  const {
+    businessId
+  } = useBusiness();
+
   const previewRef = useRef();
 
   const settings = useMemo(

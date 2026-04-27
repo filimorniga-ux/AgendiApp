@@ -6,7 +6,6 @@ import CashSessionsHistoryTab from '../components/dailyCash/CashSessionsHistoryT
 import TransactionsHistoryTab from '../components/dailyCash/TransactionsHistoryTab';
 import TechnicalConsumptionTab from '../components/dailyCash/TechnicalConsumptionTab';
 import CashSessionModal from '../components/modals/CashSessionModal';
-import { useData } from '../context/DataContext';
 
 export default function CajaDiariaPage() {
   const { t } = useTranslation();

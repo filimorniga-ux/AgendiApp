@@ -137,10 +137,15 @@ export default defineConfig({
             if (id.includes('@fontsource')) {
               return 'vendor-fonts';
             }
+            // ── Geographic Data ───────────────────────────────────────────
+            if (id.includes('country-state-city')) {
+              return 'vendor-geodata';
+            }
           }
         },
       },
     },
+    chunkSizeWarningLimit: 9000,
   },
 
   test: {

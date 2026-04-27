@@ -1,11 +1,13 @@
 // ===== INICIO: src/pages/ClientDetailPage.jsx (Refactorizado con CRM extendido) =====
 import React, { useMemo, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useData } from '../context/DataContext';
 import feather from 'feather-icons';
 import { parseDate } from '../lib/dateUtils';
 import { sbUpdate } from '../supabase/db';
 import toast from 'react-hot-toast';
+
+import { useClients } from '../context/collections/ClientsContext';
+import { useMovements } from '../context/collections/MovementsContext';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -14,10 +16,18 @@ const formatCurrency = (value) => {
 
 const ClientDetailPage = () => {
   const { id: clientId } = useParams();
-  
-  const { clients, movements, isLoading, refreshData } = useData();
-  const loadingClients = isLoading;
-  const loadingMovements = isLoading;
+
+  const {
+    clients,
+    loading: loadingClients
+  } = useClients();
+
+  const {
+    movements,
+    loading: loadingMovements
+  } = useMovements();
+
+  const isLoading = loadingClients || loadingMovements;
 
   const [notes, setNotes] = useState('');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
@@ -53,7 +63,7 @@ const ClientDetailPage = () => {
   if (isLoadingPage) {
     return null; // Layout.jsx muestra loader
   }
-  
+
   if (!client) {
     return <h1 className="text-2xl font-bold text-red-500 p-8">Error: Cliente no encontrado.</h1>;
   }

@@ -835,8 +835,160 @@
     "PagoGiftCard": "Pago con Gift Card",
     "VentaGiftCard": "Venta Gift Card",
     "ComisionVenta": "Comisión Venta",
-    "ComisionPropina": "Propina",
-    "Adelanto": "Adelanto",
-    "CierreCaja": "Cierre de Caja"
+    "ComisionPropina": "Propina"
+  },
+  "jobBoard": {
+    "tabLabel": "Bolsa de Empleo",
+    "title": "Bolsa de Empleo",
+    "subtitle": "Gestiona las ofertas de empleo de tu negocio",
+    "createCampaign": "Crear Oferta",
+    "editCampaign": "Editar Oferta",
+    "noCampaigns": "No hay ofertas publicadas aún.",
+    "campaignTitle": "Título del puesto",
+    "campaignDescription": "Descripción del empleo",
+    "requirements": "Requisitos",
+    "benefits": "Beneficios",
+    "sector": "Sector",
+    "positionType": "Tipo de puesto",
+    "salaryFixed": "Salario fijo",
+    "salaryApproximate": "Salario aproximado",
+    "commissionPercentage": "Porcentaje de comisión",
+    "commissionDetails": "Detalle de comisiones",
+    "contactWhatsapp": "WhatsApp de contacto",
+    "contactEmail": "Email de contacto",
+    "expiresAt": "Fecha de expiración",
+    "apply": "Aplicar",
+    "applyViaWhatsApp": "Aplicar vía WhatsApp",
+    "viewDetails": "Ver detalles",
+    "views": "Vistas",
+    "applications": "Aplicaciones",
+    "status": {
+      "active": "Activa",
+      "paused": "Pausada",
+      "expired": "Expirada"
+    },
+    "positionTypes": {
+      "full_time": "Tiempo Completo",
+      "part_time": "Medio Tiempo",
+      "freelance": "Freelance",
+      "temporary": "Temporal"
+    },
+    "sectors": {
+      "barbershop": "Barbería",
+      "salon": "Salón de Belleza",
+      "spa": "Spa",
+      "clinic": "Clínica Estética",
+      "nails": "Uñas",
+      "restaurant": "Restaurante",
+      "other": "Otro"
+    },
+    "filters": {
+      "title": "Filtros",
+      "country": "País",
+      "state": "Estado/Departamento",
+      "city": "Ciudad",
+      "sector": "Sector",
+      "positionType": "Tipo de puesto",
+      "search": "Buscar ofertas...",
+      "clearAll": "Limpiar filtros",
+      "noResults": "No se encontraron ofertas con estos filtros.",
+      "resultsCount": "{{count}} ofertas encontradas"
+    },
+    "freemiumLimit": "Plan gratuito: máximo 1 oferta activa. Actualiza tu plan para publicar más.",
+    "saved": "Oferta guardada con éxito",
+    "deleted": "Oferta eliminada",
+    "confirmDelete": "¿Eliminar esta oferta de empleo?",
+    "noCampaignsDesc": "Publica tu primera oferta de empleo y conecta con talento del sector.",
+    "createFirst": "Publicar primera oferta",
+    "campaignCreated": "Oferta creada con éxito",
+    "campaignUpdated": "Oferta actualizada con éxito"
+  },
+  "businessProfile": {
+    "tabLabel": "Perfil Público",
+    "title": "Perfil Público",
+    "subtitle": "Gestiona cómo se ve tu negocio en la bolsa de empleo y en el directorio público.",
+    "isPublic": "Mostrar en directorio público",
+    "isPublicHelp": "Activa esta opción para que tu negocio aparezca en la bolsa de empleo y el directorio.",
+    "description": "Descripción del negocio",
+    "sector": "Sector principal",
+    "socialMedia": "Redes Sociales",
+    "instagram": "Instagram",
+    "facebook": "Facebook",
+    "tiktok": "TikTok",
+    "websiteUrl": "Sitio web",
+    "logoUrl": "Logo del negocio",
+    "photos": "Fotos del negocio (máx. 5)",
+    "location": "Ubicación",
+    "latitude": "Latitud",
+    "longitude": "Longitud",
+    "saved": "Perfil público guardado"
+  },
+  "phoneInput": {
+    "selectCountry": "Selecciona un país primero",
+    "invalidNumber": "Número incompleto o inválido",
+    "validNumber": "Número válido"
+  },
+  "chat": {
+    "title": "Chat de Equipo",
+    "searchPlaceholder": "Buscar persona o mensaje...",
+    "newChannel": "Nuevo Canal",
+    "channelName": "Nombre del canal",
+    "typeMessage": "Escribe un mensaje...",
+    "noMessages": "No hay mensajes aún. ¡Inicia la conversación!",
+    "unread": "No leídos",
+    "contacts": "Contactos",
+    "ptt": "Mantén presionado para hablar",
+    "attachFile": "Adjuntar archivo",
+    "takePhoto": "Tomar foto",
+    "sendAudio": "Enviar audio",
+    "messageTypes": {
+      "text": "Texto",
+      "image": "Imagen",
+      "video": "Video",
+      "audio": "Audio",
+      "file": "Archivo"
+    }
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "noNotifications": "No tienes notificaciones nuevas",
+    "markAllRead": "Marcar todas como leídas",
+    "types": {
+      "chat_message": "Nuevo mensaje",
+      "appointment": "Cita",
+      "job_apply": "Aplicación de empleo",
+      "system": "Sistema",
+      "platinum_handoff": "Transferencia a humano"
+    }
+  },
+  "platinum": {
+    "title": "Agente IA WhatsApp",
+    "subtitle": "Configura tu asistente virtual para atender clientes por WhatsApp 24/7.",
+    "agentName": "Nombre del agente",
+    "welcomeMessage": "Mensaje de bienvenida",
+    "offHoursMessage": "Mensaje fuera de horario",
+    "capabilities": "Capacidades",
+    "schedule": "Horario de atención",
+    "connectWhatsApp": "Conectar WhatsApp Business",
+    "status": {
+      "active": "Agente activo",
+      "inactive": "Agente inactivo"
+    },
+    "capabilityLabels": {
+      "agenda": "Agendar citas",
+      "prices": "Consultar precios",
+      "cancel": "Cancelaciones",
+      "reschedule": "Reagendamientos",
+      "policies": "Políticas del negocio",
+      "reminders": "Recordatorios",
+      "handoff": "Transferir a humano"
+    },
+    "language": "Idioma del agente",
+    "languages": {
+      "es": "Español",
+      "en": "English",
+      "pt": "Português",
+      "auto": "Auto-detectar"
+    }
   }
 }

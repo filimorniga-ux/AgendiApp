@@ -1,8 +1,8 @@
 // ===== INICIO: src/pages/InventarioGeneralPage.jsx =====
 import React, { useState, useMemo, useEffect } from 'react';
 import feather from 'feather-icons';
-import { useData } from '../context/DataContext';
 import EmptyState from '../components/ui/EmptyState';
+import { useInventory } from '../context/collections/InventoryContext';
 
 const formatCurrency = (value) => {
   if (typeof value !== 'number') value = 0;
@@ -12,8 +12,14 @@ const formatCurrency = (value) => {
 const InventarioGeneralPage = () => {
   const [activeTab, setActiveTab] = useState('technical');
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const { technicalInventory: techInventory, retailInventory, isLoading } = useData();
+
+  const {
+    technicalInventory: techInventory,
+    retailInventory,
+    loading: loadingInventory
+  } = useInventory();
+
+  const isLoading = loadingInventory;
 
   useEffect(() => {
     feather.replace();

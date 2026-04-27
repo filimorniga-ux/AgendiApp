@@ -1,14 +1,32 @@
 import React, { useState, useMemo } from 'react';
-import { useData } from '../../../context/DataContext';
 import SearchableDropdown from '../../../components/ui/SearchableDropdown';
 import { useTranslation } from 'react-i18next';
 import feather from 'feather-icons';
 import { supabase } from '../../../supabase/client';
 import toast from 'react-hot-toast';
 
+import { useServices } from '../../../context/collections/ServicesContext';
+import { useCollaborators } from '../../../context/collections/CollaboratorsContext';
+import { useBusiness } from '../../../context/BusinessContext';
+
 const BookingWidget = () => {
     const { t } = useTranslation();
-    const { services, collaborators, isLoading, businessId } = useData();
+
+    const {
+        services,
+        loading: loadingServices
+    } = useServices();
+
+    const {
+        collaborators,
+        loading: loadingCollaborators
+    } = useCollaborators();
+
+    const {
+        businessId
+    } = useBusiness();
+
+    const isLoading = loadingServices || loadingCollaborators;
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [bookingData, setBookingData] = useState({

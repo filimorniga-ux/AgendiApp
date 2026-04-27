@@ -2,15 +2,40 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as XLSX from 'xlsx';
 import feather from 'feather-icons';
-import { useData } from '../../context/DataContext';
 import { useSupabaseCollection } from '../../hooks/useSupabaseCollection';
 import { supabase } from '../../supabase/client';
 import toast from 'react-hot-toast';
 import { parseDate } from '../../lib/dateUtils';
 
+import { useClients } from '../../context/collections/ClientsContext';
+import { useCollaborators } from '../../context/collections/CollaboratorsContext';
+import { useInventory } from '../../context/collections/InventoryContext';
+import { useAppConfig } from '../../context/collections/ConfigContext';
+import { useBusiness } from '../../context/BusinessContext';
+
 const AdvancedExportModal = ({ onClose }) => {
     const { t } = useTranslation();
-    const { clients, collaborators, technicalInventory, retailInventory, config, businessId } = useData();
+
+    const {
+        clients
+    } = useClients();
+
+    const {
+        collaborators
+    } = useCollaborators();
+
+    const {
+        technicalInventory,
+        retailInventory
+    } = useInventory();
+
+    const {
+        config
+    } = useAppConfig();
+
+    const {
+        businessId
+    } = useBusiness();
 
     // State for Period Selection
     const [periodType, setPeriodType] = useState('day'); // day, month, year, custom, payroll, closing

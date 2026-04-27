@@ -1,7 +1,6 @@
 // ===== INICIO: src/pages/PedidosPage.jsx =====
 import React, { useState, useEffect, useMemo } from 'react';
 import feather from 'feather-icons';
-import { useData } from '../context/DataContext';
 import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import { sbCreate, sbUpdate, sbDelete } from '../supabase/db';
 import toast from 'react-hot-toast';
@@ -9,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import SearchableDropdown from '../components/ui/SearchableDropdown';
 import { useStorage } from '../hooks/useStorage';
 import { parseDate } from '../lib/dateUtils';
+import { useBusiness } from '../context/BusinessContext';
 
 const formatCurrency = (value) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
 
@@ -16,7 +16,9 @@ const PedidosPage = () => {
     const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState('suppliers');
     const { uploadFile, progress, isUploading } = useStorage();
-    const { businessId } = useData();
+    const {
+        businessId
+    } = useBusiness();
 
     const { data: suppliersData, loading: loadSup } = useSupabaseCollection('suppliers');
     const { data: invoicesData, loading: loadInv } = useSupabaseCollection('invoices');

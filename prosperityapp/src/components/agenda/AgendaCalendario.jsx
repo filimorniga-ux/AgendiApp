@@ -1,7 +1,6 @@
 // ===== INICIO: src/components/agenda/AgendaCalendario.jsx (Sprint 107 - Kanban Real) =====
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import feather from 'feather-icons';
-import { useData } from '../../context/DataContext';
 import { sbCreate, sbUpdate, sbDelete } from '../../supabase/db';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +10,12 @@ import 'react-calendar/dist/Calendar.css';
 import TimeClockModal from '../modals/TimeClockModal';
 import TechCalculatorModal from '../modals/TechCalculatorModal';
 import { parseDate } from '../../lib/dateUtils';
+
+import { useAppointments } from '../../context/collections/AppointmentsContext';
+import { useClients } from '../../context/collections/ClientsContext';
+import { useCollaborators } from '../../context/collections/CollaboratorsContext';
+import { useServices } from '../../context/collections/ServicesContext';
+import { useBusiness } from '../../context/BusinessContext';
 
 // Helper para formatear hora
 const formatTime = (dateObj) => {
@@ -107,7 +112,32 @@ const StylistColumn = ({ stylist, appointments, onAdd, onEdit }) => {
 
 const AgendaCalendario = () => {
   const { t, i18n } = useTranslation();
-  const { appointments, clients, collaborators, services, isLoading, businessId } = useData();
+
+  const {
+    appointments,
+    loading: loadingAppointments
+  } = useAppointments();
+
+  const {
+    clients,
+    loading: loadingClients
+  } = useClients();
+
+  const {
+    collaborators,
+    loading: loadingCollaborators
+  } = useCollaborators();
+
+  const {
+    services,
+    loading: loadingServices
+  } = useServices();
+
+  const {
+    businessId
+  } = useBusiness();
+
+  const isLoading = loadingAppointments || loadingClients || loadingCollaborators || loadingServices;
 
   const [date, setDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);

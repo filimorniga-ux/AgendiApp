@@ -2,13 +2,15 @@
 import React, { useState, useEffect } from 'react';
 import feather from 'feather-icons';
 import { sbCreate, sbUpdate } from '../../supabase/db';
-import { useData } from '../../context/DataContext';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { useBusiness } from '../../context/BusinessContext';
 
 const ClientModal = ({ isOpen, onClose, clientToEdit }) => {
   const { t } = useTranslation();
-  const { businessId } = useData();
+  const {
+    businessId
+  } = useBusiness();
   const [formData, setFormData] = useState({});
   const [activeTab, setActiveTab] = useState('personal');
   const [isSaving, setIsSaving] = useState(false);

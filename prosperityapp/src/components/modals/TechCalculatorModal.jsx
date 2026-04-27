@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import feather from 'feather-icons';
-import { useData } from '../../context/DataContext';
 import SearchableDropdown from '../ui/SearchableDropdown';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import CurrencyInput from '../ui/CurrencyInput';
 import { useCurrencyFormat } from '../../hooks/useCurrencyFormat';
+import { useInventory } from '../../context/collections/InventoryContext';
 
 const calculateCostPerUnit = (item) => {
   if (item.sellMode === 'whole') return item.collabCost || 0;
@@ -16,7 +16,13 @@ const calculateCostPerUnit = (item) => {
 
 const TechCalculatorModal = ({ isOpen, onClose, onSubmit, serviceName, initialProducts = [] }) => {
   const { t } = useTranslation();
-  const { technicalInventory, isLoading } = useData();
+
+  const {
+    technicalInventory,
+    loading: loadingInventory
+  } = useInventory();
+
+  const isLoading = loadingInventory;
   const { formatCurrency } = useCurrencyFormat();
 
   const [selectedProduct, setSelectedProduct] = useState(null);

@@ -1,7 +1,6 @@
 // ===== INICIO: src/components/modals/MovementModal.jsx (Sprint 87 - Lógica Restaurada) =====
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import feather from 'feather-icons';
-import { useData } from '../../context/DataContext';
 import { supabase } from '../../supabase/client';
 import { sbCreate, sbDelete } from '../../supabase/db';
 import { batchEnqueueWrite, optimisticWrite } from '../../lib/offlineQueue';
@@ -19,6 +18,14 @@ import { BarcodeScannerButton } from '../barcode/BarcodeScannerButton';
 import { useBarcodeLookup } from '../../hooks/useBarcodeLookup';
 import { safeNum, safeSum } from '../../lib/mathUtils';
 
+import { useClients } from '../../context/collections/ClientsContext';
+import { useCollaborators } from '../../context/collections/CollaboratorsContext';
+import { useServices } from '../../context/collections/ServicesContext';
+import { useInventory } from '../../context/collections/InventoryContext';
+import { useAppConfig } from '../../context/collections/ConfigContext';
+import { useMovements } from '../../context/collections/MovementsContext';
+import { useBusiness } from '../../context/BusinessContext';
+
 const formatCurrency = (value) => {
   if (typeof value !== 'number') {
     return value;
@@ -33,7 +40,35 @@ const formatCurrency = (value) => {
 
 const MovementModal = ({ isOpen, onClose, movementToEdit, preselectedCollab }) => {
   const { t } = useTranslation();
-  const { clients, collaborators, services, retailInventory, config, movements, businessId } = useData();
+
+  const {
+    clients
+  } = useClients();
+
+  const {
+    collaborators
+  } = useCollaborators();
+
+  const {
+    services
+  } = useServices();
+
+  const {
+    retailInventory
+  } = useInventory();
+
+  const {
+    config
+  } = useAppConfig();
+
+  const {
+    movements
+  } = useMovements();
+
+  const {
+    businessId
+  } = useBusiness();
+
   const { uploadFile, progress, isUploading } = useStorage();
   const [cart, setCart] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);

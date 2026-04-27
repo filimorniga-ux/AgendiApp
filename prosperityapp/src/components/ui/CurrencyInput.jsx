@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCurrencyFormat } from '../../hooks/useCurrencyFormat';
-import { useData } from '../../context/DataContext';
 import { GLOBAL_CURRENCY_DATA } from '../../lib/currencyData';
+import { useAppConfig } from '../../context/collections/ConfigContext';
 
 const CurrencyInput = ({
     value,
@@ -15,7 +15,9 @@ const CurrencyInput = ({
     min = 0
 }) => {
     const { formatCurrency } = useCurrencyFormat();
-    const { currentLocale } = useData();
+    const {
+        currentLocale
+    } = useAppConfig();
     const [displayValue, setDisplayValue] = useState('');
     const inputRef = useRef(null);
 

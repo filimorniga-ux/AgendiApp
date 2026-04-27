@@ -1,7 +1,6 @@
 // ===== INICIO: src/pages/PayrollDetailPage.jsx (Sprint 92) =====
 import React, { useState, useEffect } from 'react';
 import feather from 'feather-icons';
-import { useData } from '../context/DataContext';
 import { useSupabaseCollection } from '../hooks/useSupabaseCollection';
 import { useParams, Link } from 'react-router-dom';
 import DetailModal from '../components/modals/DetailModal';
@@ -31,7 +30,7 @@ const PayrollDetailPage = () => {
   const { id: closingId } = useParams();
   const { data: closingsData, loading } = useSupabaseCollection('payroll_closings', [{ field: 'id', op: 'eq', value: closingId }]);
   const closing = closingsData?.[0] || null;
-  const { isLoading: isDataLoading } = useData();
+  const isDataLoading = false;
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState({ title: '', items: [] });

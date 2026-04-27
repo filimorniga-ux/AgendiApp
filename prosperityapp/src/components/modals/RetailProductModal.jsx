@@ -1,14 +1,16 @@
 // ===== INICIO: src/components/modals/RetailProductModal.jsx (Sprint 95) =====
 import React, { useState, useEffect } from 'react';
 import { sbCreate, sbUpdate } from '../../supabase/db';
-import { useData } from '../../context/DataContext';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import CurrencyInput from '../ui/CurrencyInput';
+import { useBusiness } from '../../context/BusinessContext';
 
 const RetailProductModal = ({ isOpen, onClose, productToEdit }) => {
   const { t } = useTranslation();
-  const { businessId } = useData();
+  const {
+    businessId
+  } = useBusiness();
   const [formData, setFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const isEditMode = !!productToEdit;

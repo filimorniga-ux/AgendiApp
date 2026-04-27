@@ -1,17 +1,33 @@
 // ===== INICIO: src/components/agenda/ModalNuevaCita.jsx (Refactorizado) =====
 import React, { useState, useEffect } from 'react';
-import { useData } from '../../context/DataContext'; // <-- 1. USAR DATACONTEXT
 import { sbCreate } from '../../supabase/db';
 import SearchableDropdown from '../ui/SearchableDropdown';
 import toast from 'react-hot-toast';
+
+import { useClients } from '../../context/collections/ClientsContext';
+import { useServices } from '../../context/collections/ServicesContext';
+import { useBusiness } from '../../context/BusinessContext';
 
 const ModalNuevaCita = ({ isOpen, onClose, slotInfo }) => {
   const [selectedClient, setSelectedClient] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // --- 2. Consumir datos desde el "cerebro" ---
-  const { clients, services, isLoading, businessId } = useData();
+  const {
+    clients,
+    loading: loadingClients
+  } = useClients();
+
+  const {
+    services,
+    loading: loadingServices
+  } = useServices();
+
+  const {
+    businessId
+  } = useBusiness();
+
+  const isLoading = loadingClients || loadingServices;
   const loadingClients = isLoading; // Simplificado
   const loadingServices = isLoading; // Simplificado
   // --- Fin de cambios ---

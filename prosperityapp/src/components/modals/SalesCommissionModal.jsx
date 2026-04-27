@@ -1,13 +1,15 @@
 // ===== INICIO: src/components/modals/SalesCommissionModal.jsx (Tema Corregido) =====
 import React, { useState, useEffect, useMemo } from 'react';
-import { useData } from '../../context/DataContext';
 import { useTranslation } from 'react-i18next'; // <-- Importar hook
+import { useCollaborators } from '../../context/collections/CollaboratorsContext';
 
 const formatCurrency = (value) => { /* ... */ };
 
 const SalesCommissionModal = ({ isOpen, onClose, item, onSave }) => {
   const { t } = useTranslation(); // <-- Hook
-  const { collaborators } = useData();
+  const {
+    collaborators
+  } = useCollaborators();
   const [commissionType, setCommissionType] = useState('auto');
   const [manualAmount, setManualAmount] = useState(0);
 

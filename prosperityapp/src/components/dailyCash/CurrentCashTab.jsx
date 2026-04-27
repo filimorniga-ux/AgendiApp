@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import feather from 'feather-icons';
 import { useTranslation } from 'react-i18next';
 import { useReactToPrint } from 'react-to-print';
-import { useData } from '../../context/DataContext';
 import MovementModal from '../modals/MovementModal';
 import PinModal from '../modals/PinModal';
 import DailyReportTemplate from '../reports/DailyReportTemplate';
@@ -14,6 +13,10 @@ import { BarcodeScannerButton } from '../barcode/BarcodeScannerButton';
 import { QuickCreateProductModal } from '../inventory/QuickCreateProductModal';
 import { useBarcodeLookup } from '../../hooks/useBarcodeLookup';
 import { safeNum, safeSum } from '../../lib/mathUtils';
+
+import { useMovements } from '../../context/collections/MovementsContext';
+import { useCollaborators } from '../../context/collections/CollaboratorsContext';
+import { useAppConfig } from '../../context/collections/ConfigContext';
 
 const formatCurrency = (value) => {
   const safeValue = safeNum(value);
@@ -75,7 +78,23 @@ export default function CurrentCashTab({ onArqueoClick }) {
   const [preselectedCollab, setPreselectedCollab] = useState(null);
   const [sortBy, setSortBy] = useState('custom');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const { movements, collaborators, isLoading, config } = useData();
+
+  const {
+    movements,
+    loading: loadingMovements
+  } = useMovements();
+
+  const {
+    collaborators,
+    loading: loadingCollaborators
+  } = useCollaborators();
+
+  const {
+    config,
+    loading: loadingAppConfig
+  } = useAppConfig();
+
+  const isLoading = loadingMovements || loadingCollaborators || loadingAppConfig;
   const componentRef = useRef();
 
   const [scannerActive, setScannerActive] = useState(false);

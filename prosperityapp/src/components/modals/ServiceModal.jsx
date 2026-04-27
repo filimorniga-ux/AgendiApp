@@ -1,14 +1,16 @@
 // ===== src/components/modals/ServiceModal.jsx — Migrado a Supabase =====
 import React, { useState, useEffect } from 'react';
 import { sbCreate, sbUpdate } from '../../supabase/db';
-import { useData } from '../../context/DataContext';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import CurrencyInput from '../ui/CurrencyInput';
+import { useBusiness } from '../../context/BusinessContext';
 
 const ServiceModal = ({ isOpen, onClose, serviceToEdit }) => {
   const { t } = useTranslation();
-  const { businessId } = useData();
+  const {
+    businessId
+  } = useBusiness();
   const [formData, setFormData] = useState({ name: '', category: '', price: '', duration: '' });
   const [isSaving, setIsSaving] = useState(false);
   const isEditMode = !!serviceToEdit;

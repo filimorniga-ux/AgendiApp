@@ -1,7 +1,6 @@
 // ===== INICIO: src/pages/ColaboradoresPage.jsx (Sprint 91) =====
 import React, { useEffect, useState, useMemo } from 'react';
 import feather from 'feather-icons';
-import { useData } from '../context/DataContext';
 import { sbDelete, sbUpdate } from '../supabase/db';
 import {
   DndContext,
@@ -22,6 +21,7 @@ import { CSS } from '@dnd-kit/utilities';
 import CollaboratorModal from '../components/modals/CollaboratorModal';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '../hooks/useDebounce';
+import { useCollaborators } from '../context/collections/CollaboratorsContext';
 
 // Componente Sortable para cada fila
 const SortableCollaboratorRow = ({ collaborator, sortBy, t, onEdit, onDelete }) => {
@@ -92,7 +92,13 @@ const ColaboradoresPage = () => {
   const [collaboratorToEdit, setCollaboratorToEdit] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('custom'); // 'custom' | 'alphabetical'
-  const { collaborators, isLoading } = useData();
+
+  const {
+    collaborators,
+    loading: loadingCollaborators
+  } = useCollaborators();
+
+  const isLoading = loadingCollaborators;
   const loading = isLoading;
   const error = null;
 

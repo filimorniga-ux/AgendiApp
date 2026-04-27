@@ -5,6 +5,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/empleo/(?<id>[a-zA-Z0-9-]+)",
+      "destination": "/api/job?id=$id"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

@@ -5,15 +5,25 @@ import { exportToExcel } from '../../lib/exportUtils';
 import { exportToPDF } from '../../lib/exportPDFUtils';
 import { useSupabaseCollection } from '../../hooks/useSupabaseCollection';
 import { parseDate } from '../../lib/dateUtils';
-import { useData } from '../../context/DataContext';
 
 import { safeNum } from '../../lib/mathUtils';
+
+import { useInventory } from '../../context/collections/InventoryContext';
+import { useCollaborators } from '../../context/collections/CollaboratorsContext';
 
 const formatCurrency = (val) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(safeNum(val));
 
 export default function TechnicalConsumptionTab() {
   const { t } = useTranslation();
-  const { technicalInventory, collaborators } = useData();
+
+  const {
+    technicalInventory
+  } = useInventory();
+
+  const {
+    collaborators
+  } = useCollaborators();
+
   const [dateRange, setDateRange] = useState({ 
     start: new Date().toISOString().split('T')[0], 
     end: new Date().toISOString().split('T')[0] 
@@ -26,7 +36,7 @@ export default function TechnicalConsumptionTab() {
     // Salidas ('out') representan consumos. Pero también podríamos incluir 'in' si quieren ver "Mermas" (que también son out). 
     { field: 'type', op: 'eq', value: 'out' }
   ], []);
-  
+
   const { data: stockMovements, loading } = useSupabaseCollection('stockMovements', filters);
 
   const filteredMovements = useMemo(() => {

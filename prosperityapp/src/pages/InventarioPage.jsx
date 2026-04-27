@@ -1,7 +1,6 @@
 // ===== INICIO: src/pages/InventarioPage.jsx =====
 import React, { useState, useMemo, useEffect } from 'react';
 import feather from 'feather-icons';
-import { useData } from '../context/DataContext';
 import TechProductModal from '../components/modals/TechProductModal';
 import RetailProductModal from '../components/modals/RetailProductModal';
 import StockMovementModal from '../components/modals/StockMovementModal';
@@ -18,6 +17,9 @@ import { useBarcodeLookup } from '../hooks/useBarcodeLookup';
 import { LotRow } from '../components/inventory/LotRow';
 import { parseDate } from '../lib/dateUtils';
 import { safeNum } from '../lib/mathUtils';
+
+import { useInventory } from '../context/collections/InventoryContext';
+import { useBusiness } from '../context/BusinessContext';
 
 const formatCurrency = (value) => {
   const num = safeNum(value);
@@ -37,7 +39,13 @@ const TabInventarioTecnico = ({ handleOpenStockModal }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [visibleCount, setVisibleCount] = useState(20);
-  const { technicalInventory, isLoading } = useData();
+
+  const {
+    technicalInventory,
+    loading: loadingInventory
+  } = useInventory();
+
+  const isLoading = loadingInventory;
   const loading = isLoading;
   const error = null;
 
@@ -254,7 +262,13 @@ const TabInventarioRetail = ({ handleOpenStockModal }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [visibleCount, setVisibleCount] = useState(20);
-  const { retailInventory, isLoading } = useData();
+
+  const {
+    retailInventory,
+    loading: loadingInventory
+  } = useInventory();
+
+  const isLoading = loadingInventory;
   const loading = isLoading;
   const error = null;
 
@@ -420,7 +434,12 @@ const InventarioPage = () => {
   const [currentProduct, setCurrentProduct] = useState(null);
   const [movementType, setMovementType] = useState('ingreso');
   const [collectionName, setCollectionName] = useState('technicalInventory');
-  const { isLoading, businessId } = useData();
+
+  const {
+    businessId
+  } = useBusiness();
+
+  const isLoading = false;
 
   // ── Barcode scanner state ─────────────────────────────────────────────────
   const [scannerActive, setScannerActive] = useState(false);

@@ -1,5 +1,5 @@
 // ===== INICIO: src/App.jsx (Sprint 108 — Performance: Lazy Loading) =====
-import React, { lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { BusinessProvider } from './context/BusinessContext';
@@ -37,7 +37,13 @@ const RecepcionPage              = lazy(() => import('./pages/RecepcionPage.jsx'
 const PedidoInteligentePage      = lazy(() => import('./pages/PedidoInteligentePage'));
 const HistorialInventarioPage    = lazy(() => import('./pages/HistorialInventarioPage'));
 const SubscriptionPage           = lazy(() => import('./pages/SubscriptionPage'));
+const ChatPage                   = lazy(() => import('./pages/Chat/ChatPage'));
 const WebsiteApp                 = lazy(() => import('./pages/Website/App'));
+
+// Módulos Legales (Meta)
+const PrivacyPolicyPage          = lazy(() => import('./pages/Legal/PrivacyPolicyPage'));
+const TermsOfServicePage         = lazy(() => import('./pages/Legal/TermsOfServicePage'));
+const DataDeletionPage           = lazy(() => import('./pages/Legal/DataDeletionPage'));
 
 // Módulos Públicos (Clientes)
 const PublicLayout               = lazy(() => import('./components/public/PublicLayout'));
@@ -120,6 +126,11 @@ function App() {
               <Routes>
                 <Route path="/" element={<WebsiteApp />} />
 
+                {/* Rutas Legales (Verificación de Meta) */}
+                <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                <Route path="/terms" element={<TermsOfServicePage />} />
+                <Route path="/data-deletion" element={<DataDeletionPage />} />
+
                 {/* Auth callback routes (email confirmation, password reset) */}
                 <Route path="/auth/callback" element={<AuthCallbackPage />} />
                 <Route path="/auth/update-password" element={<ResetPasswordPage />} />
@@ -146,6 +157,7 @@ function App() {
                   
                   {/* Rutas exclusivas para Dueños/Admins */}
                   <Route path="dashboard"               element={<RoleGuard><DashboardPage /></RoleGuard>} />
+                  <Route path="chat"                    element={<RoleGuard><ChatPage /></RoleGuard>} />
                   <Route path="caja"                    element={<RoleGuard><CajaDiariaPage /></RoleGuard>} />
                   <Route path="pedidos"                 element={<RoleGuard><PedidosPage /></RoleGuard>} />
                   <Route path="clientes"                element={<RoleGuard><ClientesPage /></RoleGuard>} />

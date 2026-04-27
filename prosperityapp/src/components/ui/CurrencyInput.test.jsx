@@ -10,9 +10,9 @@ vi.mock('feather-icons', () => ({
     },
 }));
 
-// Mock DataContext to control currentLocale
-vi.mock('../../context/DataContext', () => ({
-    useData: () => ({
+// Mock ConfigContext to control currentLocale
+vi.mock('../../context/collections/ConfigContext', () => ({
+    useAppConfig: () => ({
         currentLocale: 'es-CL', // Default to Chilean Pesos for tests
     }),
 }));
