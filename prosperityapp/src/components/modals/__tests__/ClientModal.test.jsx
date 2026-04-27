@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '../../../test/utils';
 import { vi } from 'vitest';
 import ClientModal from '../ClientModal';
 import * as dbMock from '../../../supabase/db';
-import * as dataContextMock from '../../../context/DataContext';
+import * as BusinessContextMock from '../../../context/BusinessContext';
 import toast from 'react-hot-toast';
 
 // Mock Supabase DB calls
@@ -12,10 +12,14 @@ vi.mock('../../../supabase/db', () => ({
   sbUpdate: vi.fn(),
 }));
 
-// Mock DataContext
-vi.mock('../../../context/DataContext', () => ({
-  useData: vi.fn(),
-}));
+// Mock BusinessContext
+vi.mock('../../../context/BusinessContext', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useBusiness: vi.fn(),
+  };
+});
 
 // Mock react-hot-toast
 vi.mock('react-hot-toast', () => ({
@@ -37,7 +41,7 @@ describe('ClientModal', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    dataContextMock.useData.mockReturnValue({ businessId: 'test-business-id' });
+    BusinessContextMock.useBusiness.mockReturnValue({ businessId: 'test-business-id' });
   });
 
   it('does not render when isOpen is false', () => {
@@ -139,7 +143,7 @@ describe('ClientModal', () => {
           docNumber: '',
           phone: '',
           email: '',
-          birthday: '',
+          birthday: null,
           lastVisit: expect.any(String), // should be today's date
         }),
         'test-business-id'

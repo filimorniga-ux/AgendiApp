@@ -33,7 +33,50 @@ serve(async (req: Request) => {
 
     // 2. RECEIVE MESSAGES (POST)
     if (req.method === 'POST') {
-      const body = await req.json();
+      const rawBody = await req.text();
+
+      // Validar firma del webhook usando el APP SECRET (Webhooks security)
+      const signature = req.headers.get('x-hub-signature-256');
+      const appSecret = Deno.env.get('WHATSAPP_APP_SECRET');
+
+      if (appSecret) {
+        if (!signature) {
+          console.error("Header signature ausente pero WHATSAPP_APP_SECRET está configurado. Rechazando.");
+          return new Response('Missing signature', { status: 401 });
+        }
+
+        // La firma viene con formato "sha256=..."
+        const expectedSignature = signature.replace('sha256=', '');
+
+        // Crear HMAC SHA256 de forma asíncrona usando la Crypto API estándar (soportada en Deno/Supabase Edge)
+        const encoder = new TextEncoder();
+        const key = await crypto.subtle.importKey(
+          'raw',
+          encoder.encode(appSecret),
+          { name: 'HMAC', hash: 'SHA-256' },
+          false,
+          ['sign']
+        );
+
+        const signatureBuffer = await crypto.subtle.sign(
+          'HMAC',
+          key,
+          encoder.encode(rawBody)
+        );
+
+        // Convertir ArrayBuffer a string hex
+        const hashArray = Array.from(new Uint8Array(signatureBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+        if (hashHex !== expectedSignature) {
+          console.error("Firma de webhook inválida");
+          return new Response('Invalid signature', { status: 401 });
+        }
+      } else {
+        console.warn("WHATSAPP_APP_SECRET no configurado, saltando validación de seguridad de forma insegura.");
+      }
+
+      const body = JSON.parse(rawBody);
       console.log('Incoming webhook event:', JSON.stringify(body, null, 2));
 
       // Validar si es un evento de WhatsApp
@@ -121,15 +164,35 @@ serve(async (req: Request) => {
               .single();
 
             if (convError) {
-              console.error('Error creando conversación:', convError);
-              continue;
+              // 23505 = unique_violation, significa que otro webhook concurrente ya la creó (condición de carrera)
+              if (convError.code === '23505') {
+                 console.log(`Conversación ya creada concurrentemente para ${customerPhone}`);
+                 const { data: concurrentConv } = await supabaseAdmin
+                    .from('whatsapp_conversations')
+                    .select('id, status')
+                    .eq('business_id', businessId)
+                    .eq('customer_phone', customerPhone)
+                    .single();
+
+                 if (concurrentConv) {
+                    conversationId = concurrentConv.id;
+                    conversationStatus = concurrentConv.status;
+                 } else {
+                    console.error('Error recuperando conversación concurrente:', convError);
+                    continue;
+                 }
+              } else {
+                 console.error('Error creando conversación:', convError);
+                 continue;
+              }
+            } else {
+              conversationId = newConv.id;
+              conversationStatus = config.bot_active ? 'bot_active' : 'human_active';
             }
-            conversationId = newConv.id;
-            conversationStatus = config.bot_active ? 'bot_active' : 'human_active';
           }
 
           // 4. Guardar el mensaje del cliente en DB
-          await supabaseAdmin
+          const { error: msgInsertError } = await supabaseAdmin
             .from('whatsapp_messages')
             .insert({
               conversation_id: conversationId,
@@ -138,6 +201,15 @@ serve(async (req: Request) => {
               message_type: message.type,
               meta_message_id: metaMessageId
             });
+
+          if (msgInsertError) {
+             if (msgInsertError.code === '23505') {
+                console.log(`Mensaje duplicado detectado y omitido (meta_message_id: ${metaMessageId})`);
+                continue; // Saltar procesamiento si el mensaje ya existe
+             } else {
+                console.error('Error guardando mensaje:', msgInsertError);
+             }
+          }
 
           // 5. Invocar al Agente si el bot está activo para esta conversación
           if (conversationStatus === 'bot_active') {

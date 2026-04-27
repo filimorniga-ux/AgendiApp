@@ -38,6 +38,16 @@ CREATE TABLE IF NOT EXISTS public.whatsapp_messages (
   is_read BOOLEAN DEFAULT false
 );
 
+-- Agregar UNIQUE constraint a meta_message_id para garantizar idempotencia
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'whatsapp_messages_meta_message_id_key'
+  ) THEN
+    ALTER TABLE public.whatsapp_messages ADD CONSTRAINT whatsapp_messages_meta_message_id_key UNIQUE (meta_message_id);
+  END IF;
+END $$;
+
 -- RLS para whatsapp_configs
 ALTER TABLE public.whatsapp_configs ENABLE ROW LEVEL SECURITY;
 

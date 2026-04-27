@@ -3,6 +3,7 @@ import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '../context/ThemeContext';
 import { BusinessContext } from '../context/BusinessContext';
+import { AppProviders } from '../context/AppProviders';
 
 /**
  * Renderizador personalizado para tests.
@@ -26,9 +27,9 @@ const customRender = (ui, { businessContextValue = {}, route = '/', ...options }
       <BrowserRouter>
         <ThemeProvider>
           <BusinessContext.Provider value={defaultBusinessContext}>
-            {/* Si necesitamos DataContext, los tests de nivel superior pueden inyectarlo
-                o podemos agregar un mock global para useData y useSupabaseCollection */}
-            {children}
+            <AppProviders>
+              {children}
+            </AppProviders>
           </BusinessContext.Provider>
         </ThemeProvider>
       </BrowserRouter>

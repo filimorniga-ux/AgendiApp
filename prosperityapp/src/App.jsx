@@ -87,13 +87,8 @@ const PlaceholderPage = ({ title }) => (
 function App() {
   return (
     <ThemeProvider>
-<<<<<<< HEAD
       <AppProviders>
         <TimerProvider>
-=======
-      <BusinessProvider>
-          <TimerProvider>
->>>>>>> origin/fix-landing-page-ui-5442098270051721237
           <Toaster
             position="bottom-right"
             toastOptions={{
