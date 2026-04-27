@@ -6,29 +6,17 @@ export const Hero = ({ isDarkMode, onRegisterClick }) => {
     const { t } = useLanguage();
     const videoRef = useRef(null);
     const sectionRef = useRef(null);
-    const [videoLoaded, setVideoLoaded] = useState(false);
+    const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
     useEffect(() => {
-        const video = videoRef.current;
         const section = sectionRef.current;
-        if (!video || !section) return;
+        if (!section) return;
 
         // Lazy-load: only start loading video when hero is visible
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting && !videoLoaded) {
-                    // Add sources dynamically to avoid preload
-                    const webm = document.createElement('source');
-                    webm.src = '/videos/hero-bg.webm';
-                    webm.type = 'video/webm';
-                    const mp4 = document.createElement('source');
-                    mp4.src = '/videos/hero-bg.mp4';
-                    mp4.type = 'video/mp4';
-                    video.appendChild(webm);
-                    video.appendChild(mp4);
-                    video.load();
-                    video.play().catch(() => {}); // Autoplay may be blocked
-                    setVideoLoaded(true);
+                if (entry.isIntersecting && !shouldLoadVideo) {
+                    setShouldLoadVideo(true);
                     observer.disconnect();
                 }
             },
@@ -37,7 +25,14 @@ export const Hero = ({ isDarkMode, onRegisterClick }) => {
 
         observer.observe(section);
         return () => observer.disconnect();
-    }, [videoLoaded]);
+    }, [shouldLoadVideo]);
+
+    useEffect(() => {
+        if (shouldLoadVideo && videoRef.current) {
+             videoRef.current.load();
+             videoRef.current.play().catch(() => {}); // Autoplay may be blocked
+        }
+    }, [shouldLoadVideo]);
 
     return (
         <section ref={sectionRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -49,8 +44,15 @@ export const Hero = ({ isDarkMode, onRegisterClick }) => {
                     muted 
                     playsInline
                     preload="none"
-                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${videoLoaded ? 'opacity-60' : 'opacity-0'}`}
-                />
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${shouldLoadVideo ? 'opacity-60' : 'opacity-0'}`}
+                >
+                    {shouldLoadVideo && (
+                        <>
+                            <source src="/videos/hero-bg.webm" type="video/webm" />
+                            <source src="/videos/hero-bg.mp4" type="video/mp4" />
+                        </>
+                    )}
+                </video>
                 {/* Gradient Overlay para máxima legibilidad, enfatizando el "Dark / Gold luxury" */}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent z-10"></div>
                 {/* Acento Gold Sutil de fondo */}
@@ -61,32 +63,32 @@ export const Hero = ({ isDarkMode, onRegisterClick }) => {
             <div className="relative z-20 container mx-auto px-6 text-center max-w-6xl pt-20">
                 <AnimatedSection>
                     {/* Badge Glassmorphism */}
-                    <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 text-white/90 text-xs font-bold uppercase tracking-[0.2em] mb-10 shadow-2xl">
+                    <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-white/90 text-xs font-bold uppercase tracking-[0.2em] mb-10 shadow-2xl">
                         <span className="w-2 h-2 rounded-full bg-[#f6e05e] animate-pulse shadow-[0_0_10px_#f6e05e]"></span> 
                         AgendiApp 2026 Edition
                     </div>
                     
                     {/* Title */}
-                    <h1 className="text-6xl md:text-8xl font-black mb-8 leading-[1.1] tracking-tighter text-white drop-shadow-2xl">
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-[1.1] tracking-tighter text-white drop-shadow-2xl">
                         {t.hero.title}
                     </h1>
                     
                     {/* Subtitle */}
-                    <p className="text-xl md:text-3xl mb-14 max-w-3xl mx-auto leading-relaxed text-slate-300 font-light tracking-wide">
+                    <p className="text-lg md:text-2xl lg:text-3xl mb-14 max-w-3xl mx-auto leading-relaxed text-slate-300 font-light tracking-wide">
                         {t.hero.subtitle}
                     </p>
                     
                     {/* CTAs */}
-                    <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                    <div className="flex flex-col w-full sm:w-auto sm:flex-row gap-6 justify-center items-center">
                         <button
                             onClick={onRegisterClick}
-                            className="px-12 py-5 rounded-2xl font-black text-lg bg-[#f6e05e] text-slate-950 shadow-[0_15px_50px_-10px_rgba(246,224,94,0.4)] hover:scale-105 hover:shadow-[0_20px_60px_-10px_rgba(246,224,94,0.6)] hover:bg-[#ffe866] transition-all duration-500 uppercase tracking-widest relative overflow-hidden group"
+                            className="w-full sm:w-auto px-12 py-5 rounded-2xl font-black text-lg bg-[#f6e05e] text-slate-950 shadow-[0_15px_50px_-10px_rgba(246,224,94,0.4)] hover:scale-105 hover:shadow-[0_20px_60px_-10px_rgba(246,224,94,0.6)] hover:bg-[#ffe866] transition-all duration-500 uppercase tracking-widest relative overflow-hidden group"
                         >
                             <span className="relative z-10">{t.hero.cta_primary}</span>
                             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-0"></div>
                         </button>
                         <button 
-                            className="px-12 py-5 rounded-2xl font-bold text-lg text-white bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-500 shadow-2xl uppercase tracking-widest"
+                            className="w-full sm:w-auto px-12 py-5 rounded-2xl font-bold text-lg text-white bg-white/10 backdrop-blur-xl border border-white/10 hover:bg-white/20 hover:border-white/30 transition-all duration-500 shadow-2xl uppercase tracking-widest"
                         >
                             {t.hero.cta_secondary}
                         </button>
