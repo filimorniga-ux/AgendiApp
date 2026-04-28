@@ -38,10 +38,10 @@ export const Header = ({ isDarkMode, toggleTheme, user, onLoginClick, onRegister
 
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center gap-8">
-                    {!user && ['features', 'ecosystem', 'tutorials', 'pricing', 'contact'].map((item) => (
+                    {!user && ['features', 'ecosystem', 'tutorials', 'pricing', 'contact', 'careers'].map((item) => (
                         <a
                             key={item}
-                            href={`#${item}`}
+                            href={item === 'careers' ? '/empleo' : `#${item}`}
                             className={`text-sm font-medium hover:text-[#f6e05e] transition-colors ${
                                 scrolled
                                     ? isDarkMode ? 'text-slate-300' : 'text-slate-600'
@@ -101,10 +101,10 @@ export const Header = ({ isDarkMode, toggleTheme, user, onLoginClick, onRegister
 
                     {!user && (
                         <div className="flex flex-col gap-4">
-                            {['features', 'ecosystem', 'tutorials', 'pricing', 'contact'].map((item) => (
+                            {['features', 'ecosystem', 'tutorials', 'pricing', 'contact', 'careers'].map((item) => (
                                 <a
                                     key={item}
-                                    href={`#${item}`}
+                                    href={item === 'careers' ? '/empleo' : `#${item}`}
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     className={`text-lg font-medium hover:text-[#f6e05e] transition-colors ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}
                                 >

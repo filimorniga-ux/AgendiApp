@@ -11,7 +11,8 @@ export const translations = {
             login: "Iniciar Sesión",
             register: "Ver Planes y Precios",
             logout: "Salir",
-            dashboard: "Panel"
+            dashboard: "Panel",
+            careers: "Ofertas Laborales"
         },
         hero: {
             title: "El Sistema Operativo para Salones del Futuro",
@@ -218,7 +219,8 @@ export const translations = {
             login: "Login",
             register: "View Plans & Pricing",
             logout: "Logout",
-            dashboard: "Dashboard"
+            dashboard: "Dashboard",
+            careers: "Careers"
         },
         hero: {
             title: "The Operating System for Future Salons",

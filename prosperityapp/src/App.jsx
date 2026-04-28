@@ -38,6 +38,7 @@ const HistorialInventarioPage    = lazy(() => import('./pages/HistorialInventari
 const SubscriptionPage           = lazy(() => import('./pages/SubscriptionPage'));
 const ChatPage                   = lazy(() => import('./pages/Chat/ChatPage'));
 const WebsiteApp                 = lazy(() => import('./pages/Website/App'));
+const JobBoardPage               = lazy(() => import('./pages/Website/components/sections/JobBoardPage'));
 
 // Módulos Legales (Meta)
 const PrivacyPolicyPage          = lazy(() => import('./pages/Legal/PrivacyPolicyPage'));
@@ -123,6 +124,8 @@ function App() {
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<WebsiteApp />} />
+                <Route path="/empleo" element={<JobBoardPage />} />
+                <Route path="/empleo/:id" element={<JobBoardPage />} />
 
                 {/* Rutas Legales (Verificación de Meta) */}
                 <Route path="/privacy" element={<PrivacyPolicyPage />} />
