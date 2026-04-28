@@ -207,6 +207,45 @@ export const translations = {
                 promotions: "Promociones Activas",
                 history: "My Historial"
             }
+        },
+        jobBoard: {
+            hero_title: "Únete a los Mejores",
+            hero_subtitle: "Encuentra oportunidades en los salones y barberías top de tu ciudad.",
+            tab_campaigns: "Ofertas de Empleo",
+            tab_seekers: "Profesionales Disponibles",
+            results_count: "resultados",
+            no_results: "No se encontraron resultados",
+            cta_employer: "¿Buscas talento?",
+            cta_employer_desc: "Publica tu vacante en AgendiApp y conecta con los mejores profesionales.",
+            cta_employer_btn: "Registrar Comercio",
+            search_placeholder: "Buscar puesto...",
+            filter_country: "País",
+            filter_state: "Estado",
+            filter_city: "Ciudad",
+            filter_sector: "Sector",
+            filter_position: "Tipo de contrato",
+            filter_clear: "Limpiar filtros",
+            sectors: {
+                barbershop: "Barbería",
+                salon: "Salón de Belleza",
+                spa: "Spa",
+                clinic: "Clínica Estética",
+                nails: "Uñas",
+                restaurant: "Restaurante",
+                other: "Otro"
+            },
+            full_time: "Tiempo Completo",
+            part_time: "Medio Tiempo",
+            freelance: "Independiente",
+            temporary: "Temporal",
+            commission: "comisión",
+            salary: "Salario",
+            requirements: "Requisitos",
+            benefits: "Beneficios",
+            expires: "Expira",
+            apply_whatsapp: "Postularse por WhatsApp",
+            apply_email: "Postularse por Email",
+            link_copied: "Enlace copiado al portapapeles"
         }
     },
     en: {
@@ -415,6 +454,45 @@ export const translations = {
                 promotions: "Active Promotions",
                 history: "My History"
             }
+        },
+        jobBoard: {
+            hero_title: "Join the Best",
+            hero_subtitle: "Find opportunities at the top salons and barbershops in your city.",
+            tab_campaigns: "Job Offers",
+            tab_seekers: "Available Professionals",
+            results_count: "results",
+            no_results: "No results found",
+            cta_employer: "Looking for talent?",
+            cta_employer_desc: "Post your vacancy on AgendiApp and connect with the best professionals.",
+            cta_employer_btn: "Register Business",
+            search_placeholder: "Search position...",
+            filter_country: "Country",
+            filter_state: "State",
+            filter_city: "City",
+            filter_sector: "Sector",
+            filter_position: "Contract Type",
+            filter_clear: "Clear Filters",
+            sectors: {
+                barbershop: "Barbershop",
+                salon: "Beauty Salon",
+                spa: "Spa",
+                clinic: "Aesthetic Clinic",
+                nails: "Nails",
+                restaurant: "Restaurant",
+                other: "Other"
+            },
+            full_time: "Full Time",
+            part_time: "Part Time",
+            freelance: "Freelance",
+            temporary: "Temporary",
+            commission: "commission",
+            salary: "Salary",
+            requirements: "Requirements",
+            benefits: "Benefits",
+            expires: "Expires",
+            apply_whatsapp: "Apply via WhatsApp",
+            apply_email: "Apply via Email",
+            link_copied: "Link copied to clipboard"
         }
     }
 };
