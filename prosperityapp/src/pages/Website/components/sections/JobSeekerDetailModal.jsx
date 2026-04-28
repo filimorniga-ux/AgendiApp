@@ -33,7 +33,7 @@ export const JobSeekerDetailModal = ({ profile, t, onClose }) => {
             <p className="jb-detail__company">{profile.profession}</p>
             <div className="jb-card__tags" style={{ marginTop: 8 }}>
               <span className="jb-tag jb-tag--sector">
-                ⭐ {profile.experience_years} años de experiencia
+                ⭐ {profile.experience_years} {t.jobBoard?.years_exp_full || 'años de experiencia'}
               </span>
               {profile.city && (
                 <span className="jb-tag jb-tag--location">
@@ -46,25 +46,25 @@ export const JobSeekerDetailModal = ({ profile, t, onClose }) => {
 
         {/* Description */}
         <div className="jb-detail__section">
-          <h4 className="jb-detail__section-title">Sobre mí</h4>
-          <p className="jb-detail__text">{profile.bio || 'Sin descripción adicional.'}</p>
+          <h4 className="jb-detail__section-title">{t.jobBoard?.detail_about_me || 'Sobre mí'}</h4>
+          <p className="jb-detail__text">{profile.bio || (t.jobBoard?.detail_no_bio || 'Sin descripción adicional.')}</p>
         </div>
 
         {/* Action buttons */}
         <div className="jb-detail__actions">
           {profile.contact_whatsapp && (
             <button className="jb-btn jb-btn--whatsapp" onClick={handleWhatsApp}>
-              💬 Contactar por WhatsApp
+              💬 {t.jobBoard?.detail_whatsapp || 'Contactar por WhatsApp'}
             </button>
           )}
           {profile.contact_email && (
             <button className="jb-btn jb-btn--email" onClick={handleEmail}>
-              ✉️ Enviar Email
+              ✉️ {t.jobBoard?.detail_email || 'Enviar Email'}
             </button>
           )}
           {profile.instagram && (
             <button className="jb-btn" style={{ background: '#e1306c', color: 'white' }} onClick={handleInstagram}>
-              📸 Ver Instagram
+              📸 {t.jobBoard?.detail_instagram || 'Ver Instagram'}
             </button>
           )}
         </div>

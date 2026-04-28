@@ -402,6 +402,7 @@ const JobCampaignModal = ({ isOpen, onClose, onSave, campaign = null, businessCo
           <button
             onClick={handleSubmit}
             disabled={saving || !form.title.trim()}
+            data-testid="btn-save-campaign"
             className="px-6 py-2 bg-accent text-accent-text rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {saving ? t('common.loading') : t('common.save')}

@@ -23,15 +23,15 @@ export const JobSeekerCard = ({ profile, t, onSelect }) => {
       {/* Tags */}
       <div className="jb-card__tags">
         <span className="jb-tag jb-tag--sector">
-          ⭐ {profile.experience_years} años de exp.
+          ⭐ {profile.experience_years} {t.jobBoard?.years_exp || 'años de exp.'}
         </span>
         {profile.compensation_type && (
           <span className="jb-tag jb-tag--type" style={{background: 'rgba(255,215,0,0.1)', color: '#FFD700'}}>
             💰 {
-              profile.compensation_type === 'percentage' ? 'Porcentaje' :
-              profile.compensation_type === 'chair_rental' ? 'Arrendamiento de sillón' :
-              profile.compensation_type === 'fixed_salary' ? 'Salario fijo' :
-              'A convenir'
+              profile.compensation_type === 'percentage' ? t.jobBoard?.comp_percentage || 'Porcentaje' :
+              profile.compensation_type === 'chair_rental' ? t.jobBoard?.comp_chair_rental || 'Arrendamiento de sillón' :
+              profile.compensation_type === 'fixed_salary' ? t.jobBoard?.comp_fixed_salary || 'Salario fijo' :
+              t.jobBoard?.comp_to_agree || 'A convenir'
             }
           </span>
         )}

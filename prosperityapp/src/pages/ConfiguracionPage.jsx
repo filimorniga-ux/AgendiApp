@@ -12,6 +12,7 @@ import TicketEditorTab from './Settings/TicketEditorTab';
 import ClientAcquisitionTab from './Settings/ClientAcquisitionTab';
 import IntegrationsTab from './Settings/IntegrationsTab';
 import WhatsAppAgentTab from './Settings/WhatsAppAgentTab';
+import JobCampaignsTab from './Settings/JobCampaignsTab';
 import { useStorage } from '../hooks/useStorage';
 import { Country, State, City } from 'country-state-city';
 import { IMaskInput } from 'react-imask';
@@ -399,6 +400,7 @@ const ConfiguracionPage = () => {
     { id: 'security', icon: 'lock', label: t('settings.tabs.security') },
     { id: 'integrations', icon: 'link-2', label: 'Integraciones' },
     { id: 'whatsapp-agent', icon: 'message-circle', label: 'Agente WhatsApp AI' },
+    { id: 'job-board', icon: 'briefcase', label: t('settings.tabs.jobBoard', 'Bolsa de Empleo') },
   ];
 
   return (
@@ -415,6 +417,7 @@ const ConfiguracionPage = () => {
       <div className="flex lg:hidden overflow-x-auto gap-1 mb-4 pb-1 border-b border-border-main">
         {settingsTabs.map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+            data-testid={`tab-${tab.id}`}
             className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors flex-shrink-0 ${activeTab === tab.id ? 'bg-accent text-accent-text' : 'bg-bg-secondary text-text-muted border border-border-main hover:bg-bg-tertiary'}`}
           >
             <i data-feather={tab.icon} className="w-4 h-4"></i>
@@ -429,6 +432,7 @@ const ConfiguracionPage = () => {
           <nav id="settings-tabs" className="flex flex-col space-y-1">
             {settingsTabs.map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                data-testid={`tab-${tab.id}`}
                 className={`p-3 rounded-md text-left flex items-center gap-3 transition-colors ${activeTab === tab.id ? 'bg-accent text-accent-text font-bold' : 'text-text-muted hover:bg-bg-tertiary'}`}
               >
                 <i data-feather={tab.icon} className="w-5 h-5"></i> {tab.label}
@@ -455,6 +459,11 @@ const ConfiguracionPage = () => {
               <p className="text-sm text-text-muted">Personaliza qué información aparece en el ticket que recibe el cliente al pagar.</p>
             </div>
             <TicketEditorTab />
+          </div>
+
+          {/* --- BOLSA DE EMPLEO --- */}
+          <div className={`space-y-8 ${activeTab === 'job-board' ? '' : 'hidden'}`}>
+            <JobCampaignsTab />
           </div>
 
           {/* --- INFORMACIÓN DE EMPRESA --- */}

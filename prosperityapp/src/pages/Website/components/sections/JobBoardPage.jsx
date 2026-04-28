@@ -86,10 +86,10 @@ const JobCard = ({ campaign, t, onSelect }) => {
         {campaign.compensation_type && (
           <span className="jb-card__salary" style={{color: '#FFD700'}}>
             💰 {
-              campaign.compensation_type === 'percentage' ? 'Porcentaje' :
-              campaign.compensation_type === 'chair_rental' ? 'Arrendamiento de sillón' :
-              campaign.compensation_type === 'fixed_salary' ? 'Salario fijo' :
-              'A convenir'
+              campaign.compensation_type === 'percentage' ? t.jobBoard?.comp_percentage || 'Porcentaje' :
+              campaign.compensation_type === 'chair_rental' ? t.jobBoard?.comp_chair_rental || 'Arrendamiento de sillón' :
+              campaign.compensation_type === 'fixed_salary' ? t.jobBoard?.comp_fixed_salary || 'Salario fijo' :
+              t.jobBoard?.comp_to_agree || 'A convenir'
             }
           </span>
         )}
@@ -177,12 +177,12 @@ const JobDetail = ({ campaign, t, onClose }) => {
         <div className="jb-detail__compensation">
           {campaign.compensation_type && (
             <div className="jb-detail__comp-item">
-              <span className="jb-detail__comp-label">Modalidad</span>
+              <span className="jb-detail__comp-label">{t.jobBoard?.modal_mode || 'Modalidad'}</span>
               <span className="jb-detail__comp-value" style={{color: '#FFD700'}}>
-                {campaign.compensation_type === 'percentage' ? 'Porcentaje' :
-                 campaign.compensation_type === 'chair_rental' ? 'Arrendamiento de sillón' :
-                 campaign.compensation_type === 'fixed_salary' ? 'Salario fijo' :
-                 'A convenir'}
+                {campaign.compensation_type === 'percentage' ? t.jobBoard?.comp_percentage || 'Porcentaje' :
+                 campaign.compensation_type === 'chair_rental' ? t.jobBoard?.comp_chair_rental || 'Arrendamiento de sillón' :
+                 campaign.compensation_type === 'fixed_salary' ? t.jobBoard?.comp_fixed_salary || 'Salario fijo' :
+                 t.jobBoard?.comp_to_agree || 'A convenir'}
               </span>
             </div>
           )}
@@ -396,7 +396,13 @@ function JobBoardContent() {
   const handleSelect = useCallback(async (campaign) => {
     setSelected(campaign);
     navigate(`/empleo/${campaign.id}`);
-    supabase.rpc('increment_campaign_views', { campaign_id: campaign.id }).catch(() => {});
+    
+    // Fire and forget, wrap in async IIFE
+    (async () => {
+      try {
+        await supabase.rpc('increment_campaign_views', { campaign_id: campaign.id });
+      } catch (e) {}
+    })();
   }, [navigate]);
 
   // Client-side filtering
@@ -433,10 +439,10 @@ function JobBoardContent() {
     }
   }, [campaigns, jobSeekers, filters, activeTab]);
 
-  const isDarkMode = true; // Always dark for landing
+  const [isDarkMode, setIsDarkMode] = useState(false); // Default to light mode as requested
 
   return (
-    <div className="jb-page" data-theme="dark">
+    <div className="jb-page" data-theme={isDarkMode ? "dark" : "light"}>
       <Helmet>
         <title>Bolsa de Empleo — AgendiApp | {lang === 'es' ? 'Ofertas de trabajo en belleza y bienestar' : 'Beauty & wellness job listings'}</title>
         <meta name="description" content={lang === 'es' ? 'Encuentra las mejores oportunidades de empleo en el sector belleza y bienestar. Barberías, salones, spas y más.' : 'Find the best job opportunities in the beauty and wellness industry. Barbershops, salons, spas and more.'} />
@@ -444,6 +450,7 @@ function JobBoardContent() {
 
       <Header
         isDarkMode={isDarkMode}
+        toggleTheme={() => setIsDarkMode(!isDarkMode)}
         user={null}
         onLoginClick={() => navigate('/')}
         onRegisterClick={() => navigate('/')}
@@ -513,17 +520,17 @@ function JobBoardContent() {
           {/* CTA Employer / Professional */}
           <div className="jb-cta-employer">
             <div className="jb-cta-employer__content">
-              <h3>{activeTab === 'campaigns' ? (t.jobBoard?.cta_employer || '¿Buscas talento?') : '¿Eres profesional de la belleza?'}</h3>
+              <h3>{activeTab === 'campaigns' ? (t.jobBoard?.cta_employer || '¿Buscas talento?') : (t.jobBoard?.seeker_cta || '¿Eres profesional de la belleza?')}</h3>
               <p>{activeTab === 'campaigns' 
                   ? (t.jobBoard?.cta_employer_desc || 'Publica tu vacante en AgendiApp y conecta con los mejores profesionales.') 
-                  : 'Publica tu perfil profesional para que los salones y barberías te encuentren.'}
+                  : (t.jobBoard?.seeker_cta_desc || 'Publica tu perfil profesional para que los salones y barberías te encuentren.')}
               </p>
             </div>
             <button 
               className="jb-btn jb-btn--gold" 
               onClick={() => activeTab === 'campaigns' ? navigate('/') : setShowSeekerForm(true)}
             >
-              {activeTab === 'campaigns' ? (t.jobBoard?.cta_employer_btn || 'Registrar Comercio') : 'Publicar mi Perfil'}
+              {activeTab === 'campaigns' ? (t.jobBoard?.cta_employer_btn || 'Registrar Comercio') : (t.jobBoard?.seeker_cta_btn || 'Publicar mi Perfil')}
             </button>
           </div>
         </div>
@@ -544,6 +551,7 @@ function JobBoardContent() {
       {/* Job Seeker Form Modal */}
       {showSeekerForm && (
         <JobSeekerFormModal 
+          t={t}
           onClose={() => setShowSeekerForm(false)} 
           onSuccess={() => {
             setShowSeekerForm(false);

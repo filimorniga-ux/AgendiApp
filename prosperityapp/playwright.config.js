@@ -59,7 +59,7 @@ export default defineConfig({
     timeout: 60000,
     reuseExistingServer: !process.env.CI,
     env: {
-      VITE_DEV_BYPASS_AUTH: 'true',
+      VITE_DEV_BYPASS_AUTH: 'false',
       VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL || 'https://mzoodzsefyaymhjpzopm.supabase.co',
       VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16b29kenNlZnlheW1oanB6b3BtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzQxNjk1MTEsImV4cCI6MTk4OTczMzUxMX0.xyz',
     },

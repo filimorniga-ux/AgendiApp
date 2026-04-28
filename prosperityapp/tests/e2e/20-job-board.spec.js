@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('20 — Job Board', () => {
+test.describe.serial('20 — Job Board', () => {
 
   const jobTitle = `Oferta QA Test ${Date.now()}`;
 
@@ -10,23 +10,22 @@ test.describe('20 — Job Board', () => {
     await page.waitForTimeout(2000);
 
     // 2. Click en tab "Bolsa de Empleo"
-    const tab = page.locator('button', { hasText: /Bolsa de Empleo/i });
+    const tab = page.locator('[data-testid="tab-job-board"]:visible');
     await tab.click();
     await page.waitForTimeout(1000);
 
     // 3. Crear Oferta
-    const btnCrear = page.locator('button', { hasText: /Crear Oferta/i });
-    if (await btnCrear.isVisible()) {
-      await btnCrear.click();
+    const btnCrear = page.getByTestId('btn-create-campaign');
+    const btnCrearFirst = page.getByTestId('btn-create-first-campaign');
+    
+    if (await btnCrearFirst.isVisible()) {
+      await btnCrearFirst.click();
     } else {
-      // Si ya hay campaña activa pero queremos crear otra o si el plan no permite
-      // Se asume que el plan de prueba lo permite.
-      const btnAdd = page.locator('button').filter({ hasText: '+' });
-      await btnAdd.click();
+      await btnCrear.click();
     }
     
     // 4. Llenar modal
-    await expect(page.locator('.modal-content')).toBeVisible();
+    await expect(page.locator('input[name="title"]')).toBeVisible();
     await page.fill('input[name="title"]', jobTitle);
     await page.fill('textarea[name="description"]', 'Descripción de la oferta generada por el test.');
     await page.fill('input[name="salary_fixed"]', '1000');
@@ -34,12 +33,12 @@ test.describe('20 — Job Board', () => {
     await page.selectOption('select[name="position_type"]', 'full_time');
     
     // 5. Guardar
-    const btnSubmit = page.locator('button', { hasText: /Guardar|Publicar/i });
+    const btnSubmit = page.getByTestId('btn-save-campaign');
     await btnSubmit.click();
     
     // Esperar a que la lista se actualice y muestre la nueva oferta
-    await expect(page.locator('.modal-content')).not.toBeVisible();
-    await expect(page.locator('text=' + jobTitle)).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('input[name="title"]')).not.toBeVisible();
+    await expect(page.locator('text=' + jobTitle).first()).toBeVisible({ timeout: 10000 });
   });
 
   test('20.02 - Job board público muestra la oferta y filtros funcionan', async ({ page, context }) => {
@@ -48,7 +47,7 @@ test.describe('20 — Job Board', () => {
     await page.waitForTimeout(2000);
 
     // Verificar que la oferta publicada arriba exista en la lista
-    await expect(page.locator(`text=${jobTitle}`)).toBeVisible({ timeout: 10000 });
+    await expect(page.locator(`text=${jobTitle}`).first()).toBeVisible({ timeout: 10000 });
 
     // 2. Filtros
     // Seleccionar sector diferente, la oferta debería desaparecer

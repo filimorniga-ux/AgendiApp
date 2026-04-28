@@ -26,7 +26,7 @@ export const Header = ({ isDarkMode, toggleTheme, user, onLoginClick, onRegister
                 : 'py-5 bg-gradient-to-b from-black/70 via-black/30 to-transparent border-transparent'
         }`}>
             <nav className="container mx-auto px-6 flex justify-between items-center max-w-7xl">
-                <div className="flex items-center gap-3 group cursor-pointer">
+                <a href="/" className="flex items-center gap-3 group cursor-pointer">
                     <span className={`text-2xl font-black tracking-tighter ${
                         scrolled
                             ? isDarkMode ? 'text-white' : 'text-slate-900'
@@ -34,14 +34,14 @@ export const Header = ({ isDarkMode, toggleTheme, user, onLoginClick, onRegister
                     }`} style={!scrolled ? { textShadow: '0 1px 4px rgba(0,0,0,0.5)' } : undefined}>
                         AGENDI<span className="text-[#f6e05e]">APP</span>
                     </span>
-                </div>
+                </a>
 
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center gap-8">
                     {!user && ['features', 'ecosystem', 'tutorials', 'pricing', 'contact', 'careers'].map((item) => (
                         <a
                             key={item}
-                            href={item === 'careers' ? '/empleo' : `#${item}`}
+                            href={item === 'careers' ? '/empleo' : `/#${item}`}
                             className={`text-sm font-medium hover:text-[#f6e05e] transition-colors ${
                                 scrolled
                                     ? isDarkMode ? 'text-slate-300' : 'text-slate-600'
@@ -104,7 +104,7 @@ export const Header = ({ isDarkMode, toggleTheme, user, onLoginClick, onRegister
                             {['features', 'ecosystem', 'tutorials', 'pricing', 'contact', 'careers'].map((item) => (
                                 <a
                                     key={item}
-                                    href={item === 'careers' ? '/empleo' : `#${item}`}
+                                    href={item === 'careers' ? '/empleo' : `/#${item}`}
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     className={`text-lg font-medium hover:text-[#f6e05e] transition-colors ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}
                                 >

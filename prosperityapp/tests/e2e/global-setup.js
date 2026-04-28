@@ -45,8 +45,8 @@ export default async function globalSetup(config) {
   }
 
   // Since webServer.env does not leak to the test runner process automatically,
-  // we default to true here as requested, or evaluate the env var if passed.
-  const bypassAuth = process.env.VITE_DEV_BYPASS_AUTH === 'true' || true;
+  // we evaluate the env var if passed.
+  const bypassAuth = process.env.VITE_DEV_BYPASS_AUTH === 'true';
 
   const maxRetries = 3;
   try {
@@ -99,7 +99,7 @@ export default async function globalSetup(config) {
           throw error;
         }
         console.log('Retrying in 5 seconds...');
-        await page.waitForTimeout(5000);
+        await page.screenshot({ path: "error.png", fullPage: true }); await page.waitForTimeout(5000);
       }
     }
   } finally {

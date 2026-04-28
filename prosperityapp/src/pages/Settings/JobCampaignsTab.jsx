@@ -11,6 +11,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBusiness } from '../../context/BusinessContext';
+import { useAppConfig } from '../../context/collections/ConfigContext';
 import { supabase } from '../../supabase/client';
 import toast from 'react-hot-toast';
 import JobCampaignModal from './JobCampaignModal';
@@ -22,14 +23,15 @@ const STATUS_COLORS = {
 };
 
 const JobCampaignsTab = () => {
-  
-  const { countryCode } = useBusiness();
+  const { t } = useTranslation();
+  const { businessId } = useBusiness();
+  const { config } = useAppConfig();
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState(null);
 
-  const businessCountryCode = countryCode || '';
+  const businessCountryCode = config?.[0]?.settings?.countryCode || 'CL';
 
   // Cargar campañas del negocio
   const fetchCampaigns = useCallback(async () => {
@@ -171,6 +173,7 @@ const JobCampaignsTab = () => {
         </div>
         <button
           onClick={openCreate}
+          data-testid="btn-create-campaign"
           className="flex items-center gap-2 bg-accent text-accent-text px-4 py-2.5 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -210,6 +213,7 @@ const JobCampaignsTab = () => {
           <p className="text-sm text-text-muted mb-4">{t('jobBoard.noCampaignsDesc')}</p>
           <button
             onClick={openCreate}
+            data-testid="btn-create-first-campaign"
             className="bg-accent text-accent-text px-5 py-2 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity"
           >
             {t('jobBoard.createFirst')}
