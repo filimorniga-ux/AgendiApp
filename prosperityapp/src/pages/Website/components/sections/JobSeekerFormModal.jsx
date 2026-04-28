@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../../../../../supabase/client';
+import { supabase } from '../../../../supabase/client';
 import { Country, State, City } from 'country-state-city';
 
 const PROFESSIONS = ['Barbero', 'Estilista', 'Manicurista', 'Lashista', 'Esteticista', 'Integral', 'Cajero/a', 'Administrador/a', 'Auxiliar', 'Personal de aseo', 'Otro'];
