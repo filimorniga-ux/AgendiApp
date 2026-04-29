@@ -28,8 +28,6 @@ const ModalNuevaCita = ({ isOpen, onClose, slotInfo }) => {
   } = useBusiness();
 
   const isLoading = loadingClients || loadingServices;
-  const loadingClients = isLoading; // Simplificado
-  const loadingServices = isLoading; // Simplificado
   // --- Fin de cambios ---
 
 
