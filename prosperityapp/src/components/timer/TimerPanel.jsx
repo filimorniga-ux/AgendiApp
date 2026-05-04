@@ -6,7 +6,7 @@ import { useTimers } from '../../context/TimerContext';
 import TimerCard from './TimerCard';
 import NewTimerModal from './NewTimerModal';
 
-const TimerPanel = ({ onClose }) => {
+const TimerPanel = ({ onClose, isMobile }) => {
   const { activeTimers, expiredTimers, dismissAll, activeCount, expiredCount } = useTimers();
   const [showNewModal, setShowNewModal] = useState(false);
   const allTimers = [...expiredTimers, ...activeTimers];
@@ -18,11 +18,19 @@ const TimerPanel = ({ onClose }) => {
 
       {/* Panel */}
       <div
-        className="fixed z-40 bg-bg-secondary border border-border-main rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300 flex flex-col"
+        className={`fixed z-40 bg-bg-secondary border border-border-main shadow-2xl overflow-hidden animate-in duration-300 flex flex-col
+          ${isMobile ? 'rounded-b-2xl slide-in-from-top-4 sm:rounded-2xl' : 'rounded-t-2xl sm:rounded-2xl slide-in-from-bottom-4'}`}
         style={{
-          bottom: '88px',
-          right: '16px',
-          width: 'min(380px, calc(100vw - 32px))',
+          ...(isMobile ? {
+            top: '60px',
+            left: '16px',
+            right: '16px',
+            width: 'calc(100vw - 32px)',
+          } : {
+            bottom: '88px',
+            right: '16px',
+            width: 'min(380px, calc(100vw - 32px))',
+          }),
           maxHeight: 'min(500px, 70vh)',
         }}
       >

@@ -145,8 +145,8 @@ const Layout = () => {
               </h1>
             </div>
 
-            {/* Placeholder to balance the centered title */}
-            <div style={{ width: 44 }} />
+            {/* Timer Widget para la barra superior móvil */}
+            <FloatingTimerWidget variant="topbar" />
           </div>
         )}
 
@@ -166,8 +166,8 @@ const Layout = () => {
       </main>
       {/* ── Bottom Navigation (mobile only) ─────────────────────────────── */}
       <BottomNavigationBar />
-      {/* ── Timer Widget (floating) ──────────────────────────────────────── */}
-      <FloatingTimerWidget />
+      {/* ── Timer Widget (floating - Desktop only) ─────────────────────── */}
+      {!isMobile && <FloatingTimerWidget variant="floating" />}
     </div>
   );
 };
