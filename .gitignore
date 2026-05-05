@@ -40,3 +40,6 @@ Thumbs.db
 migration/serviceAccountKey.json
 migration/package-lock.json
 migration/package.json.tmp
+
+# Source video assets (copies already in prosperityapp/public/videos/)
+landingpage/videos*/
