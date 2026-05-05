@@ -441,6 +441,20 @@ function JobBoardContent() {
 
   const [isDarkMode, setIsDarkMode] = useState(false); // Default to light mode as requested
 
+  // Detect portrait vs landscape for hero video source
+  const [isPortrait, setIsPortrait] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+  useEffect(() => {
+    const check = () => setIsPortrait(window.innerWidth < 768);
+    window.addEventListener('resize', check);
+    window.addEventListener('orientationchange', check);
+    return () => {
+      window.removeEventListener('resize', check);
+      window.removeEventListener('orientationchange', check);
+    };
+  }, []);
+
   return (
     <div className="jb-page" data-theme={isDarkMode ? "dark" : "light"}>
       <Helmet>
@@ -457,9 +471,24 @@ function JobBoardContent() {
         onLogout={() => {}}
       />
 
-      {/* Hero */}
+      {/* Hero — Video adapts to device orientation */}
       <section className="jb-hero">
-        <div className="jb-hero__bg"></div>
+        <div className="jb-hero__video-wrap">
+          <video
+            className="jb-hero__video"
+            autoPlay
+            loop
+            muted
+            playsInline
+            key={isPortrait ? 'vertical' : 'horizontal'}
+          >
+            <source
+              src={isPortrait ? '/videos/bolsa-vertical.mp4' : '/videos/bolsa-horizontal.mp4'}
+              type="video/mp4"
+            />
+          </video>
+          <div className="jb-hero__video-overlay"></div>
+        </div>
         <div className="jb-hero__content">
           <h1 className="jb-hero__title">{t.jobBoard.hero_title}</h1>
           <p className="jb-hero__subtitle">{t.jobBoard.hero_subtitle}</p>
