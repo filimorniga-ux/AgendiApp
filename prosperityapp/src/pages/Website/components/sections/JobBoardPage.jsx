@@ -4,7 +4,7 @@
  * Muestra campañas activas con filtros de ubicación, sector y tipo de puesto.
  * Conecta con la vista pública `public_job_campaigns` en Supabase.
  * ─────────────────────────────────────────────────────────────────────────── */
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import './jobboard.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../../../supabase/client';
@@ -455,6 +455,34 @@ function JobBoardContent() {
     };
   }, []);
 
+  // Lazy-load hero video (matches landing page pattern)
+  const heroRef = useRef(null);
+  const videoRef = useRef(null);
+  const [videoReady, setVideoReady] = useState(false);
+
+  useEffect(() => {
+    const section = heroRef.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !videoReady) {
+          setVideoReady(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [videoReady]);
+
+  useEffect(() => {
+    if (videoReady && videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [videoReady, isPortrait]);
+
   return (
     <div className="jb-page" data-theme={isDarkMode ? "dark" : "light"}>
       <Helmet>
@@ -471,27 +499,66 @@ function JobBoardContent() {
         onLogout={() => {}}
       />
 
-      {/* Hero — Video adapts to device orientation */}
-      <section className="jb-hero">
+      {/* Hero — Full-viewport video, matches landing page pattern */}
+      <section className="jb-hero" ref={heroRef}>
+        {/* Video Background — lazy loaded */}
         <div className="jb-hero__video-wrap">
           <video
-            className="jb-hero__video"
-            autoPlay
+            ref={videoRef}
+            className={`jb-hero__video ${videoReady ? 'jb-hero__video--visible' : ''}`}
             loop
             muted
             playsInline
+            preload="none"
             key={isPortrait ? 'vertical' : 'horizontal'}
           >
-            <source
-              src={isPortrait ? '/videos/bolsa-vertical.mp4' : '/videos/bolsa-horizontal.mp4'}
-              type="video/mp4"
-            />
+            {videoReady && (
+              <source
+                src={isPortrait ? '/videos/bolsa-vertical.mp4' : '/videos/bolsa-horizontal.mp4'}
+                type="video/mp4"
+              />
+            )}
           </video>
+          {/* Gradient overlay for readability */}
           <div className="jb-hero__video-overlay"></div>
+          {/* Subtle gold accent glow */}
+          <div className="jb-hero__glow"></div>
         </div>
+
+        {/* Content */}
         <div className="jb-hero__content">
+          {/* Badge */}
+          <div className="jb-hero__badge">
+            <span className="jb-hero__badge-dot"></span>
+            {lang === 'es' ? 'Bolsa de Empleo' : 'Job Board'}
+          </div>
+
           <h1 className="jb-hero__title">{t.jobBoard.hero_title}</h1>
           <p className="jb-hero__subtitle">{t.jobBoard.hero_subtitle}</p>
+
+          {/* CTA */}
+          <div className="jb-hero__ctas">
+            <button
+              className="jb-hero__cta jb-hero__cta--primary"
+              onClick={() => {
+                document.querySelector('.jb-main')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              {lang === 'es' ? 'Ver Ofertas' : 'Browse Jobs'}
+            </button>
+            <button
+              className="jb-hero__cta jb-hero__cta--secondary"
+              onClick={() => setShowSeekerForm(true)}
+            >
+              {lang === 'es' ? 'Publicar mi Perfil' : 'Post My Profile'}
+            </button>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="jb-hero__scroll">
+          <span>{lang === 'es' ? 'Descubre Más' : 'Discover More'}</span>
+          <div className="jb-hero__scroll-line"></div>
         </div>
       </section>
 
