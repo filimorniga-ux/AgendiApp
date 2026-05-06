@@ -1,4 +1,16 @@
+// deno-lint-ignore-file
+/// <reference lib="deno.window" />
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
+
+// Flexible message type for OpenAI-compatible chat APIs
+type ChatMessage = {
+  role: string;
+  content: string;
+  tool_call_id?: string;
+  name?: string;
+  tool_calls?: Array<{ id: string; function: { name: string; arguments: string } }>;
+};
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -245,7 +257,7 @@ ${customInstructions ? `## Instrucciones adicionales del negocio:\n${customInstr
 // ─── DeepSeek LLM ──────────────────────────────────────────────────────────
 async function callDeepSeek(
   apiKey: string,
-  messages: Array<{role: string; content: string}>,
+  messages: ChatMessage[],
   tools: Array<Record<string, unknown>>,
   supabaseAdmin: ReturnType<typeof createClient>,
   businessId: string,
@@ -311,7 +323,7 @@ async function callDeepSeek(
 // ─── Gemini LLM (Fallback / Free tier) ─────────────────────────────────────
 async function callGemini(
   apiKey: string,
-  messages: Array<{role: string; content: string}>,
+  messages: ChatMessage[],
   supabaseAdmin: ReturnType<typeof createClient>,
   businessId: string
 ): Promise<string> {

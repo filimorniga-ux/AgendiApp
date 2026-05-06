@@ -1,3 +1,6 @@
+// deno-lint-ignore-file
+/// <reference lib="deno.window" />
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
 const corsHeaders = {
