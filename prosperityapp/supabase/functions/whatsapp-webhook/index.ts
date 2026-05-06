@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
 const corsHeaders = {
@@ -6,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -15,7 +14,7 @@ serve(async (req: Request) => {
   try {
     const url = new URL(req.url);
 
-    // 1. WEBHOOK VERIFICATION (GET)
+    // 1. WEBHOOK VERIFICATION (GET) — Meta sends this when you register the webhook URL
     if (req.method === 'GET') {
       const mode = url.searchParams.get('hub.mode');
       const token = url.searchParams.get('hub.verify_token');
@@ -24,31 +23,29 @@ serve(async (req: Request) => {
       const verifyToken = Deno.env.get('WHATSAPP_VERIFY_TOKEN');
 
       if (mode === 'subscribe' && token === verifyToken) {
-        console.log('Webhook verificado exitosamente!');
+        console.log('[whatsapp-webhook] ✅ Webhook verified successfully');
         return new Response(challenge, { status: 200 });
       } else {
+        console.warn(`[whatsapp-webhook] ❌ Verification failed. mode=${mode}, token_match=${token === verifyToken}`);
         return new Response('Forbidden', { status: 403 });
       }
     }
 
-    // 2. RECEIVE MESSAGES (POST)
+    // 2. RECEIVE MESSAGES (POST) — Meta sends message events here
     if (req.method === 'POST') {
       const rawBody = await req.text();
 
-      // Validar firma del webhook usando el APP SECRET (Webhooks security)
+      // Validate webhook signature using APP SECRET
       const signature = req.headers.get('x-hub-signature-256');
       const appSecret = Deno.env.get('WHATSAPP_APP_SECRET');
 
       if (appSecret) {
         if (!signature) {
-          console.error("Header signature ausente pero WHATSAPP_APP_SECRET está configurado. Rechazando.");
+          console.error("[whatsapp-webhook] Missing x-hub-signature-256 header");
           return new Response('Missing signature', { status: 401 });
         }
 
-        // La firma viene con formato "sha256=..."
         const expectedSignature = signature.replace('sha256=', '');
-
-        // Crear HMAC SHA256 de forma asíncrona usando la Crypto API estándar (soportada en Deno/Supabase Edge)
         const encoder = new TextEncoder();
         const key = await crypto.subtle.importKey(
           'raw',
@@ -58,28 +55,21 @@ serve(async (req: Request) => {
           ['sign']
         );
 
-        const signatureBuffer = await crypto.subtle.sign(
-          'HMAC',
-          key,
-          encoder.encode(rawBody)
-        );
-
-        // Convertir ArrayBuffer a string hex
+        const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
         const hashArray = Array.from(new Uint8Array(signatureBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
         if (hashHex !== expectedSignature) {
-          console.error("Firma de webhook inválida");
+          console.error("[whatsapp-webhook] ❌ Invalid webhook signature");
           return new Response('Invalid signature', { status: 401 });
         }
       } else {
-        console.warn("WHATSAPP_APP_SECRET no configurado, saltando validación de seguridad de forma insegura.");
+        console.warn("[whatsapp-webhook] ⚠️ WHATSAPP_APP_SECRET not set — skipping signature validation");
       }
 
       const body = JSON.parse(rawBody);
-      console.log('Incoming webhook event:', JSON.stringify(body, null, 2));
 
-      // Validar si es un evento de WhatsApp
+      // Validate it's a WhatsApp Business event
       if (body.object !== 'whatsapp_business_account') {
         return new Response('Not a WhatsApp event', { status: 404 });
       }
@@ -93,15 +83,20 @@ serve(async (req: Request) => {
         for (const change of entry.changes || []) {
           const value = change.value;
 
-          // Ignorar eventos que no sean mensajes recibidos (e.g. status updates)
-          if (!value.messages || value.messages.length === 0) continue;
+          // Skip non-message events (status updates, etc.)
+          if (!value.messages || value.messages.length === 0) {
+            console.log('[whatsapp-webhook] Non-message event (status update), skipping');
+            continue;
+          }
 
           const metadata = value.metadata;
           const phoneNumberId = metadata.phone_number_id;
           const message = value.messages[0];
           const contact = value.contacts?.[0];
 
-          // 1. Identificar el Tenant (Business ID) usando el phone_number_id
+          console.log(`[whatsapp-webhook] 📩 Message from ${message.from} (type: ${message.type})`);
+
+          // 1. Identify the Tenant (Business) using phone_number_id
           const { data: config, error: configError } = await supabaseAdmin
             .from('whatsapp_configs')
             .select('business_id, bot_active, system_prompt_customization')
@@ -109,7 +104,7 @@ serve(async (req: Request) => {
             .single();
 
           if (configError || !config) {
-            console.error(`Config no encontrada para phone_number_id: ${phoneNumberId}`);
+            console.error(`[whatsapp-webhook] ❌ No config found for phone_number_id: ${phoneNumberId}`);
             continue;
           }
 
@@ -118,20 +113,28 @@ serve(async (req: Request) => {
           const customerName = contact?.profile?.name || 'Cliente';
           const metaMessageId = message.id;
 
-          // 2. Extraer el contenido del mensaje
+          // 2. Extract message content
           let content = '';
           if (message.type === 'text') {
             content = message.text.body;
           } else if (message.type === 'audio') {
-            content = '[Mensaje de Audio]'; // Implementar transcripción luego si se requiere
+            content = '[Mensaje de Audio — transcripción no disponible]';
           } else if (message.type === 'image') {
-            content = '[Imagen recibida]';
+            content = message.image?.caption
+              ? `[Imagen] ${message.image.caption}`
+              : '[Imagen recibida]';
+          } else if (message.type === 'document') {
+            content = `[Documento: ${message.document?.filename || 'sin nombre'}]`;
+          } else if (message.type === 'location') {
+            content = `[Ubicación: ${message.location?.latitude}, ${message.location?.longitude}]`;
           } else {
             content = `[Mensaje tipo: ${message.type}]`;
           }
 
-          // 3. Buscar o crear la conversación
-          let conversationId;
+          // 3. Find or create conversation
+          let conversationId: string;
+          let conversationStatus = 'bot_active';
+
           const { data: existingConv } = await supabaseAdmin
             .from('whatsapp_conversations')
             .select('id, status')
@@ -139,18 +142,17 @@ serve(async (req: Request) => {
             .eq('customer_phone', customerPhone)
             .single();
 
-          let conversationStatus = 'bot_active';
-
           if (existingConv) {
             conversationId = existingConv.id;
             conversationStatus = existingConv.status;
-            // Actualizar last_message_at
             await supabaseAdmin
               .from('whatsapp_conversations')
-              .update({ last_message_at: new Date().toISOString() })
+              .update({
+                last_message_at: new Date().toISOString(),
+                customer_name: customerName // Update name in case it changed
+              })
               .eq('id', conversationId);
           } else {
-            // Crear nueva conversación
             const { data: newConv, error: convError } = await supabaseAdmin
               .from('whatsapp_conversations')
               .insert({
@@ -164,34 +166,34 @@ serve(async (req: Request) => {
               .single();
 
             if (convError) {
-              // 23505 = unique_violation, significa que otro webhook concurrente ya la creó (condición de carrera)
+              // Handle race condition (another webhook created it concurrently)
               if (convError.code === '23505') {
-                 console.log(`Conversación ya creada concurrentemente para ${customerPhone}`);
-                 const { data: concurrentConv } = await supabaseAdmin
-                    .from('whatsapp_conversations')
-                    .select('id, status')
-                    .eq('business_id', businessId)
-                    .eq('customer_phone', customerPhone)
-                    .single();
+                console.log(`[whatsapp-webhook] Race condition: conversation already exists for ${customerPhone}`);
+                const { data: concurrentConv } = await supabaseAdmin
+                  .from('whatsapp_conversations')
+                  .select('id, status')
+                  .eq('business_id', businessId)
+                  .eq('customer_phone', customerPhone)
+                  .single();
 
-                 if (concurrentConv) {
-                    conversationId = concurrentConv.id;
-                    conversationStatus = concurrentConv.status;
-                 } else {
-                    console.error('Error recuperando conversación concurrente:', convError);
-                    continue;
-                 }
+                if (concurrentConv) {
+                  conversationId = concurrentConv.id;
+                  conversationStatus = concurrentConv.status;
+                } else {
+                  console.error('[whatsapp-webhook] Failed to recover conversation after race condition');
+                  continue;
+                }
               } else {
-                 console.error('Error creando conversación:', convError);
-                 continue;
+                console.error('[whatsapp-webhook] Error creating conversation:', convError);
+                continue;
               }
             } else {
-              conversationId = newConv.id;
+              conversationId = newConv!.id;
               conversationStatus = config.bot_active ? 'bot_active' : 'human_active';
             }
           }
 
-          // 4. Guardar el mensaje del cliente en DB
+          // 4. Save customer message to DB
           const { error: msgInsertError } = await supabaseAdmin
             .from('whatsapp_messages')
             .insert({
@@ -203,36 +205,43 @@ serve(async (req: Request) => {
             });
 
           if (msgInsertError) {
-             if (msgInsertError.code === '23505') {
-                console.log(`Mensaje duplicado detectado y omitido (meta_message_id: ${metaMessageId})`);
-                continue; // Saltar procesamiento si el mensaje ya existe
-             } else {
-                console.error('Error guardando mensaje:', msgInsertError);
-             }
+            if (msgInsertError.code === '23505') {
+              console.log(`[whatsapp-webhook] Duplicate message skipped (${metaMessageId})`);
+              continue;
+            } else {
+              console.error('[whatsapp-webhook] Error saving message:', msgInsertError);
+            }
           }
 
-          // 5. Invocar al Agente si el bot está activo para esta conversación
+          // 5. Invoke agent-processor if bot is active
           if (conversationStatus === 'bot_active') {
-             // Invocamos agent-processor para que procese y responda. 
-             // Usamos await para asegurar que se procese (Deno en Supabase puede matar tareas en background)
-             const payload = {
-                businessId,
-                conversationId,
-                customerPhone,
-                messageContent: content,
-                phoneNumberId
-             };
+            console.log(`[whatsapp-webhook] 🤖 Invoking agent-processor for conversation ${conversationId}`);
+            const payload = {
+              businessId,
+              conversationId,
+              customerPhone,
+              messageContent: content,
+              phoneNumberId
+            };
 
-             const { error: invokeError } = await supabaseAdmin.functions.invoke('agent-processor', {
+            try {
+              const { error: invokeError } = await supabaseAdmin.functions.invoke('agent-processor', {
                 body: payload,
                 headers: {
                   Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
                 }
-             });
+              });
 
-             if (invokeError) {
-                 console.error('Error invoking agent-processor:', invokeError);
-             }
+              if (invokeError) {
+                console.error('[whatsapp-webhook] ❌ Error invoking agent-processor:', invokeError);
+              } else {
+                console.log('[whatsapp-webhook] ✅ agent-processor invoked successfully');
+              }
+            } catch (invokeErr) {
+              console.error('[whatsapp-webhook] ❌ Exception invoking agent-processor:', invokeErr);
+            }
+          } else {
+            console.log(`[whatsapp-webhook] 👤 Conversation in human mode, skipping bot`);
           }
         }
       }
@@ -242,8 +251,8 @@ serve(async (req: Request) => {
 
     return new Response('Method Not Allowed', { status: 405 });
 
-  } catch (err: any) {
-    console.error("Webhook error:", err);
-    return new Response(err.message, { status: 500 });
+  } catch (err: unknown) {
+    console.error("[whatsapp-webhook] Fatal error:", err);
+    return new Response(err instanceof Error ? err.message : String(err), { status: 500 });
   }
 });
