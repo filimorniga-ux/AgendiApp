@@ -4,6 +4,18 @@ import { supabase } from '../../supabase/client';
 import feather from 'feather-icons';
 import toast from 'react-hot-toast';
 
+const Icon = ({ name, className = '' }) => {
+  const icon = feather.icons[name];
+  if (!icon) return null;
+  return (
+    <span
+      className={className}
+      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+      dangerouslySetInnerHTML={{ __html: icon.toSvg({ class: 'w-full h-full' }) }}
+    />
+  );
+};
+
 const ChatPage = () => {
   const { businessId } = useBusiness();
   const [conversations, setConversations] = useState([]);
@@ -90,9 +102,7 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  useEffect(() => {
-    feather.replace();
-  }, [conversations, activeConvId, messages, loading]);
+  // Removed feather.replace() to prevent React unmount crashes
 
   const activeConversation = conversations.find(c => c.id === activeConvId);
 
@@ -153,7 +163,7 @@ const ChatPage = () => {
       <div className={`w-full md:w-1/3 lg:w-1/4 border-r border-border-main flex flex-col bg-bg-secondary ${activeConvId ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-border-main flex justify-between items-center bg-bg-secondary sticky top-0 z-10">
           <h2 className="text-xl font-bold text-text-main flex items-center gap-2">
-            <i data-feather="message-circle" className="text-accent w-5 h-5"></i>
+            <Icon name="message-circle" className="text-accent w-5 h-5" />
             Chat AI
           </h2>
         </div>
@@ -202,7 +212,7 @@ const ChatPage = () => {
                   className="md:hidden text-text-muted hover:text-text-main p-1"
                   onClick={() => setActiveConvId(null)}
                 >
-                  <i data-feather="arrow-left" className="w-5 h-5"></i>
+                  <Icon name="arrow-left" className="w-5 h-5" />
                 </button>
                 <div className="w-10 h-10 rounded-full bg-bg-tertiary flex items-center justify-center text-text-main font-bold border border-border-main">
                   {(activeConversation.customer_name || 'C')[0].toUpperCase()}
@@ -224,7 +234,7 @@ const ChatPage = () => {
                     className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-accent/10 text-accent hover:bg-accent/20 border border-accent/20 transition-colors text-sm font-semibold"
                     title="Tomar el control de la conversación"
                   >
-                    <i data-feather="user" className="w-4 h-4"></i>
+                    <Icon name="user" className="w-4 h-4" />
                     Tomar control
                   </button>
                 ) : (
@@ -233,7 +243,7 @@ const ChatPage = () => {
                     className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 transition-colors text-sm font-semibold"
                     title="Devolver control al Bot AI"
                   >
-                    <i data-feather="cpu" className="w-4 h-4"></i>
+                    <Icon name="cpu" className="w-4 h-4" />
                     Activar Bot
                   </button>
                 )}
@@ -265,7 +275,7 @@ const ChatPage = () => {
                           isCustomer ? 'text-text-muted' : (isBot ? 'text-blue-200' : 'text-accent-text/80')
                         }`}>
                           {!isCustomer && (
-                            <i data-feather={isBot ? "cpu" : "user"} className="w-3 h-3"></i>
+                            <Icon name={isBot ? "cpu" : "user"} className="w-3 h-3" />
                           )}
                           <span>{formatTime(msg.created_at)}</span>
                         </div>
@@ -281,7 +291,7 @@ const ChatPage = () => {
             <div className="p-3 bg-bg-secondary border-t border-border-main">
               {activeConversation.status === 'bot_active' ? (
                 <div className="text-center p-2 text-sm text-text-muted bg-bg-tertiary rounded-lg border border-border-main/50 flex flex-col items-center gap-1">
-                  <i data-feather="cpu" className="w-4 h-4 text-blue-400"></i>
+                  <Icon name="cpu" className="w-4 h-4 text-blue-400" />
                   <span>El Bot AI está respondiendo. Para enviar mensajes debes tomar el control.</span>
                 </div>
               ) : (
@@ -304,7 +314,7 @@ const ChatPage = () => {
                     disabled={!inputText.trim()}
                     className="p-3 rounded-lg bg-accent text-accent-text hover:bg-yellow-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                   >
-                    <i data-feather="send" className="w-5 h-5"></i>
+                    <Icon name="send" className="w-5 h-5" />
                   </button>
                 </form>
               )}
@@ -313,7 +323,7 @@ const ChatPage = () => {
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-text-muted p-6">
             <div className="w-20 h-20 bg-bg-secondary rounded-full flex items-center justify-center mb-4 border border-border-main/50 shadow-inner">
-              <i data-feather="message-square" className="w-10 h-10 text-accent/50"></i>
+              <Icon name="message-square" className="w-10 h-10 text-accent/50" />
             </div>
             <p className="text-lg font-medium text-text-main mb-2">Chat Inteligente</p>
             <p className="text-center max-w-sm">Selecciona una conversación del panel lateral para ver los mensajes o tomar el control.</p>
