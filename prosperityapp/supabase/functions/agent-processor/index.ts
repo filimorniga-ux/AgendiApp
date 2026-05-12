@@ -204,10 +204,18 @@ ${customInstructions ? `## Instrucciones adicionales del negocio:\n${customInstr
     }
 
     // 8. Enviar mensaje de vuelta a WhatsApp
-    const whatsappToken = Deno.env.get('WHATSAPP_ACCESS_TOKEN');
+    // Multi-tenant: use per-tenant token from DB, fallback to global env var
+    const { data: tenantToken } = await supabaseAdmin
+      .from('whatsapp_configs')
+      .select('access_token')
+      .eq('business_id', businessId)
+      .not('access_token', 'is', null)
+      .single();
+
+    const whatsappToken = tenantToken?.access_token || Deno.env.get('WHATSAPP_ACCESS_TOKEN');
     if (whatsappToken) {
-      console.log(`[agent-processor] Sending reply to ${customerPhone}`);
-      const waResponse = await fetch(`https://graph.facebook.com/v19.0/${phoneNumberId}/messages`, {
+      console.log(`[agent-processor] Sending reply to ${customerPhone} (token: ${tenantToken?.access_token ? 'tenant' : 'global'})`);
+      const waResponse = await fetch(`https://graph.facebook.com/v25.0/${phoneNumberId}/messages`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${whatsappToken}`,
@@ -228,7 +236,7 @@ ${customInstructions ? `## Instrucciones adicionales del negocio:\n${customInstr
         console.log('[agent-processor] WhatsApp message sent successfully');
       }
     } else {
-      console.error('[agent-processor] WHATSAPP_ACCESS_TOKEN not set');
+      console.error('[agent-processor] No WhatsApp token available (neither tenant nor global)');
     }
 
     // 9. Guardar la respuesta del bot en DB

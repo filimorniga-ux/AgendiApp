@@ -399,7 +399,7 @@ const ConfiguracionPage = () => {
     { id: 'accounting', icon: 'dollar-sign', label: t('settings.tabs.accounting') },
     { id: 'security', icon: 'lock', label: t('settings.tabs.security') },
     { id: 'integrations', icon: 'link-2', label: 'Integraciones' },
-    { id: 'whatsapp-agent', icon: 'message-circle', label: 'Agente WhatsApp AI' },
+    { id: 'whatsapp-agent', icon: 'cpu', label: 'AgendiBot 🤖' },
     { id: 'job-board', icon: 'briefcase', label: t('settings.tabs.jobBoard', 'Bolsa de Empleo') },
   ];
 
